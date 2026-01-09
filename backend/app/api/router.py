@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth import get_username
+from app.api.end_day import router as end_day_router
 from app.api.sessions import router as sessions_router
 from app.api.timers import router as timers_router
 from app.db import get_db
@@ -48,5 +49,6 @@ def get_me(request: Request, db: Session = Depends(get_db)) -> dict:
 
 api_router.include_router(timers_router)
 api_router.include_router(sessions_router)
+api_router.include_router(end_day_router)
 router.include_router(public_router)
 router.include_router(api_router)
