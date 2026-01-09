@@ -20,3 +20,18 @@ class EndDayResponse(BaseModel):
     ended_day_date: date
     finalized: bool
     totals: list[TimerTotal]
+
+
+class DayStatsResponse(BaseModel):
+    day_date: date
+    totals: list[TimerTotal]
+
+
+class WeekStatsDay(BaseModel):
+    day_date: date
+    totals: list[TimerTotal]
+
+
+class WeekStatsResponse(BaseModel):
+    week_start: date
+    daily: list[WeekStatsDay]
