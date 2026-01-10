@@ -4,36 +4,51 @@ import { apiFetch } from "../api/apiClient";
 import { Session } from "../api/types";
 import { getClientTimezone } from "../utils/date";
 
-export const useActiveSession = () => {
+export const useActiveSession = (enabled = true) => {
   const [activeSession, setActiveSession] = useState<Session | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  const refresh = useCallback(async (initial = false) => {
-    if (initial) {
-      setLoading(true);
-    }
-    try {
-      const response = await apiFetch<{ active_session: Session | null }>(
-        "/active-session"
-      );
-      setActiveSession(response.active_session);
-    } finally {
-      if (initial) {
-        setLoading(false);
+  const refresh = useCallback(
+    async (initial = false) => {
+      if (!enabled) {
+        if (initial) {
+          setLoading(false);
+        }
+        return;
       }
-    }
-  }, []);
+      if (initial) {
+        setLoading(true);
+      }
+      try {
+        const response = await apiFetch<{ active_session: Session | null }>(
+          "/active-session"
+        );
+        setActiveSession(response.active_session);
+      } finally {
+        if (initial) {
+          setLoading(false);
+        }
+      }
+    },
+    [enabled]
+  );
 
   useEffect(() => {
+    if (!enabled) {
+      setActiveSession(null);
+      setElapsedSeconds(0);
+      setLoading(false);
+      return;
+    }
     refresh(true);
     const interval = window.setInterval(() => refresh(false), 15000);
     return () => window.clearInterval(interval);
-  }, [refresh]);
+  }, [enabled, refresh]);
 
   useEffect(() => {
-    if (!activeSession) {
+    if (!enabled || !activeSession) {
       setElapsedSeconds(0);
       return;
     }
@@ -47,28 +62,37 @@ export const useActiveSession = () => {
     tick();
     const interval = window.setInterval(tick, 1000);
     return () => window.clearInterval(interval);
-  }, [activeSession]);
+  }, [activeSession, enabled]);
 
-  const startTimer = useCallback(async (timerId: string) => {
-    setBusy(true);
-    try {
-      const response = await apiFetch<{
-        stopped_session: Session | null;
-        active_session: Session;
-      }>(`/timers/${timerId}/start`, {
-        method: "POST",
-        body: {
-          client_tz: getClientTimezone(),
-          started_at_client: new Date().toISOString(),
-        },
-      });
-      setActiveSession(response.active_session);
-    } finally {
-      setBusy(false);
-    }
-  }, []);
+  const startTimer = useCallback(
+    async (timerId: string) => {
+      if (!enabled) {
+        return;
+      }
+      setBusy(true);
+      try {
+        const response = await apiFetch<{
+          stopped_session: Session | null;
+          active_session: Session;
+        }>(`/timers/${timerId}/start`, {
+          method: "POST",
+          body: {
+            client_tz: getClientTimezone(),
+            started_at_client: new Date().toISOString(),
+          },
+        });
+        setActiveSession(response.active_session);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [enabled]
+  );
 
   const stopTimer = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
     setBusy(true);
     try {
       await apiFetch<{ stopped_session: Session | null }>("/stop", {
@@ -79,7 +103,7 @@ export const useActiveSession = () => {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [enabled]);
 
   return useMemo(
     () => ({

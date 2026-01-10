@@ -2,8 +2,8 @@ import { CSSProperties, useEffect, useMemo, useState } from "react";
 
 import { Timer } from "../api/types";
 import TimerFormModal from "../components/TimerFormModal";
+import { useTimerRuntime } from "../context/TimerRuntimeContext";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
-import { useActiveSession } from "../hooks/useActiveSession";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
 import { getContrastColor, isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
@@ -11,11 +11,17 @@ import { formatDuration } from "../utils/time";
 const TimersPage = () => {
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
   const timersState = useTimers(true);
-  const { activeSession, elapsedSeconds, busy, startTimer, stopTimer } =
-    useActiveSession();
   const [editingTimer, setEditingTimer] = useState<Timer | null>(null);
   const [actionError, setActionError] = useState("");
-  const [offsets, setOffsets] = useState<Record<string, number>>({});
+  const {
+    activeSession,
+    elapsedSeconds,
+    busy,
+    startTimer,
+    stopTimer,
+    offsets,
+    adjustOffset,
+  } = useTimerRuntime();
 
   const selectedTimer = useMemo(() => {
     if (!selectedTimerId) {
@@ -64,20 +70,14 @@ const TimersPage = () => {
     if (!selectedTimerId) {
       return;
     }
-    setOffsets((prev) => ({
-      ...prev,
-      [selectedTimerId]: (prev[selectedTimerId] ?? 0) + 300,
-    }));
+    adjustOffset(selectedTimerId, 300);
   };
 
   const handleMinusOne = () => {
     if (!selectedTimerId) {
       return;
     }
-    setOffsets((prev) => ({
-      ...prev,
-      [selectedTimerId]: (prev[selectedTimerId] ?? 0) - 60,
-    }));
+    adjustOffset(selectedTimerId, -60);
   };
 
   const handleUpdate = async (values: TimerFormValues) => {

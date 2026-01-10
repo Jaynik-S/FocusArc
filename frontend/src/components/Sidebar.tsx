@@ -4,8 +4,9 @@ import { NavLink } from "react-router-dom";
 import { ResetTotalsResponse } from "../api/types";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
-import { getContrastColor, getMutedTextColor, isValidHexColor } from "../utils/color";
-import { formatDurationShort } from "../utils/time";
+import { useTimerRuntime } from "../context/TimerRuntimeContext";
+import { isValidHexColor } from "../utils/color";
+import { formatDuration } from "../utils/time";
 import EndDayButton from "./EndDayButton";
 import TimerFormModal from "./TimerFormModal";
 
@@ -17,6 +18,7 @@ const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
   const timersState = useTimers(isReady);
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
+  const { activeSession, elapsedSeconds, offsets } = useTimerRuntime();
   const [createOpen, setCreateOpen] = useState(false);
   const [actionError, setActionError] = useState("");
 
@@ -90,8 +92,14 @@ const Sidebar = ({ username }: SidebarProps) => {
             <div className="muted">No timers yet.</div>
           ) : null}
           {timers.map((timer, index) => {
-            const totalSeconds = timer.cycle_total_seconds ?? 0;
             const isSelected = timer.id === selectedTimerId;
+            const isRunning = activeSession?.timer_id === timer.id;
+            const offsetSeconds = offsets[timer.id] ?? 0;
+            const displaySeconds = Math.max(
+              0,
+              (isRunning ? elapsedSeconds : 0) + offsetSeconds
+            );
+            const timerColor = isValidHexColor(timer.color) ? timer.color : "transparent";
             return (
               <button
                 key={timer.id}
@@ -101,9 +109,15 @@ const Sidebar = ({ username }: SidebarProps) => {
                 onClick={() => setSelectedTimerId(timer.id)}
               >
                 <div className="timer-row-main">
-                  <span className="timer-row-name">{timer.name}</span>
+                  <div className="timer-row-name">
+                    <span
+                      className="timer-row-dot"
+                      style={{ backgroundColor: timerColor }}
+                    />
+                    <span>{timer.name}</span>
+                  </div>
                   <span className="timer-row-total">
-                    {formatDurationShort(totalSeconds)}
+                    {formatDuration(displaySeconds)}
                   </span>
                 </div>
               </button>

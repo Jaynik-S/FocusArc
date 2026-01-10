@@ -66,7 +66,7 @@ button { font-family: inherit; }
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
-  padding: var(--space-2xl) var(--space-xl);
+  padding: var(--space-xl) var(--space-lg) var(--space-md);
   background: transparent;
   display: flex;
   flex-direction: column;
@@ -78,7 +78,7 @@ button { font-family: inherit; }
 }
 
 .sidebar-user {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .sidebar-user strong {
@@ -106,14 +106,14 @@ button { font-family: inherit; }
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .sidebar-link {
   display: block;
-  padding: 8px 0; /* No background usually, just text linkage */
+  padding: 6px 0; /* No background usually, just text linkage */
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -129,7 +129,7 @@ button { font-family: inherit; }
 
 /* Sidebar Section Headers */
 .sidebar-section {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .sidebar-endday {
@@ -152,22 +152,22 @@ button { font-family: inherit; }
   letter-spacing: 0.1em;
   color: var(--muted);
   opacity: 0.6;
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-xs);
 }
 
 /* Sidebar Timers List */
 .timer-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
 .timer-row {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  min-height: 40px;
-  padding: 6px 0;
+  min-height: 52px;
+  padding: 10px 0;
   border-radius: 0;
   width: 100%;
   background: transparent;
@@ -175,7 +175,7 @@ button { font-family: inherit; }
   cursor: pointer;
   transition: opacity 0.2s ease;
   text-align: left;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .timer-row:hover {
@@ -190,19 +190,38 @@ button { font-family: inherit; }
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .timer-row-name {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 16px;
   font-weight: 500;
   color: var(--fg);
 }
 
 .timer-row-total {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+
+.timer-row-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  opacity: 0.65;
+}
+
+.timer-row:hover .timer-row-dot {
+  opacity: 0.9;
+}
+
+.timer-row-active .timer-row-dot {
+  opacity: 1;
 }
 
 /* Toggle Switch (Minimal) */
@@ -752,7 +771,7 @@ button.link-button {
 .timer-dial::after {
   content: "";
   position: absolute;
-  inset: 6px; /* Slightly thicker ring */
+  inset: 10px; /* Thicker ring */
   background: var(--bg);
   border-radius: 50%;
   z-index: 1;
