@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { CSSProperties, useMemo, useState } from "react";
 
 import { useSessions } from "../hooks/useSessions";
 import { useTimers } from "../hooks/useTimers";
+import { getContrastColor, getMutedTextColor } from "../utils/color";
 import {
   formatDateShort,
   formatTime,
@@ -19,10 +20,10 @@ const getDateOffset = (days: number) => {
 const HistoryPage = () => {
   const clientTz = useMemo(() => getClientTimezone(), []);
   const [fromDate, setFromDate] = useState(() =>
-    getLocalDateString(getDateOffset(-6), clientTz)
+    getLocalDateString(getDateOffset(-1), clientTz)
   );
   const [toDate, setToDate] = useState(() =>
-    getLocalDateString(new Date(), clientTz)
+    getLocalDateString(getDateOffset(0), clientTz)
   );
   const [selectedTimerId, setSelectedTimerId] = useState<string | null>(null);
 
@@ -47,6 +48,8 @@ const HistoryPage = () => {
           id: session.id,
           name: timer?.name ?? "Timer",
           color: timer?.color ?? "#1d4ed8",
+          textColor: getContrastColor(timer?.color ?? "#1d4ed8"),
+          mutedColor: getMutedTextColor(timer?.color ?? "#1d4ed8"),
           dateLabel: formatDateShort(
             new Date(`${session.day_date}T00:00:00`),
             clientTz
@@ -126,10 +129,21 @@ const HistoryPage = () => {
           ) : null}
           <div className="session-list">
             {rows.map((row) => (
-              <div className="session-row" key={row.id}>
+              <div
+                className="session-row"
+                key={row.id}
+                style={
+                  {
+                    background: row.color,
+                    color: row.textColor,
+                    borderColor: row.color,
+                    "--session-muted": row.mutedColor,
+                  } as CSSProperties
+                }
+              >
                 <div>
                   <div className="session-title">
-                    <span className="dot" style={{ background: row.color }} />
+                    <span className="dot" style={{ background: row.textColor }} />
                     {row.name}
                   </div>
                   <div className="session-meta">

@@ -9,7 +9,6 @@ const sortTimers = (timers: Timer[]) =>
 export type TimerFormValues = {
   name: string;
   color: string;
-  icon: string;
 };
 
 export const useTimers = (enabled = true) => {

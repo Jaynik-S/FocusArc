@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
 
 import { Timer } from "../api/types";
 import TimerFormModal from "../components/TimerFormModal";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { useActiveSession } from "../hooks/useActiveSession";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
+import { getContrastColor, isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
 
 const TimersPage = () => {
@@ -31,8 +32,14 @@ const TimersPage = () => {
 
   const isActive = activeSession?.timer_id === selectedTimerId;
   const offsetSeconds = selectedTimerId ? offsets[selectedTimerId] ?? 0 : 0;
-  const displaySeconds = (isActive ? elapsedSeconds : 0) + offsetSeconds;
+  const rawSeconds = (isActive ? elapsedSeconds : 0) + offsetSeconds;
+  const displaySeconds = Math.max(0, rawSeconds);
   const progress = ((displaySeconds % 3600) / 3600) * 360;
+  const accentColor =
+    selectedTimer && isValidHexColor(selectedTimer.color)
+      ? selectedTimer.color
+      : "#111827";
+  const accentContrast = getContrastColor(accentColor);
 
   const handlePlayPause = async () => {
     if (!selectedTimerId) {
@@ -42,8 +49,10 @@ const TimersPage = () => {
     try {
       if (isActive) {
         await stopTimer();
+        await timersState.reload();
       } else {
         await startTimer(selectedTimerId);
+        await timersState.reload();
       }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to update timer");
@@ -57,6 +66,16 @@ const TimersPage = () => {
     setOffsets((prev) => ({
       ...prev,
       [selectedTimerId]: (prev[selectedTimerId] ?? 0) + 300,
+    }));
+  };
+
+  const handleMinusOne = () => {
+    if (!selectedTimerId) {
+      return;
+    }
+    setOffsets((prev) => ({
+      ...prev,
+      [selectedTimerId]: (prev[selectedTimerId] ?? 0) - 60,
     }));
   };
 
@@ -90,15 +109,30 @@ const TimersPage = () => {
 
   return (
     <div className="page minimal-page">
-      <div className="timer-view">
+      <div
+        className="timer-view"
+        style={
+          {
+            "--accent": accentColor,
+            "--accent-contrast": accentContrast,
+          } as CSSProperties
+        }
+      >
         <div className="timer-meta">
           <span className="label">Active timer</span>
-          <strong>{selectedTimer ? selectedTimer.name : "Select a timer"}</strong>
+          <strong className="timer-name">
+            {selectedTimer ? selectedTimer.name : "Select a timer"}
+          </strong>
           <span className="muted">{formatDuration(displaySeconds)}</span>
         </div>
-        <div className="timer-dial" style={{
-          background: `conic-gradient(#111827 ${progress}deg, #e5e7eb ${progress}deg)`
-        }}>
+        <div
+          className="timer-dial"
+          style={
+            {
+              "--accent-progress": `${progress}deg`,
+            } as CSSProperties
+          }
+        >
           <div className="timer-face">
             <div
               className="timer-hand"
@@ -118,12 +152,20 @@ const TimersPage = () => {
             {isActive ? "Pause" : "Play"}
           </button>
           <button
-            className="ghost"
+            className="ghost accent"
             type="button"
             onClick={handleAddFive}
             disabled={!selectedTimerId}
           >
             +5 min
+          </button>
+          <button
+            className="ghost accent"
+            type="button"
+            onClick={handleMinusOne}
+            disabled={!selectedTimerId}
+          >
+            -1 min
           </button>
         </div>
         {selectedTimer ? (
@@ -151,7 +193,6 @@ const TimersPage = () => {
             ? {
                 name: editingTimer.name,
                 color: editingTimer.color,
-                icon: editingTimer.icon,
               }
             : undefined
         }

@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 
-import { EndDayResponse } from "../api/types";
+import { ResetTotalsResponse } from "../api/types";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
-import { useDayStats } from "../hooks/useDayStats";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
-import { getClientTimezone, getLocalDateString } from "../utils/date";
+import { getContrastColor, getMutedTextColor, isValidHexColor } from "../utils/color";
 import { formatDurationShort } from "../utils/time";
 import EndDayButton from "./EndDayButton";
 import TimerFormModal from "./TimerFormModal";
@@ -16,23 +15,11 @@ type SidebarProps = {
 
 const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
-  const clientTz = useMemo(() => getClientTimezone(), []);
-  const [dayDate, setDayDate] = useState(() =>
-    getLocalDateString(new Date(), clientTz)
-  );
   const timersState = useTimers(isReady);
-  const dayStats = useDayStats(dayDate, isReady);
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
   const [createOpen, setCreateOpen] = useState(false);
   const [timerToggles, setTimerToggles] = useState<Record<string, boolean>>({});
   const [actionError, setActionError] = useState("");
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setDayDate(getLocalDateString(new Date(), clientTz));
-    }, 60000);
-    return () => window.clearInterval(interval);
-  }, [clientTz]);
 
   useEffect(() => {
     if (!timersState.loading && timersState.timers.length > 0) {
@@ -43,13 +30,34 @@ const Sidebar = ({ username }: SidebarProps) => {
     }
   }, [timersState.loading, timersState.timers, selectedTimerId, setSelectedTimerId]);
 
-  const totalsMap = useMemo(() => {
-    const map = new Map<string, number>();
-    dayStats.totals.forEach((total) => map.set(total.timer_id, total.total_seconds));
-    return map;
-  }, [dayStats.totals]);
-
   const timers = timersState.timers;
+  const selectedTimer = useMemo(
+    () => timers.find((timer) => timer.id === selectedTimerId) ?? null,
+    [timers, selectedTimerId]
+  );
+
+  const sidebarStyle = useMemo(() => {
+    if (!selectedTimer || !isValidHexColor(selectedTimer.color)) {
+      return undefined;
+    }
+    const bg = selectedTimer.color;
+    const fg = getContrastColor(bg);
+    const muted = getMutedTextColor(bg);
+    const isDark = fg === "#ffffff";
+    const highlight = isDark
+      ? "rgba(255, 255, 255, 0.16)"
+      : "rgba(17, 24, 39, 0.08)";
+    const border = isDark
+      ? "rgba(255, 255, 255, 0.28)"
+      : "rgba(17, 24, 39, 0.18)";
+    return {
+      "--sidebar-bg": bg,
+      "--sidebar-fg": fg,
+      "--sidebar-muted": muted,
+      "--sidebar-highlight": highlight,
+      "--sidebar-border": border,
+    } as CSSProperties;
+  }, [selectedTimer]);
 
   const handleCreate = async (values: TimerFormValues) => {
     setActionError("");
@@ -68,12 +76,12 @@ const Sidebar = ({ username }: SidebarProps) => {
     }));
   };
 
-  const handleEndDay = (_response: EndDayResponse) => {
-    dayStats.reload();
+  const handleResetTotals = async (_response: ResetTotalsResponse) => {
+    await timersState.reload();
   };
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" style={sidebarStyle}>
       <div className="sidebar-user">
         <span className="sidebar-label">Signed in</span>
         <strong>{username || "Not set"}</strong>
@@ -81,9 +89,6 @@ const Sidebar = ({ username }: SidebarProps) => {
       <nav className="sidebar-nav">
         <NavLink to="/timers" className="sidebar-link">
           Timers
-        </NavLink>
-        <NavLink to="/schedule" className="sidebar-link">
-          Schedule
         </NavLink>
         <NavLink to="/history" className="sidebar-link">
           History
@@ -107,7 +112,7 @@ const Sidebar = ({ username }: SidebarProps) => {
             <div className="muted">No timers yet.</div>
           ) : null}
           {timers.map((timer, index) => {
-            const totalSeconds = totalsMap.get(timer.id) ?? 0;
+            const totalSeconds = timer.cycle_total_seconds ?? 0;
             const isSelected = timer.id === selectedTimerId;
             const isEnabled = timerToggles[timer.id] ?? true;
             return (
@@ -119,7 +124,7 @@ const Sidebar = ({ username }: SidebarProps) => {
                 onClick={() => setSelectedTimerId(timer.id)}
               >
                 <div className="timer-row-main">
-                  <span>{timer.name}</span>
+                  <span className="timer-row-name">{timer.name}</span>
                   <span className="timer-row-total">
                     {formatDurationShort(totalSeconds)}
                   </span>
@@ -141,10 +146,8 @@ const Sidebar = ({ username }: SidebarProps) => {
       </div>
       <div className="sidebar-section sidebar-endday">
         <EndDayButton
-          dayDate={dayDate}
-          clientTz={clientTz}
           disabled={!isReady}
-          onEnded={handleEndDay}
+          onEnded={handleResetTotals}
         />
       </div>
       <TimerFormModal

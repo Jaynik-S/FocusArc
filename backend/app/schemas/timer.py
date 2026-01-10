@@ -8,8 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class TimerBase(BaseModel):
     name: str = Field(min_length=1, max_length=32)
-    color: str = Field(min_length=1, max_length=32)
-    icon: str = Field(min_length=1, max_length=32)
+    color: str = Field(min_length=7, max_length=7, pattern=r"^#[0-9A-Fa-f]{6}$")
+    icon: str = Field(default="book", min_length=1, max_length=32)
 
 
 class TimerCreate(TimerBase):
@@ -18,7 +18,9 @@ class TimerCreate(TimerBase):
 
 class TimerUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=32)
-    color: str | None = Field(default=None, min_length=1, max_length=32)
+    color: str | None = Field(
+        default=None, min_length=7, max_length=7, pattern=r"^#[0-9A-Fa-f]{6}$"
+    )
     icon: str | None = Field(default=None, min_length=1, max_length=32)
     is_archived: bool | None = None
 
@@ -30,6 +32,7 @@ class TimerOut(BaseModel):
     name: str
     color: str
     icon: str
+    cycle_total_seconds: int
     is_archived: bool
     created_at: datetime
     updated_at: datetime

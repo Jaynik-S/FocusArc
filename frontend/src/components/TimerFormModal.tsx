@@ -1,14 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 
 import { TimerFormValues } from "../hooks/useTimers";
-
-const DEFAULT_COLORS = [
-  "#0ea5e9",
-  "#22c55e",
-  "#f97316",
-  "#e11d48",
-  "#1d4ed8",
-];
+import { isValidHexColor } from "../utils/color";
 
 type TimerFormModalProps = {
   title: string;
@@ -21,8 +14,7 @@ type TimerFormModalProps = {
 
 const getDefaults = (): TimerFormValues => ({
   name: "",
-  color: DEFAULT_COLORS[0],
-  icon: "book",
+  color: "#111827",
 });
 
 const TimerFormModal = ({
@@ -60,8 +52,12 @@ const TimerFormModal = ({
       setError("Name is required.");
       return;
     }
+    if (!isValidHexColor(values.color)) {
+      setError("Color must be a valid hex code (e.g. #1A2B3C).");
+      return;
+    }
     setError("");
-    await onSubmit({ ...values, name: normalized });
+    await onSubmit({ ...values, name: normalized, color: values.color.trim() });
   };
 
   return (
@@ -84,34 +80,14 @@ const TimerFormModal = ({
             />
           </label>
           <label className="field">
-            <span>Icon</span>
-            <input
-              value={values.icon}
-              onChange={(event) => updateValue("icon", event.target.value)}
-              placeholder="book"
-              maxLength={32}
-            />
-          </label>
-          <label className="field">
             <span>Color</span>
             <input
-              type="color"
               value={values.color}
               onChange={(event) => updateValue("color", event.target.value)}
+              placeholder="#1A2B3C"
+              maxLength={7}
             />
           </label>
-          <div className="color-row">
-            {DEFAULT_COLORS.map((color) => (
-              <button
-                key={color}
-                type="button"
-                className="color-swatch"
-                style={{ background: color }}
-                onClick={() => updateValue("color", color)}
-                aria-label={`Use color ${color}`}
-              />
-            ))}
-          </div>
           {error ? <div className="error">{error}</div> : null}
           <div className="modal-actions">
             <button className="secondary" type="button" onClick={onClose}>

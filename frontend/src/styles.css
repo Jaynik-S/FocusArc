@@ -82,13 +82,18 @@ a {
 .sidebar {
   width: clamp(180px, 20vw, 240px);
   padding: 24px 16px;
-  background: rgba(255, 255, 255, 0.75);
-  border-right: 1px solid var(--line);
+  background: var(--sidebar-bg, rgba(255, 255, 255, 0.75));
+  border-right: 1px solid var(--sidebar-border, var(--line));
   backdrop-filter: blur(6px);
   position: sticky;
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  color: var(--sidebar-fg, var(--text));
+}
+
+.sidebar button {
+  color: var(--sidebar-fg, var(--text));
 }
 
 .sidebar-user {
@@ -102,7 +107,7 @@ a {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--muted);
+  color: var(--sidebar-muted, var(--muted));
 }
 
 .sidebar-nav {
@@ -116,13 +121,13 @@ a {
   display: block;
   padding: 6px 10px;
   border-radius: 10px;
-  color: var(--muted);
+  color: var(--sidebar-muted, var(--muted));
   font-size: 13px;
 }
 
 .sidebar-link[aria-current="page"] {
-  background: rgba(15, 23, 42, 0.08);
-  color: var(--text);
+  background: var(--sidebar-highlight, rgba(15, 23, 42, 0.08));
+  color: var(--sidebar-fg, var(--text));
   font-weight: 600;
 }
 
@@ -140,7 +145,7 @@ a {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--muted);
+  color: var(--sidebar-muted, var(--muted));
 }
 
 .timer-list {
@@ -163,12 +168,12 @@ a {
 }
 
 .timer-row:hover {
-  background: rgba(15, 23, 42, 0.05);
+  background: var(--sidebar-highlight, rgba(15, 23, 42, 0.05));
 }
 
 .timer-row-active {
-  border-color: var(--line);
-  background: rgba(15, 23, 42, 0.08);
+  border-color: var(--sidebar-border, var(--line));
+  background: var(--sidebar-highlight, rgba(15, 23, 42, 0.08));
 }
 
 .timer-row-main {
@@ -176,12 +181,26 @@ a {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 13px;
+  font-size: 15px;
+}
+
+.timer-row-name {
+  font-weight: 600;
 }
 
 .timer-row-total {
-  font-size: 11px;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--sidebar-fg, var(--text));
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.sidebar .muted {
+  color: var(--sidebar-muted, var(--muted));
+}
+
+.sidebar .link-button {
+  color: var(--sidebar-fg, var(--text));
 }
 
 .timer-toggle {
@@ -348,7 +367,7 @@ button:disabled {
 
 button.primary {
   background: var(--accent);
-  color: #f9fafb;
+  color: var(--accent-contrast, #f9fafb);
   border-color: var(--accent);
 }
 
@@ -360,6 +379,12 @@ button.secondary {
 button.ghost {
   border-color: transparent;
   color: var(--muted);
+}
+
+button.ghost.accent {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast, #f9fafb);
 }
 
 button.link-button {
@@ -411,8 +436,11 @@ label {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--line);
-  background: #f3f4f6;
+  border: 1px solid var(--accent);
+  background: conic-gradient(
+    var(--accent) var(--accent-progress, 0deg),
+    var(--accent-soft) var(--accent-progress, 0deg)
+  );
 }
 
 .timer-face {
@@ -431,7 +459,7 @@ label {
   height: 40%;
   top: 10%;
   left: 50%;
-  background: var(--text);
+  background: var(--accent);
   transform-origin: bottom center;
 }
 
@@ -439,13 +467,18 @@ label {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: var(--text);
+  background: var(--accent);
 }
 
 .timer-time {
   font-family: var(--font-display);
   font-size: 20px;
   letter-spacing: 0.02em;
+}
+
+.timer-name {
+  font-size: 22px;
+  letter-spacing: -0.01em;
 }
 
 .timer-controls {
@@ -532,14 +565,14 @@ label {
 
 .session-meta {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--session-muted, var(--muted));
   margin-top: 4px;
 }
 
 .session-duration {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: var(--text);
+  color: inherit;
 }
 
 .stats-card h3 {

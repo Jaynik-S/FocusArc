@@ -1,21 +1,14 @@
 import { useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
-import { EndDayResponse } from "../api/types";
+import { ResetTotalsResponse } from "../api/types";
 
 type EndDayButtonProps = {
-  dayDate: string;
-  clientTz: string;
   disabled?: boolean;
-  onEnded: (response: EndDayResponse) => void;
+  onEnded: (response: ResetTotalsResponse) => void;
 };
 
-const EndDayButton = ({
-  dayDate,
-  clientTz,
-  disabled = false,
-  onEnded,
-}: EndDayButtonProps) => {
+const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -24,17 +17,13 @@ const EndDayButton = ({
     setBusy(true);
     setError("");
     try {
-      const response = await apiFetch<EndDayResponse>("/end-day", {
+      const response = await apiFetch<ResetTotalsResponse>("/totals/reset", {
         method: "POST",
-        body: {
-          client_tz: clientTz,
-          day_date: dayDate,
-        },
       });
       onEnded(response);
       setOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to end day");
+      setError(err instanceof Error ? err.message : "Failed to reset totals");
     } finally {
       setBusy(false);
     }
@@ -48,13 +37,13 @@ const EndDayButton = ({
         disabled={disabled}
         onClick={() => setOpen(true)}
       >
-        End Day
+        Reset Totals
       </button>
       {open ? (
         <div className="modal-overlay" role="dialog" aria-modal="true">
           <div className="modal">
             <div className="modal-header">
-              <h3>End today?</h3>
+              <h3>Reset totals?</h3>
               <button
                 className="ghost"
                 type="button"
@@ -66,7 +55,7 @@ const EndDayButton = ({
             </div>
             <div className="modal-body">
               <p className="modal-text">
-                This will stop any running timer and finalize totals for {dayDate}.
+                This will stop any running timer and reset all total counters to zero.
               </p>
               {error ? <div className="error">{error}</div> : null}
               <div className="modal-actions">
@@ -84,7 +73,7 @@ const EndDayButton = ({
                   onClick={handleConfirm}
                   disabled={busy}
                 >
-                  {busy ? "Ending..." : "Confirm"}
+                  {busy ? "Resetting..." : "Confirm"}
                 </button>
               </div>
             </div>

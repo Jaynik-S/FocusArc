@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     String,
     UniqueConstraint,
 )
@@ -28,6 +29,9 @@ class Timer(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     color: Mapped[str] = mapped_column(String, nullable=False)
     icon: Mapped[str] = mapped_column(String, nullable=False)
+    cycle_total_seconds: Mapped[int] = mapped_column(
+        Integer, server_default=sa.text("0"), nullable=False
+    )
     is_archived: Mapped[bool] = mapped_column(
         Boolean, server_default=sa.text("false"), nullable=False
     )

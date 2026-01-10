@@ -3,6 +3,7 @@ export type Timer = {
   name: string;
   color: string;
   icon: string;
+  cycle_total_seconds: number;
   is_archived: boolean;
   created_at: string;
   updated_at: string;
@@ -22,6 +23,10 @@ export type Session = {
 export type TimerTotal = {
   timer_id: string;
   total_seconds: number;
+};
+
+export type ResetTotalsResponse = {
+  totals: TimerTotal[];
 };
 
 export type DayStatsResponse = {

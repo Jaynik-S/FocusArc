@@ -13,6 +13,15 @@ from app.models.session import Session as SessionModel
 from app.models.timer import Timer
 
 
+def _increment_cycle_total(db: Session, timer_id: UUID, delta_seconds: int) -> None:
+    if delta_seconds <= 0:
+        return
+    timer = db.get(Timer, timer_id)
+    if timer is None:
+        return
+    timer.cycle_total_seconds += delta_seconds
+
+
 def _get_timezone(client_tz: str) -> ZoneInfo:
     if not client_tz:
         raise ValueError("invalid_timezone")
@@ -83,6 +92,9 @@ def start_timer(
                     0, int((active.end_at - active.start_at).total_seconds())
                 )
                 stopped_session = active
+                _increment_cycle_total(
+                    db, active.timer_id, active.duration_seconds or 0
+                )
 
             new_session = SessionModel(
                 username=username,
@@ -132,6 +144,7 @@ def stop_active_session(db: Session, username: str) -> SessionModel | None:
         active.duration_seconds = max(
             0, int((active.end_at - active.start_at).total_seconds())
         )
+        _increment_cycle_total(db, active.timer_id, active.duration_seconds or 0)
 
     db.refresh(active)
     return active
@@ -190,6 +203,7 @@ def stop_active_session_for_day(
         active.duration_seconds = max(
             0, int((active.end_at - active.start_at).total_seconds())
         )
+        _increment_cycle_total(db, active.timer_id, active.duration_seconds or 0)
 
     db.refresh(active)
     return active

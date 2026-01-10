@@ -7,6 +7,7 @@ from app.api.end_day import router as end_day_router
 from app.api.stats import router as stats_router
 from app.api.sessions import router as sessions_router
 from app.api.timers import router as timers_router
+from app.api.totals import router as totals_router
 from app.db import get_db
 from app.models.session import Session as SessionModel
 
@@ -52,5 +53,6 @@ api_router.include_router(timers_router)
 api_router.include_router(sessions_router)
 api_router.include_router(end_day_router)
 api_router.include_router(stats_router)
+api_router.include_router(totals_router)
 router.include_router(public_router)
 router.include_router(api_router)
