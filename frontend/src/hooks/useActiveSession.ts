@@ -65,7 +65,7 @@ export const useActiveSession = (enabled = true) => {
   }, [activeSession, enabled]);
 
   const startTimer = useCallback(
-    async (timerId: string) => {
+    async (timerId: string, stoppedAdjustmentSeconds: number = 0) => {
       if (!enabled) {
         return;
       }
@@ -79,6 +79,7 @@ export const useActiveSession = (enabled = true) => {
           body: {
             client_tz: getClientTimezone(),
             started_at_client: new Date().toISOString(),
+            stopped_adjustment_seconds: stoppedAdjustmentSeconds,
           },
         });
         setActiveSession(response.active_session);
@@ -89,7 +90,8 @@ export const useActiveSession = (enabled = true) => {
     [enabled]
   );
 
-  const stopTimer = useCallback(async () => {
+  const stopTimer = useCallback(
+    async (adjustmentSeconds: number = 0) => {
     if (!enabled) {
       return;
     }
@@ -97,13 +99,18 @@ export const useActiveSession = (enabled = true) => {
     try {
       await apiFetch<{ stopped_session: Session | null }>("/stop", {
         method: "POST",
-        body: { stopped_at_client: new Date().toISOString() },
+        body: {
+          stopped_at_client: new Date().toISOString(),
+          adjustment_seconds: adjustmentSeconds,
+        },
       });
       setActiveSession(null);
     } finally {
       setBusy(false);
     }
-  }, [enabled]);
+    },
+    [enabled]
+  );
 
   return useMemo(
     () => ({

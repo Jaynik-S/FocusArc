@@ -87,6 +87,7 @@ button { font-family: inherit; }
   position: sticky;
   top: 0;
   overflow-y: auto;
+  z-index: 10;
   /* Visual separation via spacing only */
 }
 
@@ -462,7 +463,7 @@ button.ghost.accent:hover {
 
 button:disabled {
   opacity: 0.3;
-  pointer-events: none;
+  cursor: not-allowed;
 }
 
 button.link-button {
@@ -692,7 +693,7 @@ button.link-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 2000;
   animation: fadeIn 0.2s ease both;
 }
 

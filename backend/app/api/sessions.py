@@ -45,7 +45,11 @@ def start_timer(
     username = request.state.username
     try:
         stopped_session, active_session = sessions_service.start_timer(
-            db, username, timer_id, payload.client_tz
+            db,
+            username,
+            timer_id,
+            payload.client_tz,
+            payload.stopped_adjustment_seconds,
         )
     except LookupError as exc:
         if str(exc) == "timer_not_found":
@@ -70,9 +74,11 @@ def stop_timer(
     db: Session = Depends(get_db),
     payload: StopTimerRequest | None = None,
 ) -> StopTimerResponse:
-    _ = payload
     username = request.state.username
-    stopped_session = sessions_service.stop_active_session(db, username)
+    adjustment_seconds = payload.adjustment_seconds if payload else None
+    stopped_session = sessions_service.stop_active_session(
+        db, username, adjustment_seconds
+    )
     return StopTimerResponse(
         stopped_session=SessionOut.model_validate(stopped_session)
         if stopped_session

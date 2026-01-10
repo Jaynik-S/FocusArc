@@ -57,7 +57,11 @@ def get_active_session(db: Session, username: str) -> SessionModel | None:
 
 
 def start_timer(
-    db: Session, username: str, timer_id: UUID, client_tz: str
+    db: Session,
+    username: str,
+    timer_id: UUID,
+    client_tz: str,
+    stopped_adjustment_seconds: int | None = None,
 ) -> Tuple[SessionModel | None, SessionModel]:
     timer = db.get(Timer, timer_id)
     if timer is None or timer.username != username:
@@ -88,9 +92,9 @@ def start_timer(
 
             if active is not None:
                 active.end_at = now
-                active.duration_seconds = max(
-                    0, int((active.end_at - active.start_at).total_seconds())
-                )
+                base_duration = int((active.end_at - active.start_at).total_seconds())
+                adjustment = stopped_adjustment_seconds or 0
+                active.duration_seconds = max(0, base_duration + adjustment)
                 stopped_session = active
                 _increment_cycle_total(
                     db, active.timer_id, active.duration_seconds or 0
@@ -120,7 +124,9 @@ def start_timer(
         raise
 
 
-def stop_active_session(db: Session, username: str) -> SessionModel | None:
+def stop_active_session(
+    db: Session, username: str, adjustment_seconds: int | None = None
+) -> SessionModel | None:
     now = datetime.now(timezone.utc)
 
     with db.begin_nested():
@@ -141,9 +147,9 @@ def stop_active_session(db: Session, username: str) -> SessionModel | None:
             return None
 
         active.end_at = now
-        active.duration_seconds = max(
-            0, int((active.end_at - active.start_at).total_seconds())
-        )
+        base_duration = int((active.end_at - active.start_at).total_seconds())
+        adjustment = adjustment_seconds or 0
+        active.duration_seconds = max(0, base_duration + adjustment)
         _increment_cycle_total(db, active.timer_id, active.duration_seconds or 0)
 
     db.refresh(active)

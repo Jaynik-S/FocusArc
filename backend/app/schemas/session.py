@@ -26,6 +26,7 @@ class ActiveSessionResponse(BaseModel):
 class StartTimerRequest(BaseModel):
     client_tz: str
     started_at_client: datetime | None = None
+    stopped_adjustment_seconds: int | None = None
 
 
 class StartTimerResponse(BaseModel):
@@ -35,6 +36,7 @@ class StartTimerResponse(BaseModel):
 
 class StopTimerRequest(BaseModel):
     stopped_at_client: datetime | None = None
+    adjustment_seconds: int | None = None
 
 
 class StopTimerResponse(BaseModel):

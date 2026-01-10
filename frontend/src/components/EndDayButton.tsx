@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
 import { ResetTotalsResponse } from "../api/types";
+import { useTimerRuntime } from "../context/TimerRuntimeContext";
 
 type EndDayButtonProps = {
   disabled?: boolean;
@@ -12,6 +13,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const { activeAdjustmentSeconds } = useTimerRuntime();
 
   const handleConfirm = async () => {
     setBusy(true);
@@ -19,6 +21,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
     try {
       const response = await apiFetch<ResetTotalsResponse>("/totals/reset", {
         method: "POST",
+        body: { adjustment_seconds: activeAdjustmentSeconds },
       });
       onEnded(response);
       setOpen(false);

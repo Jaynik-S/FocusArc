@@ -67,14 +67,14 @@ const TimersPage = () => {
   };
 
   const handleAddFive = () => {
-    if (!selectedTimerId) {
+    if (!selectedTimerId || !isActive) {
       return;
     }
     adjustOffset(selectedTimerId, 300);
   };
 
   const handleMinusOne = () => {
-    if (!selectedTimerId) {
+    if (!selectedTimerId || !isActive) {
       return;
     }
     adjustOffset(selectedTimerId, -60);
@@ -146,7 +146,7 @@ const TimersPage = () => {
             className="ghost accent timer-control-secondary"
             type="button"
             onClick={handleMinusOne}
-            disabled={!selectedTimerId}
+            disabled={!selectedTimerId || !isActive}
           >
             -1 min
           </button>
@@ -162,7 +162,7 @@ const TimersPage = () => {
             className="ghost accent timer-control-secondary"
             type="button"
             onClick={handleAddFive}
-            disabled={!selectedTimerId}
+            disabled={!selectedTimerId || !isActive}
           >
             +5 min
           </button>
