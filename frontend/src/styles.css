@@ -92,12 +92,14 @@ button { font-family: inherit; }
 }
 
 .sidebar-user {
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  text-decoration: white wavy underline;
+
 }
 
 .sidebar-user strong {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 30px;
   color: var(--fg);
 }
 
@@ -506,6 +508,10 @@ button.link-button {
   gap: var(--space-xs);
 }
 
+.history-chip-row {
+  margin-top: var(--space-sm);
+}
+
 .chip {
   padding: 6px 12px;
   border-radius: 999px;
@@ -545,29 +551,73 @@ button.link-button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--space-sm);
-  padding: 12px 14px;
+  gap: var(--space-md);
+  padding: 14px 16px;
   border-radius: 12px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
-.session-title {
+.session-name {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 17px;
+  flex: 1 1 160px;
+  min-width: 0;
 }
 
-.session-meta {
+.session-date-duration {
   font-size: 12px;
-  margin-top: 4px;
+  font-weight: 500;
   color: var(--session-muted, var(--muted));
+  flex: 1 1 180px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.session-duration {
-  font-size: 12px;
+.session-time {
+  font-size: 17px;
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+/* --- History Summary --- */
+
+.history-summary-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.history-summary-chip {
+  flex: 0 1 calc((100% - (var(--space-sm) * 6)) / 7);
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.history-summary-value {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-summary-label {
+  font-size: 20px;
+  font-weight: 600;
+  opacity: 0.95;
 }
 
 /* --- Day Timeline --- */
