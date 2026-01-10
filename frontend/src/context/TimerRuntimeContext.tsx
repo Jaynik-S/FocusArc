@@ -16,6 +16,45 @@ type TimerRuntimeContextValue = {
   adjustOffset: (timerId: string, deltaSeconds: number) => void;
 };
 
+const OFFSETS_STORAGE_KEY = "coursetimers.timerOffsets";
+const SESSION_ADJUSTMENTS_STORAGE_KEY = "coursetimers.sessionAdjustments";
+
+const readStoredOffsets = () => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = localStorage.getItem(OFFSETS_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw) as Record<string, number>;
+    return Object.fromEntries(
+      Object.entries(parsed).map(([key, value]) => [key, Number(value) || 0])
+    );
+  } catch {
+    return {};
+  }
+};
+
+const readStoredSessionAdjustments = () => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = localStorage.getItem(SESSION_ADJUSTMENTS_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw) as Record<string, number>;
+    return Object.fromEntries(
+      Object.entries(parsed).map(([key, value]) => [key, Number(value) || 0])
+    );
+  } catch {
+    return {};
+  }
+};
+
 const TimerRuntimeContext = createContext<TimerRuntimeContextValue | undefined>(
   undefined
 );
@@ -28,12 +67,47 @@ export const TimerRuntimeProvider = ({
   const hasUsername = Boolean(getUsername());
   const { activeSession, elapsedSeconds, loading, busy, refresh, startTimer, stopTimer } =
     useActiveSession(hasUsername);
-  const [offsets, setOffsets] = useState<Record<string, number>>({});
+  const [offsets, setOffsets] = useState<Record<string, number>>(() => readStoredOffsets());
   const [sessionAdjustmentSeconds, setSessionAdjustmentSeconds] = useState(0);
 
   useEffect(() => {
-    setSessionAdjustmentSeconds(0);
+    if (!activeSession) {
+      setSessionAdjustmentSeconds(0);
+      return;
+    }
+    const stored = readStoredSessionAdjustments();
+    setSessionAdjustmentSeconds(stored[activeSession.id] ?? 0);
   }, [activeSession?.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    try {
+      localStorage.setItem(OFFSETS_STORAGE_KEY, JSON.stringify(offsets));
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [offsets]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (!activeSession) {
+      return;
+    }
+    try {
+      const stored = readStoredSessionAdjustments();
+      stored[activeSession.id] = sessionAdjustmentSeconds;
+      localStorage.setItem(
+        SESSION_ADJUSTMENTS_STORAGE_KEY,
+        JSON.stringify(stored)
+      );
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [activeSession, sessionAdjustmentSeconds]);
 
   const adjustOffset = useCallback(
     (timerId: string, deltaSeconds: number) => {

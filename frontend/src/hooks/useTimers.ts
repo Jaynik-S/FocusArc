@@ -6,13 +6,36 @@ import { Timer } from "../api/types";
 const sortTimers = (timers: Timer[]) =>
   [...timers].sort((a, b) => a.created_at.localeCompare(b.created_at));
 
+const TIMERS_STORAGE_KEY = "coursetimers.timers";
+
+const readStoredTimers = () => {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const raw = localStorage.getItem(TIMERS_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw) as Timer[];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((item) => item && typeof item.id === "string");
+  } catch {
+    return [];
+  }
+};
+
 export type TimerFormValues = {
   name: string;
   color: string;
 };
 
 export const useTimers = (enabled = true) => {
-  const [timers, setTimers] = useState<Timer[]>([]);
+  const [timers, setTimers] = useState<Timer[]>(() =>
+    enabled ? readStoredTimers() : []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +62,30 @@ export const useTimers = (enabled = true) => {
   useEffect(() => {
     loadTimers();
   }, [loadTimers]);
+
+  useEffect(() => {
+    if (!enabled || !loading) {
+      return;
+    }
+    if (timers.length > 0) {
+      return;
+    }
+    const stored = readStoredTimers();
+    if (stored.length > 0) {
+      setTimers(stored);
+    }
+  }, [enabled, loading, timers.length]);
+
+  useEffect(() => {
+    if (!enabled || loading) {
+      return;
+    }
+    try {
+      localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [timers, enabled, loading]);
 
   const createTimer = useCallback(async (payload: TimerFormValues) => {
     const timer = await apiFetch<Timer>("/timers", {

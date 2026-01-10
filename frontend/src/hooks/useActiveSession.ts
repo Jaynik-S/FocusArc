@@ -4,9 +4,41 @@ import { apiFetch } from "../api/apiClient";
 import { Session } from "../api/types";
 import { getClientTimezone } from "../utils/date";
 
+const ACTIVE_SESSION_STORAGE_KEY = "coursetimers.activeSession";
+
+const readStoredActiveSession = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const raw = localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw) as {
+      activeSession: Session | null;
+      elapsedSeconds: number;
+    };
+    if (!parsed?.activeSession) {
+      return null;
+    }
+    return {
+      activeSession: parsed.activeSession,
+      elapsedSeconds: Number(parsed.elapsedSeconds) || 0,
+    };
+  } catch {
+    return null;
+  }
+};
+
 export const useActiveSession = (enabled = true) => {
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const stored = enabled ? readStoredActiveSession() : null;
+  const [activeSession, setActiveSession] = useState<Session | null>(
+    stored?.activeSession ?? null
+  );
+  const [elapsedSeconds, setElapsedSeconds] = useState(
+    stored?.elapsedSeconds ?? 0
+  );
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -64,6 +96,24 @@ export const useActiveSession = (enabled = true) => {
     return () => window.clearInterval(interval);
   }, [activeSession, enabled]);
 
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined") {
+      return;
+    }
+    try {
+      if (activeSession) {
+        localStorage.setItem(
+          ACTIVE_SESSION_STORAGE_KEY,
+          JSON.stringify({ activeSession, elapsedSeconds })
+        );
+      } else {
+        localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+      }
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [activeSession, elapsedSeconds, enabled]);
+
   const startTimer = useCallback(
     async (timerId: string, stoppedAdjustmentSeconds: number = 0) => {
       if (!enabled) {
@@ -92,22 +142,22 @@ export const useActiveSession = (enabled = true) => {
 
   const stopTimer = useCallback(
     async (adjustmentSeconds: number = 0) => {
-    if (!enabled) {
-      return;
-    }
-    setBusy(true);
-    try {
-      await apiFetch<{ stopped_session: Session | null }>("/stop", {
-        method: "POST",
-        body: {
-          stopped_at_client: new Date().toISOString(),
-          adjustment_seconds: adjustmentSeconds,
-        },
-      });
-      setActiveSession(null);
-    } finally {
-      setBusy(false);
-    }
+      if (!enabled) {
+        return;
+      }
+      setBusy(true);
+      try {
+        await apiFetch<{ stopped_session: Session | null }>("/stop", {
+          method: "POST",
+          body: {
+            stopped_at_client: new Date().toISOString(),
+            adjustment_seconds: adjustmentSeconds,
+          },
+        });
+        setActiveSession(null);
+      } finally {
+        setBusy(false);
+      }
     },
     [enabled]
   );
