@@ -14,9 +14,9 @@ router = APIRouter(prefix="/timers", tags=["timers"])
 
 @router.get("")
 def list_timers(
-    include_archived: bool = Query(default=False),
     request: Request,
     db: Session = Depends(get_db),
+    include_archived: bool = Query(default=False),
 ) -> TimerList:
     username = request.state.username
     timers = timers_service.list_timers(db, username, include_archived)

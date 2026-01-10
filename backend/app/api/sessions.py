@@ -66,9 +66,9 @@ def start_timer(
 
 @router.post("/stop")
 def stop_timer(
-    payload: StopTimerRequest | None = None,
     request: Request,
     db: Session = Depends(get_db),
+    payload: StopTimerRequest | None = None,
 ) -> StopTimerResponse:
     _ = payload
     username = request.state.username

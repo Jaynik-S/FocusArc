@@ -60,7 +60,7 @@ def start_timer(
     stopped_session: SessionModel | None = None
 
     try:
-        with db.begin():
+        with db.begin_nested():
             active = (
                 db.execute(
                     select(SessionModel)
@@ -111,7 +111,7 @@ def start_timer(
 def stop_active_session(db: Session, username: str) -> SessionModel | None:
     now = datetime.now(timezone.utc)
 
-    with db.begin():
+    with db.begin_nested():
         active = (
             db.execute(
                 select(SessionModel)
@@ -161,7 +161,7 @@ def stop_active_session_for_day(
     tz = _get_timezone(client_tz)
     now = datetime.now(timezone.utc)
 
-    with db.begin():
+    with db.begin_nested():
         active = (
             db.execute(
                 select(SessionModel)

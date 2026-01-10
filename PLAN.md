@@ -675,7 +675,7 @@ GROUP BY t.id;
 - Goal: deployable outside local machine.
 - Files:
   - Update: `README.md` (local dev + deployment)
-  - Add: `render.yaml` (Render) or `fly.toml` (Fly.io) depending on choice
+  - Add: `render.yaml` (Render)
 - Commands:
   - PaaS CLI commands vary (documented in README).
 - Acceptance checks:

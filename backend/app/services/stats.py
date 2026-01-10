@@ -61,7 +61,7 @@ def upsert_day_summaries(
         set_={"total_seconds": stmt.excluded.total_seconds},
     )
 
-    with db.begin():
+    with db.begin_nested():
         db.execute(stmt)
 
 
@@ -73,7 +73,7 @@ def compute_week_totals(
         select(
             SessionModel.day_date,
             SessionModel.timer_id,
-            func.coalesce(func.sum(SessionModel.duration_seconds), 0).label(\"total\"),
+            func.coalesce(func.sum(SessionModel.duration_seconds), 0).label("total"),
         )
         .where(
             SessionModel.username == username,
@@ -105,7 +105,7 @@ def compute_averages(
         select(
             SessionModel.day_date,
             SessionModel.timer_id,
-            func.sum(SessionModel.duration_seconds).label(\"total_seconds\"),
+            func.sum(SessionModel.duration_seconds).label("total_seconds"),
         )
         .where(
             SessionModel.username == username,
