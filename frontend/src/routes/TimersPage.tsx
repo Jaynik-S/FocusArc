@@ -21,6 +21,7 @@ const TimersPage = () => {
     stopTimer,
     offsets,
     adjustOffset,
+    elapsedByTimer,
   } = useTimerRuntime();
 
   const selectedTimer = useMemo(() => {
@@ -38,7 +39,8 @@ const TimersPage = () => {
 
   const isActive = activeSession?.timer_id === selectedTimerId;
   const offsetSeconds = selectedTimerId ? offsets[selectedTimerId] ?? 0 : 0;
-  const rawSeconds = (isActive ? elapsedSeconds : 0) + offsetSeconds;
+  const baseSeconds = selectedTimerId ? elapsedByTimer[selectedTimerId] ?? 0 : 0;
+  const rawSeconds = baseSeconds + (isActive ? elapsedSeconds : 0) + offsetSeconds;
   const displaySeconds = Math.max(0, rawSeconds);
   const progressFraction = (displaySeconds % 3600) / 3600;
   const progressAngle = progressFraction * 360;

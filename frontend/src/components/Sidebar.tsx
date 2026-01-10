@@ -1,5 +1,5 @@
 import { CSSProperties, useEffect, useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { ResetTotalsResponse } from "../api/types";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
@@ -36,10 +36,11 @@ const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
   const timersState = useTimers(isReady);
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
-  const { activeSession, elapsedSeconds, offsets } = useTimerRuntime();
+  const { activeSession, elapsedSeconds, offsets, elapsedByTimer } = useTimerRuntime();
   const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme());
   const [createOpen, setCreateOpen] = useState(false);
   const [actionError, setActionError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!timersState.loading && timersState.timers.length > 0) {
@@ -96,9 +97,6 @@ const Sidebar = ({ username }: SidebarProps) => {
         <strong>{username || "Not set"}</strong>
       </div>
       <nav className="sidebar-nav">
-        <NavLink to="/timers" className="sidebar-link">
-          Timers
-        </NavLink>
         <NavLink to="/history" className="sidebar-link">
           History
         </NavLink>
@@ -124,9 +122,10 @@ const Sidebar = ({ username }: SidebarProps) => {
             const isSelected = timer.id === selectedTimerId;
             const isRunning = activeSession?.timer_id === timer.id;
             const offsetSeconds = offsets[timer.id] ?? 0;
+            const baseSeconds = elapsedByTimer[timer.id] ?? 0;
             const displaySeconds = Math.max(
               0,
-              (isRunning ? elapsedSeconds : 0) + offsetSeconds
+              baseSeconds + (isRunning ? elapsedSeconds : 0) + offsetSeconds
             );
             const timerColor = isValidHexColor(timer.color) ? timer.color : "transparent";
             return (
@@ -135,7 +134,10 @@ const Sidebar = ({ username }: SidebarProps) => {
                 className={`timer-row${isSelected ? " timer-row-active" : ""}`}
                 type="button"
                 style={{ animationDelay: `${index * 40}ms` }}
-                onClick={() => setSelectedTimerId(timer.id)}
+                onClick={() => {
+                  setSelectedTimerId(timer.id);
+                  navigate("/timers");
+                }}
               >
                 <div className="timer-row-main">
                   <div className="timer-row-name">

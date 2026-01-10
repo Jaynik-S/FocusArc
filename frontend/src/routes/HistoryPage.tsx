@@ -9,7 +9,7 @@ import {
   getClientTimezone,
   getLocalDateString,
 } from "../utils/date";
-import { formatDurationShort } from "../utils/time";
+import { formatDuration } from "../utils/time";
 
 const getDateOffset = (days: number) => {
   const date = new Date();
@@ -58,7 +58,7 @@ const HistoryPage = () => {
             end,
             clientTz
           )}`,
-          durationLabel: formatDurationShort(durationSeconds),
+          durationLabel: formatDuration(durationSeconds),
         };
       });
   }, [sessionsState.sessions, timerMap, clientTz]);
