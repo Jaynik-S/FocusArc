@@ -92,7 +92,7 @@ const TimersPage = () => {
     }
   };
 
-  const handleArchive = async () => {
+  const handleDelete = async () => {
     if (!selectedTimer) {
       return;
     }
@@ -119,11 +119,9 @@ const TimersPage = () => {
         }
       >
         <div className="timer-meta">
-          <span className="label">Active timer</span>
           <strong className="timer-name">
             {selectedTimer ? selectedTimer.name : "Select a timer"}
           </strong>
-          <span className="muted">{formatDuration(displaySeconds)}</span>
         </div>
         <div
           className="timer-dial"
@@ -144,7 +142,15 @@ const TimersPage = () => {
         </div>
         <div className="timer-controls">
           <button
-            className="primary"
+            className="ghost accent timer-control-secondary"
+            type="button"
+            onClick={handleMinusOne}
+            disabled={!selectedTimerId}
+          >
+            -1 min
+          </button>
+          <button
+            className="primary timer-control-main"
             type="button"
             onClick={handlePlayPause}
             disabled={!selectedTimerId || busy}
@@ -152,20 +158,12 @@ const TimersPage = () => {
             {isActive ? "Pause" : "Play"}
           </button>
           <button
-            className="ghost accent"
+            className="ghost accent timer-control-secondary"
             type="button"
             onClick={handleAddFive}
             disabled={!selectedTimerId}
           >
             +5 min
-          </button>
-          <button
-            className="ghost accent"
-            type="button"
-            onClick={handleMinusOne}
-            disabled={!selectedTimerId}
-          >
-            -1 min
           </button>
         </div>
         {selectedTimer ? (
@@ -177,8 +175,8 @@ const TimersPage = () => {
             >
               Edit timer
             </button>
-            <button className="link-button" type="button" onClick={handleArchive}>
-              Archive timer
+            <button className="link-button" type="button" onClick={handleDelete}>
+              Delete timer
             </button>
           </div>
         ) : null}

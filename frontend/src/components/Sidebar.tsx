@@ -18,7 +18,6 @@ const Sidebar = ({ username }: SidebarProps) => {
   const timersState = useTimers(isReady);
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
   const [createOpen, setCreateOpen] = useState(false);
-  const [timerToggles, setTimerToggles] = useState<Record<string, boolean>>({});
   const [actionError, setActionError] = useState("");
 
   useEffect(() => {
@@ -40,23 +39,10 @@ const Sidebar = ({ username }: SidebarProps) => {
     if (!selectedTimer || !isValidHexColor(selectedTimer.color)) {
       return undefined;
     }
-    const bg = selectedTimer.color;
-    const fg = getContrastColor(bg);
-    const muted = getMutedTextColor(bg);
-    const isDark = fg === "#ffffff";
-    const highlight = isDark
-      ? "rgba(255, 255, 255, 0.16)"
-      : "rgba(17, 24, 39, 0.08)";
-    const border = isDark
-      ? "rgba(255, 255, 255, 0.28)"
-      : "rgba(17, 24, 39, 0.18)";
+    // Minimalistic: only pass accent color for indicators
     return {
-      "--sidebar-bg": bg,
-      "--sidebar-fg": fg,
-      "--sidebar-muted": muted,
-      "--sidebar-highlight": highlight,
-      "--sidebar-border": border,
-    } as CSSProperties;
+      "--sidebar-accent": selectedTimer.color,
+    } as any;
   }, [selectedTimer]);
 
   const handleCreate = async (values: TimerFormValues) => {
@@ -69,13 +55,6 @@ const Sidebar = ({ username }: SidebarProps) => {
     }
   };
 
-  const handleToggle = (timerId: string) => {
-    setTimerToggles((prev) => ({
-      ...prev,
-      [timerId]: !(prev[timerId] ?? true),
-    }));
-  };
-
   const handleResetTotals = async (_response: ResetTotalsResponse) => {
     await timersState.reload();
   };
@@ -83,7 +62,6 @@ const Sidebar = ({ username }: SidebarProps) => {
   return (
     <aside className="sidebar" style={sidebarStyle}>
       <div className="sidebar-user">
-        <span className="sidebar-label">Signed in</span>
         <strong>{username || "Not set"}</strong>
       </div>
       <nav className="sidebar-nav">
@@ -114,7 +92,6 @@ const Sidebar = ({ username }: SidebarProps) => {
           {timers.map((timer, index) => {
             const totalSeconds = timer.cycle_total_seconds ?? 0;
             const isSelected = timer.id === selectedTimerId;
-            const isEnabled = timerToggles[timer.id] ?? true;
             return (
               <button
                 key={timer.id}
@@ -129,15 +106,6 @@ const Sidebar = ({ username }: SidebarProps) => {
                     {formatDurationShort(totalSeconds)}
                   </span>
                 </div>
-                <label className="timer-toggle">
-                  <input
-                    type="checkbox"
-                    checked={isEnabled}
-                    onChange={() => handleToggle(timer.id)}
-                    onClick={(event) => event.stopPropagation()}
-                  />
-                  <span />
-                </label>
               </button>
             );
           })}
