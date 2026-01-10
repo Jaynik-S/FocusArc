@@ -8,6 +8,7 @@
   --accent: #222222;   /* Interactive / Strong */
   --highlight: rgba(0, 0, 0, 0.03); /* Hover backgrounds */
   --highlight-strong: rgba(0, 0, 0, 0.06); /* Active backgrounds */
+  --overlay: rgba(255, 255, 255, 0.88);
   
   /* Fonts */
   --font-body: "IBM Plex Sans", -apple-system, sans-serif;
@@ -21,6 +22,18 @@
   --space-lg: 24px;
   --space-xl: 32px;
   --space-2xl: 48px;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1115;
+  --fg: #f4f4f5;
+  --muted: #9aa0a6;
+  --accent: #f4f4f5;
+  --highlight: rgba(255, 255, 255, 0.06);
+  --highlight-strong: rgba(255, 255, 255, 0.12);
+  --overlay: rgba(10, 12, 16, 0.86);
+  color-scheme: dark;
 }
 
 * {
@@ -136,11 +149,45 @@ button { font-family: inherit; }
   margin-top: auto;
 }
 
+.sidebar-endday-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 .end-day-button {
-  width: 100%;
+  width: auto;
   text-align: center;
   background: var(--highlight);
   color: var(--fg);
+  min-height: 30px;
+  padding: 6px 10px;
+  font-size: 12px;
+  flex: 1;
+}
+
+.theme-toggle {
+  width: 32px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--highlight);
+  color: var(--fg);
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--highlight-strong);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .sidebar-section-header {
@@ -254,7 +301,7 @@ button { font-family: inherit; }
   width: 10px;
   left: 2px;
   bottom: 2px;
-  background-color: white;
+  background-color: var(--bg);
   transition: .2s;
   border-radius: 50%;
 }
@@ -630,7 +677,7 @@ button.link-button {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--overlay);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
@@ -640,7 +687,7 @@ button.link-button {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg);
   padding: var(--space-2xl);
   width: 100%;
   max-width: 440px;
