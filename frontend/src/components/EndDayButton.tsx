@@ -13,7 +13,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const { activeAdjustmentSeconds } = useTimerRuntime();
+  const { activeAdjustmentSeconds, refresh, resetRuntimeState } = useTimerRuntime();
 
   const handleConfirm = async () => {
     setBusy(true);
@@ -23,6 +23,8 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
         method: "POST",
         body: { adjustment_seconds: activeAdjustmentSeconds },
       });
+      resetRuntimeState();
+      refresh(true);
       onEnded(response);
       setOpen(false);
     } catch (err) {

@@ -14,6 +14,7 @@ type TimerRuntimeContextValue = {
   elapsedByTimer: Record<string, number>;
   offsets: Record<string, number>;
   activeAdjustmentSeconds: number;
+  resetRuntimeState: () => void;
   adjustOffset: (timerId: string, deltaSeconds: number) => void;
 };
 
@@ -169,6 +170,21 @@ export const TimerRuntimeProvider = ({
   );
 
   const activeAdjustmentSeconds = sessionAdjustmentSeconds;
+  const resetRuntimeState = useCallback(() => {
+    setElapsedByTimer({});
+    setOffsets({});
+    setSessionAdjustmentSeconds(0);
+    if (typeof window === "undefined") {
+      return;
+    }
+    try {
+      localStorage.removeItem(ELAPSED_STORAGE_KEY);
+      localStorage.removeItem(OFFSETS_STORAGE_KEY);
+      localStorage.removeItem(SESSION_ADJUSTMENTS_STORAGE_KEY);
+    } catch {
+      // Ignore storage errors.
+    }
+  }, []);
 
   const applyElapsedToTimer = useCallback((timerId: string, deltaSeconds: number) => {
     if (!timerId || deltaSeconds <= 0) {
@@ -220,6 +236,7 @@ export const TimerRuntimeProvider = ({
       elapsedByTimer,
       offsets,
       activeAdjustmentSeconds,
+      resetRuntimeState,
       adjustOffset,
     }),
     [
@@ -233,6 +250,7 @@ export const TimerRuntimeProvider = ({
       elapsedByTimer,
       offsets,
       activeAdjustmentSeconds,
+      resetRuntimeState,
       adjustOffset,
     ]
   );
