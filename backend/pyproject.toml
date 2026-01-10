@@ -1,7 +1,7 @@
 [project]
 name = "coursetimers-backend"
 version = "0.1.0"
-description = "Backend API for CourseTimers"
+description = "Backend API for FocusArc"
 requires-python = ">=3.10"
 dependencies = [
   "fastapi>=0.110",

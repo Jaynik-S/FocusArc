@@ -1,14 +1,11 @@
 services:
   db:
     image: postgres:15
-    container_name: coursetimers-db
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-coursetimers}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-coursetimers}
       POSTGRES_DB: ${POSTGRES_DB:-coursetimers}
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -21,33 +18,35 @@ services:
   api:
     build:
       context: ./backend
+    restart: always
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-coursetimers}:${POSTGRES_PASSWORD:-coursetimers}@db:5432/${POSTGRES_DB:-coursetimers}
-      APP_ENV: dev
-      CORS_ORIGINS: http://localhost:5173
-      LOG_LEVEL: info
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-coursetimers}:${POSTGRES_PASSWORD:-coursetimers}@db:5432/${POSTGRES_DB:-coursetimers}}
+      APP_ENV: ${APP_ENV:-prod}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
-    command: >
-      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    healthcheck:
+      test:
+        ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web:
     build:
       context: ./frontend
-    environment:
-      VITE_API_BASE_URL: http://localhost:8000/api
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api}
+    restart: always
     ports:
       - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
 volumes:
   pgdata:

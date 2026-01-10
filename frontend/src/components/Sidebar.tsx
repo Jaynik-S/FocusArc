@@ -94,7 +94,7 @@ const Sidebar = ({ username }: SidebarProps) => {
   return (
     <aside className="sidebar" style={sidebarStyle}>
       <div className="sidebar-user">
-        <strong>{username || "Not set"}</strong>
+        <strong style={{ marginTop: -15 }}>{username || "Not set"}</strong>
       </div>
       <nav className="sidebar-nav">
         <NavLink to="/history" className="sidebar-link">
@@ -103,7 +103,7 @@ const Sidebar = ({ username }: SidebarProps) => {
       </nav>
       <div className="sidebar-section">
         <div className="sidebar-section-header">
-          <span>Timers</span>
+            <span style={{ marginTop: -15 }}>Timers</span>
           <button
             className="link-button"
             type="button"
