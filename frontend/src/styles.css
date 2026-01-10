@@ -231,6 +231,8 @@ button { font-family: inherit; }
 
 .timer-row-active {
   opacity: 1;
+  min-height: 58px;
+  padding: 12px 0;
 }
 
 .timer-row-main {
@@ -269,6 +271,14 @@ button { font-family: inherit; }
 
 .timer-row-active .timer-row-dot {
   opacity: 1;
+}
+
+.timer-row-active .timer-row-name {
+  font-size: 22px;
+}
+
+.timer-row-active .timer-row-total {
+  font-size: 18px;
 }
 
 /* Toggle Switch (Minimal) */
@@ -804,7 +814,7 @@ button.link-button {
   border-radius: 50%;
   /* Using conic gradient for the progress ring */
   background: conic-gradient(
-    from -90deg,
+    from 0deg,
     var(--accent) var(--accent-progress, 0deg),
     var(--highlight-strong) 0deg
   );
