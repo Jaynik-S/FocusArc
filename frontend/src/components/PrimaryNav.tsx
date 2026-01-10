@@ -30,15 +30,6 @@ const PrimaryNav = () => {
       >
         History
       </NavLink>
-      <NavLink
-        className={({ isActive }) =>
-          `nav-pill${isActive ? " nav-pill-active" : ""}`
-        }
-        to="/stats"
-        title="Stats"
-      >
-        Stats
-      </NavLink>
     </nav>
   );
 };

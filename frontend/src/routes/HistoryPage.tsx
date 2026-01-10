@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
 
-import { getUsername } from "../api/apiClient";
-import PrimaryNav from "../components/PrimaryNav";
-import TopBar from "../components/TopBar";
 import { useSessions } from "../hooks/useSessions";
 import { useTimers } from "../hooks/useTimers";
 import {
@@ -20,7 +17,6 @@ const getDateOffset = (days: number) => {
 };
 
 const HistoryPage = () => {
-  const username = useMemo(() => getUsername(), []);
   const clientTz = useMemo(() => getClientTimezone(), []);
   const [fromDate, setFromDate] = useState(() =>
     getLocalDateString(getDateOffset(-6), clientTz)
@@ -65,15 +61,15 @@ const HistoryPage = () => {
   }, [sessionsState.sessions, timerMap, clientTz]);
 
   return (
-    <div className="page">
-      <TopBar username={username} />
-      <PrimaryNav />
-      <div className="card">
-        <div className="card-header">
-          <h2>History</h2>
-          <p>Review past sessions by date and course.</p>
+    <div className="page minimal-page">
+      <div className="page-header">
+        <div>
+          <h1>History</h1>
+          <p className="muted">Review sessions by date and timer.</p>
         </div>
-        <div className="card-body filter-block">
+      </div>
+      <div className="panel">
+        <div className="filter-block">
           <label className="field">
             <span>From</span>
             <input
@@ -113,12 +109,14 @@ const HistoryPage = () => {
           </div>
         </div>
       </div>
-      <div className="card">
-        <div className="card-header">
+      <div className="panel">
+        <div className="panel-header">
           <h3>Sessions</h3>
-          <p>{fromDate} to {toDate}</p>
+          <p className="muted">
+            {fromDate} to {toDate}
+          </p>
         </div>
-        <div className="card-body">
+        <div className="panel-body">
           {sessionsState.loading ? <div>Loading sessions...</div> : null}
           {sessionsState.error ? (
             <div className="error">{sessionsState.error}</div>

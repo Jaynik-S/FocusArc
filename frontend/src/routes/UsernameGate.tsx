@@ -28,26 +28,28 @@ const UsernameGate = () => {
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <h1>CourseTimers</h1>
-        <p>Track each course with a single, focused timer.</p>
+    <div className="page minimal-page">
+      <div className="panel gate-panel">
+        <div className="panel-header">
+          <h1>CourseTimers</h1>
+          <p className="muted">Track each course with a single, focused timer.</p>
+        </div>
+        <form onSubmit={onSubmit} className="panel-body">
+          <label className="field">
+            <span>Username</span>
+            <input
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              placeholder="e.g. jay"
+              maxLength={32}
+            />
+          </label>
+          {error ? <div className="error">{error}</div> : null}
+          <button className="primary" type="submit">
+            Continue
+          </button>
+        </form>
       </div>
-      <form onSubmit={onSubmit} className="card-body">
-        <label className="field">
-          <span>Username</span>
-          <input
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            placeholder="e.g. jay"
-            maxLength={32}
-          />
-        </label>
-        {error ? <div className="error">{error}</div> : null}
-        <button className="primary" type="submit">
-          Continue
-        </button>
-      </form>
     </div>
   );
 };

@@ -12,12 +12,17 @@ export type TimerFormValues = {
   icon: string;
 };
 
-export const useTimers = () => {
+export const useTimers = (enabled = true) => {
   const [timers, setTimers] = useState<Timer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadTimers = useCallback(async () => {
+    if (!enabled) {
+      setTimers([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -30,7 +35,7 @@ export const useTimers = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     loadTimers();

@@ -3,12 +3,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../api/apiClient";
 import { DayStatsResponse, TimerTotal } from "../api/types";
 
-export const useDayStats = (dayDate: string) => {
+export const useDayStats = (dayDate: string, enabled = true) => {
   const [totals, setTotals] = useState<TimerTotal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!enabled) {
+      setTotals([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -21,7 +26,7 @@ export const useDayStats = (dayDate: string) => {
     } finally {
       setLoading(false);
     }
-  }, [dayDate]);
+  }, [dayDate, enabled]);
 
   useEffect(() => {
     load();

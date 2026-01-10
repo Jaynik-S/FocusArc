@@ -8,8 +8,8 @@ import {
 } from "../utils/date";
 import SessionBlock from "./SessionBlock";
 
-const PX_PER_MINUTE = 1.2;
-const MIN_BLOCK_HEIGHT = 12;
+const PX_PER_MINUTE = 0.6;
+const MIN_BLOCK_HEIGHT = 8;
 
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));

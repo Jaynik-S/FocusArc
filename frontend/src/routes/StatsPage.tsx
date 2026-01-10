@@ -1,9 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { getUsername } from "../api/apiClient";
 import { AverageEntry, TimerTotal } from "../api/types";
-import PrimaryNav from "../components/PrimaryNav";
-import TopBar from "../components/TopBar";
 import { useAverages } from "../hooks/useAverages";
 import { useDayStats } from "../hooks/useDayStats";
 import { useStatsWeek } from "../hooks/useStatsWeek";
@@ -23,7 +20,6 @@ const getMax = (values: number[]) =>
   values.length ? Math.max(...values) : 0;
 
 const StatsPage = () => {
-  const username = useMemo(() => getUsername(), []);
   const clientTz = useMemo(() => getClientTimezone(), []);
   const [dayDate, setDayDate] = useState(() =>
     getLocalDateString(new Date(), clientTz)
@@ -110,17 +106,15 @@ const StatsPage = () => {
   );
 
   return (
-    <div className="page">
-      <TopBar username={username} />
-      <PrimaryNav />
-      <div className="card">
-        <div className="card-header">
-          <h2>Stats</h2>
-          <p>Daily totals, weekly trends, and running averages.</p>
+    <div className="page minimal-page">
+      <div className="page-header">
+        <div>
+          <h1>Stats</h1>
+          <p className="muted">Daily totals, weekly trends, and averages.</p>
         </div>
       </div>
-      <div className="card stats-card">
-        <div className="card-header card-header-row">
+      <div className="panel stats-card">
+        <div className="panel-header panel-header-row">
           <div>
             <h3>Day totals</h3>
             <p>{dayDate}</p>
@@ -134,7 +128,7 @@ const StatsPage = () => {
             />
           </label>
         </div>
-        <div className="card-body">
+        <div className="panel-body">
           {dayStats.loading ? <div>Loading totals...</div> : null}
           {dayStats.error ? <div className="error">{dayStats.error}</div> : null}
           {dayTotals.length === 0 ? (
@@ -165,8 +159,8 @@ const StatsPage = () => {
           )}
         </div>
       </div>
-      <div className="card stats-card">
-        <div className="card-header card-header-row">
+      <div className="panel stats-card">
+        <div className="panel-header panel-header-row">
           <div>
             <h3>Week totals</h3>
             <p>Week of {weekStart}</p>
@@ -180,7 +174,7 @@ const StatsPage = () => {
             />
           </label>
         </div>
-        <div className="card-body">
+        <div className="panel-body">
           {weekStats.loading ? <div>Loading week totals...</div> : null}
           {weekStats.error ? <div className="error">{weekStats.error}</div> : null}
           {weekRows.length === 0 ? (
@@ -236,8 +230,8 @@ const StatsPage = () => {
           )}
         </div>
       </div>
-      <div className="card stats-card">
-        <div className="card-header card-header-row">
+      <div className="panel stats-card">
+        <div className="panel-header panel-header-row">
           <div>
             <h3>Averages</h3>
             <p>Average per day across the last {avgDays} days.</p>
@@ -260,7 +254,7 @@ const StatsPage = () => {
             />
           </label>
         </div>
-        <div className="card-body">
+        <div className="panel-body">
           {averages.loading ? <div>Loading averages...</div> : null}
           {averages.error ? <div className="error">{averages.error}</div> : null}
           {averageRows.length === 0 ? (
