@@ -34,7 +34,8 @@ const TimersPage = () => {
   const offsetSeconds = selectedTimerId ? offsets[selectedTimerId] ?? 0 : 0;
   const rawSeconds = (isActive ? elapsedSeconds : 0) + offsetSeconds;
   const displaySeconds = Math.max(0, rawSeconds);
-  const progress = ((displaySeconds % 3600) / 3600) * 360;
+  const progressFraction = (displaySeconds % 3600) / 3600;
+  const progressAngle = progressFraction * 360;
   const accentColor =
     selectedTimer && isValidHexColor(selectedTimer.color)
       ? selectedTimer.color
@@ -113,11 +114,11 @@ const TimersPage = () => {
         className="timer-view"
         style={
           {
-            "--accent": accentColor,
-            "--accent-contrast": accentContrast,
-          } as CSSProperties
-        }
-      >
+              "--accent": accentColor,
+              "--accent-contrast": accentContrast,
+            } as CSSProperties
+          }
+        >
         <div className="timer-meta">
           <strong className="timer-name">
             {selectedTimer ? selectedTimer.name : "Select a timer"}
@@ -127,14 +128,14 @@ const TimersPage = () => {
           className="timer-dial"
           style={
             {
-              "--accent-progress": `${progress}deg`,
+              "--accent-progress": `${progressAngle}deg`,
             } as CSSProperties
           }
         >
           <div className="timer-face">
             <div
               className="timer-hand"
-              style={{ transform: `translateX(-50%) rotate(${progress}deg)` }}
+              style={{ transform: `translateX(-50%) rotate(${progressAngle}deg)` }}
             />
             <div className="timer-center" />
             <div className="timer-time">{formatDuration(displaySeconds)}</div>
