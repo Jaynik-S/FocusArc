@@ -79,7 +79,7 @@ const TimersPage = () => {
     if (!selectedTimerId || !isActive) {
       return;
     }
-    adjustOffset(selectedTimerId, -60);
+    adjustOffset(selectedTimerId, -600);
   };
 
   const handleUpdate = async (values: TimerFormValues) => {
@@ -150,7 +150,7 @@ const TimersPage = () => {
             onClick={handleMinusOne}
             disabled={!selectedTimerId || !isActive}
           >
-            -1 min
+            -10 min
           </button>
           <button
             className="primary timer-control-main"

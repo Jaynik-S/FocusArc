@@ -1,4 +1,4 @@
-# CourseTimers — Implementation Plan
+# FocusArc — Implementation Plan
 
 Local/personal web app to track time spent per course via multiple timers, session history, schedule views, and basic analytics. Stack: React + Vite (TS), FastAPI (Python), SQLAlchemy + Alembic, Postgres. Docker-first local dev and deployable to a PaaS.
 
@@ -671,23 +671,13 @@ GROUP BY t.id;
   - `web` served on `localhost:5173` (or `80`) and talks to `api`.
   - Migrations run on startup (or via a one-off `migrate` service).
 
-### 17) Deploy plan (PaaS) + docs
-- Goal: deployable outside local machine.
-- Files:
-  - Update: `README.md` (local dev + deployment)
-  - Add: `render.yaml` (Render)
-- Commands:
-  - PaaS CLI commands vary (documented in README).
-- Acceptance checks:
-  - Clear instructions exist for provisioning Postgres + setting env vars.
-
 ---
 
 ## Docker + Environment Variables
 
 ### Required env vars
 - Backend:
-  - `DATABASE_URL=postgresql+psycopg://user:pass@db:5432/coursetimers`
+  - `DATABASE_URL=postgresql+psycopg://coursetimers:coursetimers@db:5432/coursetimers`
   - `APP_ENV=dev|prod`
   - `CORS_ORIGINS=http://localhost:5173` (comma-separated allowed)
   - `LOG_LEVEL=info`
@@ -725,21 +715,6 @@ GROUP BY t.id;
 
 ---
 
-## Deployment Recommendation (Vercel-like PaaS)
-
-Vercel is great for static/frontends but not ideal for a stateful FastAPI + Postgres stack via Docker without extra services.
-
-Recommended options:
-- **Render**: easiest “web service + managed Postgres”; supports Docker; straightforward env vars; good for personal apps.
-- **Fly.io**: strong Docker support and low-latency; Postgres via Fly Postgres (extra ops).
-- **Railway**: very simple for small projects; Postgres add-on; pricing/limits vary.
-
-Suggested approach:
-- Deploy frontend separately (Vercel/Netlify) if desired, and backend on Render/Fly/Railway.
-- Or deploy both as Docker services on the same PaaS if supported (often easier to keep CORS simple).
-
----
-
 ## Potential Flaws / Risks + Mitigations
 
 - **Tab closes / refresh while timer running**: session remains active server-side; on reopen, UI fetches `active_session` and resumes display from `start_at`.
@@ -765,4 +740,3 @@ Suggested approach:
 ### Week view in narrow layout
 - Default: accordion per day.
 - Each day panel: compact list of blocks with `(HH:MM–HH:MM)` + duration; optional mini timeline.
-

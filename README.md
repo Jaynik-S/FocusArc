@@ -1,48 +1,53 @@
-# CourseTimers
+# FocusArc
 
-Local/personal web app to track time spent per course with multiple timers, session history, schedules, and basic analytics.
+FocusArc is a personal web app for tracking study time by course. It lets you run course-specific timers, records each session, and surfaces daily and weekly summaries so you can see where your time is going.
 
-## Repo layout
-- `backend/`: FastAPI + SQLAlchemy + Alembic
-- `frontend/`: React + Vite (TypeScript)
+## Core Functionality
 
-## Environment variables
-Copy `.env.example` to `.env` and adjust as needed.
+- Create and manage timers for individual courses.
+- Track active study sessions and store session history.
+- Review schedule-oriented views and day timelines.
+- View lightweight analytics such as totals, averages, and weekly stats.
 
-- Backend:
-  - `POSTGRES_USER=coursetimers`
-  - `POSTGRES_PASSWORD=coursetimers`
-  - `POSTGRES_DB=coursetimers`
-  - `DATABASE_URL=postgresql+psycopg://user:pass@db:5432/coursetimers`
-  - `APP_ENV=dev`
-  - `CORS_ORIGINS=http://localhost:5173`
-  - `LOG_LEVEL=info`
-- Frontend:
-  - `VITE_API_BASE_URL=http://localhost:8000/api`
+## Technical Overview
 
-## Local dev (Docker)
-Run everything with Docker Compose:
+FocusArc is a two-tier application:
+
+- `frontend/` is a React 18 single-page app built with Vite and TypeScript.
+- `backend/` is a FastAPI service using SQLAlchemy ORM and PostgreSQL.
+
+On the backend, `app/main.py` creates the API application, applies CORS from environment-based settings, and mounts all routes under `/api`. The main router splits public endpoints such as `/health` from user-scoped endpoints protected by a lightweight username-based auth layer. The frontend stores the selected username in `localStorage`, sends it in the `X-Username` header through a shared API client, and the backend uses that value to scope all timer, session, and stats operations to a single user.
+
+Persistence is handled with SQLAlchemy models and Alembic migrations. `timers` store per-course metadata such as name, color, icon, archive status, and accumulated cycle totals. `sessions` store the start and end timestamps, computed duration, client timezone, and the derived `day_date` / `day_of_week` values used for reporting. Database constraints enforce important invariants, including unique timer names per user, non-negative durations, and a partial unique index that allows only one active session per user at a time.
+
+The backend code is organized around route modules, schema modules, and service modules. Route handlers in `app/api/` translate HTTP requests into typed schema payloads, while service functions in `app/services/` encapsulate database reads and writes. Reporting logic is implemented with aggregate SQL queries rather than client-side recomputation: daily totals, weekly totals, and rolling averages are derived from session data, and day summary rows are upserted for efficient reuse.
+
+On the frontend, `App.tsx` wires route-level pages for timers, schedule, history, and stats behind a username gate. Shared behavior lives in hooks and context providers rather than page-local state. In particular, `TimerRuntimeContext` coordinates the active session, elapsed time, local timer offsets, and session adjustments, persisting runtime state in `localStorage` so the interface can recover smoothly across refreshes. Presentation is split across reusable components such as timer cards, timelines, navigation, and weekly accordions, while `src/api/apiClient.ts` centralizes API base URL resolution, username header injection, JSON serialization, and error handling.
+
+## Running Locally
+
+Copy `.env.example` to `.env`, then start the stack:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 - Frontend: `http://localhost:5173`
-- Backend: `http://localhost:8000/api/health`
+- Backend health check: `http://localhost:8000/api/health`
 
-## Deployment (Render)
-This repo includes a `render.yaml` for a simple Render deployment.
-
-1) Create the services from `render.yaml` in Render.
-2) In the `coursetimers-api` service, set `DATABASE_URL` to the Render Postgres connection string.
-3) Update `CORS_ORIGINS` to the frontend URL once Render assigns it.
-4) Update the frontend `VITE_API_BASE_URL` env var to the API URL (example values are in `render.yaml`).
-5) Run DB migrations once per deploy (Render shell on the API service):
+To inspect logs:
 
 ```bash
-alembic upgrade head
+docker compose logs -f
 ```
 
-Notes:
-- The example URLs in `render.yaml` are placeholders; update them after the first deploy.
-- If you prefer Fly.io or Railway, mirror the same env vars and run migrations once on deploy.
+To run database migrations manually:
+
+```bash
+docker compose exec api alembic upgrade head
+```
+
+## Repo Layout
+
+- `backend/`: FastAPI app, SQLAlchemy models, Alembic migrations, and tests
+- `frontend/`: React application built with Vite and TypeScript

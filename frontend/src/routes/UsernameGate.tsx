@@ -31,7 +31,7 @@ const UsernameGate = () => {
     <div className="page minimal-page">
       <div className="panel gate-panel">
         <div className="panel-header">
-          <h1>CourseTimers</h1>
+          <h1>FocusArc</h1>
           <p className="muted">Track each course with a single, focused timer.</p>
         </div>
         <form onSubmit={onSubmit} className="panel-body">

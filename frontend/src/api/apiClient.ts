@@ -11,9 +11,11 @@ export const setUsername = (username: string) => {
   localStorage.setItem(USERNAME_KEY, username);
 };
 
+type ApiFetchOptions = Omit<RequestInit, "body"> & { body?: unknown };
+
 export const apiFetch = async <T>(
   path: string,
-  options: RequestInit & { body?: unknown } = {}
+  options: ApiFetchOptions = {}
 ): Promise<T> => {
   const headers = new Headers(options.headers);
   const username = getUsername();
