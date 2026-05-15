@@ -125,9 +125,19 @@ def start_timer(
 
 
 def stop_active_session(
-    db: Session, username: str, adjustment_seconds: int | None = None
+    db: Session,
+    username: str,
+    adjustment_seconds: int | None = None,
+    stopped_at_client: datetime | None = None,
 ) -> SessionModel | None:
     now = datetime.now(timezone.utc)
+    end_at = now
+    if stopped_at_client is not None:
+        if stopped_at_client.tzinfo is None:
+            stopped_at_client = stopped_at_client.replace(tzinfo=timezone.utc)
+        else:
+            stopped_at_client = stopped_at_client.astimezone(timezone.utc)
+        end_at = min(now, stopped_at_client)
 
     with db.begin_nested():
         active = (
@@ -146,7 +156,9 @@ def stop_active_session(
         if active is None:
             return None
 
-        active.end_at = now
+        if end_at < active.start_at:
+            end_at = active.start_at
+        active.end_at = end_at
         base_duration = int((active.end_at - active.start_at).total_seconds())
         adjustment = adjustment_seconds or 0
         active.duration_seconds = max(0, base_duration + adjustment)

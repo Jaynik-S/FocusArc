@@ -59,6 +59,30 @@ def test_start_stop_duration(db_session, monkeypatch):
     assert stopped_session.duration_seconds == 125
 
 
+def test_stop_uses_client_timestamp(db_session, monkeypatch):
+    user = _create_user(db_session)
+    timer = _create_timer(db_session, user.username, "BIO130")
+
+    start = datetime(2026, 1, 1, 10, 0, tzinfo=timezone.utc)
+    _freeze_time(monkeypatch, start)
+
+    sessions_service.start_timer(db_session, user.username, timer.id, "UTC")
+
+    server_now = start + timedelta(hours=2)
+    _freeze_time(monkeypatch, server_now)
+
+    stopped_at_client = start + timedelta(minutes=30)
+    stopped_session = sessions_service.stop_active_session(
+        db_session,
+        user.username,
+        stopped_at_client=stopped_at_client,
+    )
+
+    assert stopped_session is not None
+    assert stopped_session.end_at == stopped_at_client
+    assert stopped_session.duration_seconds == 1800
+
+
 def test_starting_new_timer_stops_previous(db_session, monkeypatch):
     user = _create_user(db_session)
     timer_a = _create_timer(db_session, user.username, "BIO130")

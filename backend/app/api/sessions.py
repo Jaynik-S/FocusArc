@@ -76,8 +76,9 @@ def stop_timer(
 ) -> StopTimerResponse:
     username = request.state.username
     adjustment_seconds = payload.adjustment_seconds if payload else None
+    stopped_at_client = payload.stopped_at_client if payload else None
     stopped_session = sessions_service.stop_active_session(
-        db, username, adjustment_seconds
+        db, username, adjustment_seconds, stopped_at_client
     )
     return StopTimerResponse(
         stopped_session=SessionOut.model_validate(stopped_session)
