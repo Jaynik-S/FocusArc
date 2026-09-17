@@ -1,80 +1,163 @@
-# FocusArc deployment execution record
+# FocusArc Deployment Guide
 
-## Status
+## Architecture
 
-Implementation was approved on September 17, 2026. The selected architecture remains Render Static Site + Render Docker API + Neon PostgreSQL with protected personal access.
+- **Frontend:** Render Static Site (React/Vite)
+- **Backend:** Render Web Service (FastAPI/Docker)
+- **Database:** Neon PostgreSQL (Free tier)
+- **Authentication:** Bearer token with owner username
 
-Phase 0 is **started, but blocked at its runtime verification gate**. On retry, commands run through Windows Command Prompt, but Git metadata writes, Docker engine access and npm child-process execution remain denied. No phase is complete. No application, database, dependency, Docker configuration, or cloud deployment changes have been made.
+## Prerequisites
 
-The earlier planning-only restriction is superseded by the user's approval. The blocker is execution capability, not missing implementation authorization.
+1. Neon account with PostgreSQL database
+2. Render account
+3. GitHub repository connected to Render
 
-## Evidence collected
+## Environment Variables
 
-- Checkout: main.
-- HEAD: 0e39f499d914ca03246a8f202a447ae6d3deb693.
-- Git index: version 2, 86 entries.
-- All 86 indexed working files match their index blob content, allowing CRLF-to-LF normalization for 81 text files. This is a read-only index comparison, not a substitute for a full git status or comparison of index versus HEAD.
-- The approved plan is present at docs/superpowers/plans/2026-09-17-focusarc-hosted-migration.md.
-- The IDE-mentioned mig.md is not present on disk.
-- No root .env is present in the directory inventory. Effective Docker/process environment configuration remains unknown.
-- GET http://localhost:8000/api/health failed with ECONNREFUSED from this tool runtime.
-- GET http://localhost:5173 failed with ECONNREFUSED from this tool runtime.
-- These HTTP results do not establish whether another Docker context or machine has a running instance or existing volume.
+### Backend (Render Web Service)
 
-## Execution blocker
+Required:
+- DATABASE_URL: Neon PostgreSQL connection string (provided by Neon)
+- OWNER_USERNAME: Fixed owner username (e.g., jayy)
+- ACCESS_KEY: Strong random key (min 20 chars, keep secure)
+- APP_ENV: Set to prod
+- CORS_ORIGINS: Frontend URL (e.g., https://focusarc.onrender.com)
 
-The first attempt failed before starting a command:
+Optional:
+- LOG_LEVEL: info (default) or debug
+- PORT: Auto-set by Render (default 8000)
 
-    CreateProcessAsUserW failed: -1073283067 (Win32 error -1073283067)
+### Frontend (Render Static Site)
 
-The available Node runtime can read/write workspace files, but child-process launches for git, docker, python and node each returned:
+Required:
+- VITE_API_BASE_URL: Backend URL with /api (e.g., https://focusarc-api.onrender.com/api)
 
-    spawn EPERM
+Build command: 
+pm ci && npm run build
+Publish directory: dist
 
-No attempt was made to weaken permissions, modify protected Git metadata, or bypass the denied process launch.
+## Database Setup (Neon)
 
-## Checks still required before Phase 1
+1. Create a new Neon project
+2. Copy the connection string
+3. Create a separate migration user with schema privileges:
+   `sql
+   CREATE USER migration_user WITH PASSWORD 'strong-password';
+   GRANT ALL ON SCHEMA public TO migration_user;
+   GRANT ALL ON ALL TABLES IN SCHEMA public TO migration_user;
+   GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO migration_user;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO migration_user;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO migration_user;
+   `
+4. Use the migration user for one-time migration runs
+5. Use the default user (with restricted privileges) for runtime API
 
-1. Restore terminal execution in the agent session.
-2. Run git status --short and establish an isolated implementation branch/workspace, preserving existing user changes.
-3. Confirm Git, Docker, Python and Node versions.
-4. Inspect the actual Docker context, Compose state, database configuration and source volume without printing secrets.
-5. Determine whether local records exist; record the exact owner username, live Alembic revision, database version/size and table counts.
-6. Capture visible browser counters and make the private database backup required by the approved plan.
-7. Build the existing frontend using its lockfile.
-8. Run backend baseline tests against a verified disposable database only.
-9. Record results here and mark the Phase 0 gate complete only after its preservation and verification requirements pass.
+## Initial Deployment
 
-Do not run the current backend test fixtures against the source or production database: they drop/recreate tables.
+1. **Setup Neon Database:**
+   - Create database and migration user as above
+   - Store both connection strings securely
 
-## Resume commands
+2. **Run Initial Migration:**
+   `ash
+   # Locally or in a one-time job
+   export DATABASE_URL="postgresql+psycopg://migration_user:password@host/db"
+   cd backend
+   alembic upgrade head
+   `
 
-The following commands are diagnostic only and do not initialize, migrate, or delete a database:
+3. **Deploy Backend to Render:**
+   - Create new Web Service from GitHub repo
+   - Set root directory: ackend
+   - Use Dockerfile
+   - Add environment variables (use runtime user, not migration user)
+   - Deploy
 
-    git status --short
-    git --version
-    docker --version
-    docker compose version
-    docker compose ps
-    python --version
-    node --version
+4. **Deploy Frontend to Render:**
+   - Create new Static Site from GitHub repo
+   - Set root directory: rontend
+   - Build command: 
+pm ci && npm run build
+   - Publish directory: dist
+   - Add VITE_API_BASE_URL environment variable
+   - Deploy
 
-Once execution works, resume Phase 0 of the approved plan. Do not reinterpret this blocker as authorization to skip backup, baseline tests, or phase verification gates.
+5. **Verify Deployment:**
+   - Visit backend health: https://your-api.onrender.com/api/health
+   - Visit frontend: https://your-app.onrender.com
+   - Unlock with your ACCESS_KEY
+   - Verify timers load
 
-## Files changed in this execution attempt
+## GitHub Actions Secrets
 
-- Created docs/deployment.md (this execution record).
-- No existing files modified.
+Add these to your GitHub repository secrets:
+- RENDER_BACKEND_DEPLOY_HOOK: Backend deploy hook URL from Render
+- RENDER_FRONTEND_DEPLOY_HOOK: Frontend deploy hook URL from Render
+- BACKEND_URL: Backend base URL for health checks
 
-## Retry evidence — September 17, 2026
+## Data Migration from Local
 
-- Explicit shell C:\Windows\System32\cmd.exe successfully ran git status --short and git diff --stat. Before the installation attempt, only docs/ was untracked and the tracked diff was empty.
-- The configured PowerShell application alias failed with CreateProcessAsUserW error 5 (Access is denied).
-- git switch -c feat/hosted-migration failed because .git/refs/heads/feat/hosted-migration could not be created. Branch creation did not succeed.
-- docker compose ps failed opening the dockerDesktopLinuxEngine named pipe: Access is denied. No containers were modified.
-- Default Python is 3.9.7. The Python launcher lists Python 3.11 ARM64 and Python 3.13 as installed alternatives.
-- Node reports v24.21.0. Node 22 compatibility remains unverified.
-- npm ci --cache .npm-cache in frontend failed with spawn EPERM while running an installation lifecycle script. The baseline frontend build cannot yet be verified. The attempt may have left a partial ignored node_modules installation; rerun npm ci once permissions work.
-- No application code, database schema, environment settings or deployment resources were changed. No phase gate has been marked complete.
+After deployment is verified:
 
-Resume in a session whose execution permissions allow repository Git metadata writes, access to the local Docker engine, and build-tool child processes. Continue using an explicit cmd.exe shell if the configured PowerShell alias remains inaccessible.
+1. **Export local data:**
+   `ash
+   docker exec focusarc-db pg_dump -U coursetimers -Fc coursetimers > backup.dump
+   `
+
+2. **Restore to Neon:**
+   `ash
+   pg_restore -d "postgresql://user:pass@host/db" --clean --if-exists backup.dump
+   `
+
+3. **Verify data:**
+   - Check session counts
+   - Verify timer totals
+   - Confirm historical records
+
+## Local Development
+
+Local development still uses Docker Compose:
+`ash
+docker compose up
+`
+
+Access at http://localhost:5173 with username-only auth (no ACCESS_KEY needed).
+
+## Security Notes
+
+- Keep ACCESS_KEY secret and secure
+- Use a password manager or secure note
+- ACCESS_KEY is not in Git, Docker images, or frontend bundles
+- Frontend stores it in sessionStorage (cleared on browser close)
+- Lock the app when not in use
+- Backend rejects all requests without valid bearer token in production
+
+## Troubleshooting
+
+**Backend won't start:**
+- Check DATABASE_URL is valid
+- Verify OWNER_USERNAME and ACCESS_KEY are set
+- Check logs for validation errors
+
+**Frontend 401 errors:**
+- Verify VITE_API_BASE_URL matches backend URL
+- Check CORS_ORIGINS includes frontend URL
+- Confirm ACCESS_KEY is correct
+
+**Database connection errors:**
+- Verify Neon database is active
+- Check connection string format
+- Ensure IP is not blocked
+
+**Cold start delays:**
+- Render free tier spins down after inactivity
+- First request may take 30-60 seconds
+- Consider paid tier for always-on
+
+## Backup Strategy
+
+1. Automated Neon backups (check retention policy)
+2. Manual pg_dump before schema changes
+3. Test restore process periodically
+4. Store backups outside of Render/Neon

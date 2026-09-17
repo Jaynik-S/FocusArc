@@ -1,0 +1,85 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: focusarc_test
+          POSTGRES_USER: focusarc_test
+          POSTGRES_PASSWORD: focusarc_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -e .
+      
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+psycopg://focusarc_test:focusarc_test@localhost:5432/focusarc_test
+          TEST_DATABASE_URL: postgresql+psycopg://focusarc_test:focusarc_test@localhost:5432/focusarc_test
+        run: pytest -v
+      
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  deploy-backend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+        run: |
+          curl -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+  deploy-frontend:
+    needs: deploy-backend
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+        run: |
+          curl -X POST "$RENDER_DEPLOY_HOOK_URL"

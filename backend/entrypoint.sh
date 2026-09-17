@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
 
+# Database connectivity check
 python - <<'PY'
 import os
 import time
@@ -26,6 +27,7 @@ else:
     raise SystemExit("Database did not become ready in time")
 PY
 
-alembic upgrade head
+# Do NOT run migrations on startup
+# Migrations should be run separately with appropriate credentials
 
 exec "$@"
