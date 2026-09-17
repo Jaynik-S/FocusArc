@@ -1,7 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { getUsername } from "./api/apiClient";
+import { getUsername, AuthenticationError } from "./api/apiClient";
 import MainLayout from "./components/MainLayout";
+import { LockScreen } from "./components/LockScreen";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { TimerRuntimeProvider } from "./context/TimerRuntimeContext";
 import { TimerSelectionProvider } from "./context/TimerSelectionContext";
 import HistoryPage from "./routes/HistoryPage";
@@ -18,7 +20,13 @@ const RequireUsername = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-const App = () => {
+const AppRoutes = () => {
+  const { locked } = useAuth();
+
+  if (locked) {
+    return <LockScreen />;
+  }
+
   return (
     <TimerRuntimeProvider>
       <TimerSelectionProvider>
@@ -62,6 +70,14 @@ const App = () => {
         </Routes>
       </TimerSelectionProvider>
     </TimerRuntimeProvider>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 };
 

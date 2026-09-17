@@ -6,6 +6,10 @@ class Settings(BaseSettings):
     log_level: str = "info"
     cors_origins: str = "http://localhost:5173"
     database_url: str = "postgresql+psycopg://coursetimers:coursetimers@db:5432/coursetimers"
+    
+    # Personal access protection
+    owner_username: str | None = None
+    access_key: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

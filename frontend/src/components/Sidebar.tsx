@@ -5,6 +5,7 @@ import { ResetTotalsResponse } from "../api/types";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
+import { useAuth } from "../contexts/AuthContext";
 import { isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
 import EndDayButton from "./EndDayButton";
@@ -37,6 +38,7 @@ const Sidebar = ({ username }: SidebarProps) => {
   const timersState = useTimers(isReady);
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
   const { activeSession, elapsedSeconds, offsets, elapsedByTimer } = useTimerRuntime();
+  const { lock } = useAuth();
   const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme());
   const [createOpen, setCreateOpen] = useState(false);
   const [actionError, setActionError] = useState("");
@@ -93,9 +95,7 @@ const Sidebar = ({ username }: SidebarProps) => {
 
   return (
     <aside className="sidebar" style={sidebarStyle}>
-      <div className="sidebar-user">
-        <strong style={{ marginTop: -15 }}>{username || "Not set"}</strong>
-      </div>
+      <div className="sidebar-user" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><strong style={{ marginTop: -15, flex: 1 }}>{username || "Not set"}</strong><button className="link-button" type="button" onClick={lock} title="Lock application" style={{ fontSize: "0.875rem" }}>Lock</button></div>
       <nav className="sidebar-nav">
         <NavLink to="/history" className="sidebar-link">
           History
@@ -200,3 +200,4 @@ const Sidebar = ({ username }: SidebarProps) => {
 };
 
 export default Sidebar;
+
