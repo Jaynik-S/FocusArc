@@ -1,7 +1,12 @@
 #!/bin/sh
 set -e
 
-# Database connectivity check
+# Local development may migrate; hosted releases migrate separately in CI.
+if [ "${APP_ENV:-dev}" = "prod" ] && [ "${RUN_MIGRATIONS:-false}" != "false" ]; then
+    echo "Production startup cannot run migrations" >&2
+    exit 1
+fi
+if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
 python - <<'PY'
 import os
 import time
@@ -16,18 +21,19 @@ if database_url.startswith("postgresql+psycopg://"):
 
 for attempt in range(30):
     try:
-        with psycopg.connect(database_url) as conn:
+        with psycopg.connect(database_url, connect_timeout=3) as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT 1")
         break
-    except Exception as exc:
-        print(f"Database not ready ({exc}); retrying...")
+    except Exception:
+        print("Database not ready; retrying...")
         time.sleep(2)
 else:
     raise SystemExit("Database did not become ready in time")
 PY
-
-# Do NOT run migrations on startup
-# Migrations should be run separately with appropriate credentials
-
-exec "$@"
+    alembic upgrade head
+fi
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers 1 --log-level "${LOG_LEVEL:-info}"

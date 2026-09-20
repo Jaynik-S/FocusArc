@@ -3,6 +3,7 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
 from app.db import get_db
@@ -17,6 +18,11 @@ def _get_test_database_url() -> str:
             "TEST_DATABASE_URL not set; skipping DB-backed tests",
             allow_module_level=True,
         )
+    parsed = make_url(url)
+    if (parsed.get_backend_name() != "postgresql" or parsed.database != "focusarc_test"
+            or parsed.username != "focusarc_test"
+            or parsed.host not in {"focusarc-test-db", "localhost", "127.0.0.1"}):
+        raise RuntimeError("Refusing destructive tests: use only the disposable focusarc_test database/user on localhost or focusarc-test-db")
     return url
 
 

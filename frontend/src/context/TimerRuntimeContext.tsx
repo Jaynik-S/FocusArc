@@ -8,6 +8,7 @@ type TimerRuntimeContextValue = {
   elapsedSeconds: number;
   loading: boolean;
   busy: boolean;
+  error: string | null;
   refresh: ReturnType<typeof useActiveSession>["refresh"];
   startTimer: (timerId: string) => Promise<void>;
   stopTimer: () => Promise<void>;
@@ -86,22 +87,16 @@ export const TimerRuntimeProvider = ({
   children: React.ReactNode;
 }) => {
   const hasUsername = Boolean(getUsername());
-  const { activeSession, elapsedSeconds, loading, busy, refresh, startTimer, stopTimer } =
+  const { activeSession, elapsedSeconds, loading, busy, error, refresh, startTimer, stopTimer } =
     useActiveSession(hasUsername);
   const [elapsedByTimer, setElapsedByTimer] = useState<Record<string, number>>(
     () => readStoredElapsed()
   );
   const [offsets, setOffsets] = useState<Record<string, number>>(() => readStoredOffsets());
-  const [sessionAdjustmentSeconds, setSessionAdjustmentSeconds] = useState(0);
-
-  useEffect(() => {
-    if (!activeSession) {
-      setSessionAdjustmentSeconds(0);
-      return;
-    }
-    const stored = readStoredSessionAdjustments();
-    setSessionAdjustmentSeconds(stored[activeSession.id] ?? 0);
-  }, [activeSession?.id]);
+  const [sessionAdjustments, setSessionAdjustments] = useState<Record<string, number>>(
+    () => readStoredSessionAdjustments()
+  );
+  const sessionAdjustmentSeconds = activeSession ? sessionAdjustments[activeSession.id] ?? 0 : 0;
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -129,20 +124,15 @@ export const TimerRuntimeProvider = ({
     if (typeof window === "undefined") {
       return;
     }
-    if (!activeSession) {
-      return;
-    }
     try {
-      const stored = readStoredSessionAdjustments();
-      stored[activeSession.id] = sessionAdjustmentSeconds;
       localStorage.setItem(
         SESSION_ADJUSTMENTS_STORAGE_KEY,
-        JSON.stringify(stored)
+        JSON.stringify(sessionAdjustments)
       );
     } catch {
       // Ignore storage errors.
     }
-  }, [activeSession, sessionAdjustmentSeconds]);
+  }, [sessionAdjustments]);
 
   const adjustOffset = useCallback(
     (timerId: string, deltaSeconds: number) => {
@@ -158,7 +148,10 @@ export const TimerRuntimeProvider = ({
         }
         const appliedDelta = next - current;
         if (appliedDelta !== 0 && activeSession?.timer_id === timerId) {
-          setSessionAdjustmentSeconds((value) => value + appliedDelta);
+          setSessionAdjustments((values) => ({
+            ...values,
+            [activeSession.id]: (values[activeSession.id] ?? 0) + appliedDelta,
+          }));
         }
         return {
           ...prev,
@@ -166,14 +159,14 @@ export const TimerRuntimeProvider = ({
         };
       });
     },
-    [activeSession?.timer_id, elapsedSeconds, elapsedByTimer]
+    [activeSession?.id, activeSession?.timer_id, elapsedSeconds, elapsedByTimer]
   );
 
   const activeAdjustmentSeconds = sessionAdjustmentSeconds;
   const resetRuntimeState = useCallback(() => {
     setElapsedByTimer({});
     setOffsets({});
-    setSessionAdjustmentSeconds(0);
+    setSessionAdjustments({});
     if (typeof window === "undefined") {
       return;
     }
@@ -230,6 +223,7 @@ export const TimerRuntimeProvider = ({
       elapsedSeconds,
       loading,
       busy,
+      error,
       refresh,
       startTimer: startTimerWithAdjustments,
       stopTimer: stopTimerWithAdjustments,
@@ -244,6 +238,7 @@ export const TimerRuntimeProvider = ({
       elapsedSeconds,
       loading,
       busy,
+      error,
       refresh,
       startTimerWithAdjustments,
       stopTimerWithAdjustments,

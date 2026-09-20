@@ -21,7 +21,10 @@ services:
     restart: always
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-coursetimers}:${POSTGRES_PASSWORD:-coursetimers}@db:5432/${POSTGRES_DB:-coursetimers}}
-      APP_ENV: ${APP_ENV:-prod}
+      APP_ENV: dev
+      AUTH_MODE: local
+      RUN_MIGRATIONS: "true"
+      TZ: America/Toronto
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
@@ -41,6 +44,7 @@ services:
       context: ./frontend
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api}
+        VITE_AUTH_MODE: local
     restart: always
     ports:
       - "5173:5173"

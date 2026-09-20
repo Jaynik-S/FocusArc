@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+# Creation order is NOT guaranteed by YAML order. Create the focusarc STATIC SITE
+# first in the Dashboard to request focusarc.onrender.com; see docs/deployment.md.
+services:
+  - type: web
+    runtime: static
+    name: focusarc
+    repo: https://github.com/Jaynik-S/FocusArc
+    branch: main
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: "off"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+      - key: VITE_AUTH_MODE
+        value: personal
+      - key: VITE_API_BASE_URL
+        sync: false
+  - type: web
+    runtime: docker
+    name: focusarc-api
+    repo: https://github.com/Jaynik-S/FocusArc
+    branch: main
+    plan: free
+    region: ohio
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: "off"
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: AUTH_MODE
+        value: personal
+      - key: OWNER_USERNAME
+        value: jayy
+      - key: RUN_MIGRATIONS
+        value: "false"
+      - key: TZ
+        value: America/Toronto
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_POOL_SIZE
+        value: "2"
+      - key: DB_MAX_OVERFLOW
+        value: "3"
+      - key: DB_POOL_TIMEOUT
+        value: "15"
+      - key: DB_CONNECT_TIMEOUT
+        value: "10"
+      - key: DATABASE_URL
+        sync: false
+      - key: PERSONAL_ACCESS_KEY_SHA256
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

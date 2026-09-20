@@ -3,21 +3,15 @@ import { useAuth } from "../contexts/AuthContext";
 
 export const LockScreen = () => {
   const [key, setKey] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { unlock } = useAuth();
+  const { unlock, checking, error } = useAuth();
+  const pending = loading || checking;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
-    const success = await unlock(key);
-    
-    if (!success) {
-      setError("Invalid access key");
-      setKey("");
-    }
+    await unlock(key);
     
     setLoading(false);
   };
@@ -49,10 +43,12 @@ export const LockScreen = () => {
         <form onSubmit={handleSubmit}>
           <input
             type="password"
+            aria-label="Access key"
+            autoComplete="current-password"
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder="Access key"
-            disabled={loading}
+            disabled={pending}
             autoFocus
             style={{
               width: "100%",
@@ -67,7 +63,7 @@ export const LockScreen = () => {
           />
           
           {error && (
-            <p style={{
+            <p role="alert" style={{
               color: "#ef4444",
               marginBottom: "1rem",
               fontSize: "0.875rem"
@@ -78,7 +74,7 @@ export const LockScreen = () => {
           
           <button
             type="submit"
-            disabled={!key || loading}
+            disabled={!key || pending}
             style={{
               width: "100%",
               padding: "0.75rem",
@@ -90,7 +86,7 @@ export const LockScreen = () => {
               cursor: key && !loading ? "pointer" : "not-allowed"
             }}
           >
-            {loading ? "Verifying..." : "Unlock"}
+            {pending ? "Verifying..." : "Unlock"}
           </button>
         </form>
       </div>

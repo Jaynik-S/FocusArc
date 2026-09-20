@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { apiFetch } from "../api/apiClient";
+import { apiFetch, AuthenticationError } from "../api/apiClient";
 import { Session } from "../api/types";
 import { getClientTimezone } from "../utils/date";
 
@@ -92,12 +92,14 @@ export const useActiveSession = (enabled = true) => {
   );
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const lastActiveRef = useRef<number | null>(null);
   const lastPersistedRef = useRef<number | null>(null);
   const autoStopRef = useRef(false);
+  const refreshRef = useRef<Promise<void> | null>(null);
 
   const refresh = useCallback(
-    async (initial = false) => {
+    async (initial = false, signal?: AbortSignal) => {
       if (!enabled) {
         if (initial) {
           setLoading(false);
@@ -107,16 +109,29 @@ export const useActiveSession = (enabled = true) => {
       if (initial) {
         setLoading(true);
       }
+      if (refreshRef.current) return refreshRef.current;
+      const request = (async () => {
       try {
         const response = await apiFetch<{ active_session: Session | null }>(
-          "/active-session"
+          "/active-session", { signal }
         );
-        setActiveSession(response.active_session);
+        if (!signal?.aborted) {
+          setActiveSession(response.active_session);
+          setError(null);
+        }
+      } catch (cause) {
+        if (!signal?.aborted && !(cause instanceof AuthenticationError)) {
+          setError("Cannot sync with the API. Saved counters are retained; reconnecting automatically.");
+        }
+        throw cause;
       } finally {
         if (initial) {
           setLoading(false);
         }
       }
+      })();
+      refreshRef.current = request;
+      try { await request; } finally { refreshRef.current = null; }
     },
     [enabled]
   );
@@ -128,9 +143,42 @@ export const useActiveSession = (enabled = true) => {
       setLoading(false);
       return;
     }
-    refresh(true);
-    const interval = window.setInterval(() => refresh(false), 15000);
-    return () => window.clearInterval(interval);
+    let disposed = false;
+    let timer: number | undefined;
+    let running = false;
+    let failures = 0;
+    let initial = true;
+    const controller = new AbortController();
+    const poll = async () => {
+      if (disposed || running || document.hidden) return;
+      running = true;
+      let denied = false;
+      try {
+        await refresh(initial, controller.signal);
+        failures = 0;
+      } catch (cause) {
+        failures += 1;
+        denied = cause instanceof AuthenticationError;
+      } finally {
+        initial = false;
+        running = false;
+        if (!disposed && !document.hidden && !denied) {
+          timer = window.setTimeout(poll, Math.min(15000 * 2 ** failures, 120000));
+        }
+      }
+    };
+    const onVisibility = () => {
+      window.clearTimeout(timer);
+      if (!document.hidden) void poll();
+    };
+    void poll();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      disposed = true;
+      controller.abort();
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [enabled, refresh]);
 
   useEffect(() => {
@@ -170,7 +218,7 @@ export const useActiveSession = (enabled = true) => {
     if (lastActiveRef.current) {
       writeStoredLastActive(activeSession.id, lastActiveRef.current);
     }
-  }, [activeSession, enabled]);
+  }, [activeSession?.id, enabled]);
 
   const startTimer = useCallback(
     async (timerId: string, stoppedAdjustmentSeconds: number = 0) => {
@@ -240,7 +288,7 @@ export const useActiveSession = (enabled = true) => {
       if (!autoStopRef.current && now - lastActiveAt > SUSPEND_GRACE_MS) {
         autoStopRef.current = true;
         void stopTimer(0, new Date(lastActiveAt).toISOString()).catch(() => {
-          autoStopRef.current = false;
+          // The response may have been lost after commit. Never replay a mutation.
         });
         return;
       }
@@ -259,10 +307,11 @@ export const useActiveSession = (enabled = true) => {
       elapsedSeconds,
       loading,
       busy,
+      error,
       refresh,
       startTimer,
       stopTimer,
     }),
-    [activeSession, elapsedSeconds, loading, busy, refresh, startTimer, stopTimer]
+    [activeSession, elapsedSeconds, loading, busy, error, refresh, startTimer, stopTimer]
   );
 };

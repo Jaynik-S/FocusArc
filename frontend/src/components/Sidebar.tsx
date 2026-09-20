@@ -6,6 +6,7 @@ import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
 import { useAuth } from "../contexts/AuthContext";
+import { PERSONAL_MODE } from "../api/apiClient";
 import { isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
 import EndDayButton from "./EndDayButton";
@@ -37,7 +38,7 @@ const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
   const timersState = useTimers(isReady);
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
-  const { activeSession, elapsedSeconds, offsets, elapsedByTimer } = useTimerRuntime();
+  const { activeSession, elapsedSeconds, offsets, elapsedByTimer, error: syncError } = useTimerRuntime();
   const { lock } = useAuth();
   const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme());
   const [createOpen, setCreateOpen] = useState(false);
@@ -95,12 +96,13 @@ const Sidebar = ({ username }: SidebarProps) => {
 
   return (
     <aside className="sidebar" style={sidebarStyle}>
-      <div className="sidebar-user" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><strong style={{ marginTop: -15, flex: 1 }}>{username || "Not set"}</strong><button className="link-button" type="button" onClick={lock} title="Lock application" style={{ fontSize: "0.875rem" }}>Lock</button></div>
+      <div className="sidebar-user" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><strong style={{ marginTop: -15, flex: 1 }}>{username || "Not set"}</strong>{PERSONAL_MODE && <button className="link-button" type="button" onClick={lock} title="Lock application" style={{ fontSize: "0.875rem" }}>Lock</button>}</div>
       <nav className="sidebar-nav">
         <NavLink to="/history" className="sidebar-link">
           History
         </NavLink>
       </nav>
+      {syncError && <p className="error" role="status">{syncError}</p>}
       <div className="sidebar-section">
         <div className="sidebar-section-header">
             <span style={{ marginTop: -15 }}>Timers</span>

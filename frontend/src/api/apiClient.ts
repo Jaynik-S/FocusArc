@@ -1,5 +1,9 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
+  (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api").replace(/\/$/, "");
+
+export const PERSONAL_MODE = import.meta.env.VITE_AUTH_MODE === "personal";
+export const LOCK_EVENT = "focusarc:locked";
+export const REQUEST_TIMEOUT_MS = 90_000;
 
 const USERNAME_KEY = "coursetimers.username";
 const ACCESS_KEY = "focusarc.access_key";
@@ -22,10 +26,11 @@ export const setAccessKey = (key: string) => {
 
 export const clearAccessKey = () => {
   sessionStorage.removeItem(ACCESS_KEY);
+  window.dispatchEvent(new Event(LOCK_EVENT));
 };
 
 export const isLocked = () => {
-  return !getAccessKey();
+  return PERSONAL_MODE && !getAccessKey();
 };
 
 type ApiFetchOptions = Omit<RequestInit, "body"> & { body?: unknown };
@@ -44,26 +49,34 @@ export const apiFetch = async <T>(
   const headers = new Headers(options.headers);
   
   const accessKey = getAccessKey();
-  if (accessKey) {
+  if (PERSONAL_MODE && accessKey) {
     headers.set("Authorization", "Bearer " + accessKey);
-  } else {
+  } else if (!PERSONAL_MODE) {
     const username = getUsername();
     if (username) {
       headers.set("X-Username", username);
     }
   }
   
-  if (options.body && !headers.has("Content-Type")) {
+  if (options.body !== undefined && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
+  const controller = new AbortController();
+  const abort = () => controller.abort(options.signal?.reason);
+  options.signal?.addEventListener("abort", abort, { once: true });
+  if (options.signal?.aborted) abort();
+  const timeout = window.setTimeout(() => controller.abort(new Error("The API took too long to respond. Try again; check the current state before repeating an action.")), REQUEST_TIMEOUT_MS);
+  try {
   const response = await fetch(API_BASE_URL + path, {
     ...options,
     headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
+    signal: controller.signal,
+    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 
   if (response.status === 401) {
+    if (PERSONAL_MODE && accessKey === getAccessKey()) clearAccessKey();
     throw new AuthenticationError("Authentication required");
   }
 
@@ -78,17 +91,12 @@ export const apiFetch = async <T>(
 
   const contentType = response.headers.get("Content-Type") || "";
   if (contentType.includes("application/json")) {
-    return response.json() as Promise<T>;
+    return await response.json() as T;
   }
 
-  const text = await response.text();
-  if (!text) {
-    return undefined as T;
-  }
-
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    return text as unknown as T;
+  throw new Error("The API returned an unexpected response. Check the API URL and try again.");
+  } finally {
+    window.clearTimeout(timeout);
+    options.signal?.removeEventListener("abort", abort);
   }
 };

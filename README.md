@@ -16,13 +16,17 @@ FocusArc is a two-tier application:
 - `frontend/` is a React 18 single-page app built with Vite and TypeScript.
 - `backend/` is a FastAPI service using SQLAlchemy ORM and PostgreSQL.
 
-On the backend, `app/main.py` creates the API application, applies CORS from environment-based settings, and mounts all routes under `/api`. The main router splits public endpoints such as `/health` from user-scoped endpoints protected by a lightweight username-based auth layer. The frontend stores the selected username in `localStorage`, sends it in the `X-Username` header through a shared API client, and the backend uses that value to scope all timer, session, and stats operations to a single user.
+On the backend, `app/main.py` mounts routes under `/api`. Hosted personal mode checks a private bearer key before database access and uses the server-configured owner (`jayy`). The API stores only the key's SHA-256 digest; the browser keeps the key in sessionStorage. Locking removes access without erasing local counters. Username-only mode is available for local development only and is not authentication.
 
 Persistence is handled with SQLAlchemy models and Alembic migrations. `timers` store per-course metadata such as name, color, icon, archive status, and accumulated cycle totals. `sessions` store the start and end timestamps, computed duration, client timezone, and the derived `day_date` / `day_of_week` values used for reporting. Database constraints enforce important invariants, including unique timer names per user, non-negative durations, and a partial unique index that allows only one active session per user at a time.
 
 The backend code is organized around route modules, schema modules, and service modules. Route handlers in `app/api/` translate HTTP requests into typed schema payloads, while service functions in `app/services/` encapsulate database reads and writes. Reporting logic is implemented with aggregate SQL queries rather than client-side recomputation: daily totals, weekly totals, and rolling averages are derived from session data, and day summary rows are upserted for efficient reuse.
 
-On the frontend, `App.tsx` wires route-level pages for timers, schedule, history, and stats behind a username gate. Shared behavior lives in hooks and context providers rather than page-local state. In particular, `TimerRuntimeContext` coordinates the active session, elapsed time, local timer offsets, and session adjustments, persisting runtime state in `localStorage` so the interface can recover smoothly across refreshes. Presentation is split across reusable components such as timer cards, timelines, navigation, and weekly accordions, while `src/api/apiClient.ts` centralizes API base URL resolution, username header injection, JSON serialization, and error handling.
+On the frontend, `App.tsx` gates private pages and providers on validated authentication. `TimerRuntimeContext` persists counters, offsets, and adjustments in localStorage. The shared API client handles bearer credentials, bounded requests, and locking on HTTP 401. Network failures retain credentials and cached state; mutations are not automatically retried. Browser state is origin-specific and needs a separate transfer at cutover.
+
+## Hosted deployment
+
+The approved stack is Render Static Site + Render Docker Web Service + Neon PostgreSQL. GitHub Actions runs migrations and deploys the exact tested backend commit before the frontend. Free tiers are the initial target, subject to account quotas and cold starts. See [the deployment runbook](docs/deployment.md) for verified progress, environment settings, data preservation and remaining setup. Repository implementation does not mean a hosted deployment has completed.
 
 ## Running Locally
 

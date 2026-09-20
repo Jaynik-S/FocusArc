@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, Request
-from sqlalchemy import select
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.auth import get_username
+from app.auth import get_username, require_access
 from app.api.end_day import router as end_day_router
 from app.api.stats import router as stats_router
 from app.api.sessions import router as sessions_router
@@ -14,11 +17,26 @@ from app.models.session import Session as SessionModel
 router = APIRouter()
 public_router = APIRouter()
 api_router = APIRouter(dependencies=[Depends(get_username)])
+logger = logging.getLogger(__name__)
 
 
 @public_router.get("/health")
 def health_check() -> dict:
     return {"status": "ok"}
+
+
+@public_router.get("/ready", dependencies=[Depends(require_access)])
+def readiness(db: Session = Depends(get_db)) -> dict:
+    try:
+        db.execute(text("SELECT 1"))
+        revision = db.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+        if not isinstance(revision, str) or not revision.strip():
+            raise HTTPException(status_code=503, detail="Database is not ready")
+        return {"status": "ok", "revision": revision}
+    except SQLAlchemyError as exc:
+        # Database exceptions can include credentials, SQL, and personal data.
+        logger.warning("Readiness failed (%s)", type(exc).__name__)
+        raise HTTPException(status_code=503, detail="Database is not ready") from None
 
 
 def _session_to_dict(session: SessionModel) -> dict:

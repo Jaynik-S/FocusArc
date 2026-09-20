@@ -1,3 +1,6 @@
+import hashlib
+import hmac
+
 from fastapi import Depends, Header, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -6,30 +9,26 @@ from app.models.user import User
 from app.settings import get_settings
 
 
-def get_username(
-    request: Request,
+def require_access(
     x_username: str | None = Header(default=None, alias="X-Username"),
     authorization: str | None = Header(default=None),
-    db: Session = Depends(get_db),
 ) -> str:
     settings = get_settings()
     
     # Production mode requires authentication
-    if settings.owner_username and settings.access_key:
-        if not authorization:
-            raise HTTPException(status_code=401, detail="Authorization required")
-        
-        # Expect "Bearer <token>"
-        parts = authorization.split()
-        if len(parts) != 2 or parts[0].lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Invalid authorization format")
-        
-        provided_key = parts[1]
-        if provided_key != settings.access_key:
-            raise HTTPException(status_code=401, detail="Invalid access key")
+    if settings.auth_mode == "personal":
+        parts = (authorization or "").split()
+        valid = (len(parts) == 2 and parts[0].lower() == "bearer"
+                 and hmac.compare_digest(hashlib.sha256(parts[1].encode()).hexdigest(),
+                                         (settings.personal_access_key_sha256 or "").lower()))
+        if not valid:
+            raise HTTPException(status_code=401, detail="Invalid access credentials",
+                                headers={"WWW-Authenticate": "Bearer"})
         
         # Use configured owner username
         username = settings.owner_username
+        if x_username is not None and x_username.strip() != username:
+            raise HTTPException(status_code=403, detail="Username does not match owner")
     else:
         # Legacy mode: trust X-Username header (local development only)
         if x_username is None:
@@ -41,7 +40,12 @@ def get_username(
         if len(username) > 32:
             raise HTTPException(status_code=400, detail="X-Username must be 1-32 chars")
     
-    # Auto-create user if needed
+    return username
+
+
+def get_username(request: Request, username: str = Depends(require_access),
+                 db: Session = Depends(get_db)) -> str:
+    # Access validation resolves before the database dependency.
     user = db.get(User, username)
     if user is None:
         user = User(username=username)

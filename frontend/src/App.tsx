@@ -1,6 +1,6 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-import { getUsername, AuthenticationError } from "./api/apiClient";
+import { getUsername, PERSONAL_MODE } from "./api/apiClient";
 import MainLayout from "./components/MainLayout";
 import { LockScreen } from "./components/LockScreen";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -22,6 +22,8 @@ const RequireUsername = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => {
   const { locked } = useAuth();
+  // Local username entry navigates to /timers; rerender the runtime gate then.
+  useLocation();
 
   if (locked) {
     return <LockScreen />;
@@ -32,7 +34,7 @@ const AppRoutes = () => {
       <TimerSelectionProvider>
         <Routes>
           <Route element={<MainLayout />}>
-            <Route path="/" element={<UsernameGate />} />
+            <Route path="/" element={PERSONAL_MODE ? <Navigate to="/timers" replace /> : <UsernameGate />} />
             <Route
               path="/timers"
               element={

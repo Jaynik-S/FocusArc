@@ -12,7 +12,7 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from app.models.base import Base  # noqa: E402
-from app.settings import get_settings  # noqa: E402
+from app.settings import Settings, normalize_database_url  # noqa: E402
 import app.models  # noqa: F401,E402
 
 config = context.config
@@ -25,8 +25,7 @@ target_metadata = Base.metadata
 
 
 def get_url() -> str:
-    settings = get_settings()
-    return settings.database_url
+    return normalize_database_url(os.getenv("MIGRATION_DATABASE_URL") or Settings().database_url)
 
 
 def run_migrations_offline() -> None:
