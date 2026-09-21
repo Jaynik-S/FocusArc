@@ -6,10 +6,10 @@ Updated 2026-09-20. Approved architecture: Render Static Site, Render Docker API
 
 | Area | Evidence and remaining work |
 |---|---|
-| Checkout | Implementation extends user-updated main at 0cd507d, not the original September 17 branch. Release changes are not committed/pushed. |
+| Checkout | Implementation commit 7208fbb9e5ea5e7520e1732363962d574e149143 is pushed to main. It extends user-updated 0cd507d, not the original September 17 branch. |
 | Backend | Locked Linux Python 3.11.16 image built; 34 tests pass, two upstream deprecation warnings; pip check clean. Authentication is checked before database access. |
 | Frontend | Linux Node 22 install, 12 tests and personal-mode production build pass. HTTP production API URL is rejected. |
-| Release configuration | Render JSON schema, actionlint, Compose config and four deployment unit tests pass. Real GitHub workflow execution remains pending. |
+| Release configuration | Render JSON schema, actionlint, Compose config and four deployment unit tests pass. GitHub CI succeeded for 7208fbb; production Deploy correctly skipped while setup remains gated. |
 | Render | User confirmed Jay's workspace (tea-d0vvbb3ipnbc738bffv0). Static site created FIRST: srv-danqj9jm8hqs73c78tsg, https://focusarc.onrender.com. Auto-deploy off; no API created yet. |
 | Neon | Existing project sweet-art-50562983, branch br-weathered-queen-b54u6al3, AWS us-east-2, PostgreSQL 15. focusarc-production has revision 0002_add_cycle_totals but zero application rows. Restricted runtime role not yet created. |
 | Personal data | Last read-only source counts: 1 user, 7 timers, 155 sessions, 0 day summaries, 0 active sessions; owner jayy. No restore to Neon or browser-state transfer performed. |
@@ -33,6 +33,8 @@ Original volume: focusarc_pgdata. Physical rehearsal copy: focusarc_migration_re
 **Resolved cutover choice (September 20):** user authorized the simplest cutover; current local database is authoritative. Created fresh private backup focusarc-cutover-20260920-0940.dump in the same external backup directory. SHA-256: 9F2D66C8F7606CD8577D261EDFFF52E04E50D45896E13D41DD88BE1EF18A2F3F. No active sessions or running local API/web containers at capture. Restored successfully into new disposable focusarc_cutover_verify database; canonical whole-row hashes for users, timers and sessions all match current source, with counts 1/7/155 and timer cycle sum 0. Historical backups unchanged. Use this fresh dump for cutover unless local writes resume, in which case recapture first.
 
 **Static resource creation:** [Dashboard](https://dashboard.render.com/static/srv-danqj9jm8hqs73c78tsg). Initial deployment dep-danqj9rm8hqs73c78uu0 ended build_failed as intended: build command starts with a VITE_API_BASE_URL presence guard, and that variable is deliberately absent until the actual API exists. The assigned URL is reserved, not a live application. Build uses repository root, then cd frontend; publish frontend/dist. NODE_VERSION=22, SKIP_INSTALL_DEPS=true and VITE_AUTH_MODE=personal are set. SPA rewrite remains to configure through Dashboard/API.
+
+**Published verification:** [successful CI run](https://github.com/Jaynik-S/FocusArc/actions/runs/35502977969) for 7208fbb9e5ea5e7520e1732363962d574e149143; [gated deployment run](https://github.com/Jaynik-S/FocusArc/actions/runs/35503027459) was skipped, not deployed. No Render CLI or RENDER_API_KEY is currently available locally. Docker creation requires Dashboard/API access; the connected plugin does not support it. User-owned Static and generated tracked frontend/tsconfig.tsbuildinfo remain outside the implementation commit.
 
 Fresh-schema migrations were independently verified in focusarc_migration_test on the same disposable tmpfs container: upgrade head twice, expected tables/columns, foreign keys and partial active-session unique index all passed. The disposable restored database contains personal backup data; do not expose its container or reuse it as a destructive pytest target.
 
@@ -200,6 +202,6 @@ Rollback only to a verified secure, schema-compatible release. Keep migrations a
 
 ## Outstanding acceptance gates
 
-Real GitHub CI/deployment, runtime-role privilege proof, Neon restore, final cutover, browser-state transfer and hosted acceptance remain pending. Local logical restore is verified, not hosted restoration. Static URL assignment is verified, but no live application or deployed release SHA is claimed. The historical implementation-plan checkboxes must not be marked complete merely because code exists.
+Real production deployment, runtime-role privilege proof, Neon restore, final cutover, browser-state transfer and hosted acceptance remain pending. GitHub CI and local logical restore are verified, not hosted restoration. Static URL assignment is verified, but no live application or deployed release SHA is claimed. The historical implementation-plan checkboxes must not be marked complete merely because code exists.
 
 References: [Render Blueprint specification](https://render.com/docs/blueprint-spec), [exact-commit deploy API](https://api-docs.render.com/reference/create-deploy), [GitHub settings](https://github.com/Jaynik-S/FocusArc/settings), [Render Dashboard](https://dashboard.render.com/).
