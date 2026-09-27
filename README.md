@@ -16,13 +16,15 @@ FocusArc is a two-tier application:
 - `frontend/` is a React 18 single-page app built with Vite and TypeScript.
 - `backend/` is a FastAPI service using SQLAlchemy ORM and PostgreSQL.
 
-On the backend, `app/main.py` mounts routes under `/api`. Hosted personal mode checks a private bearer key before database access and uses the server-configured owner (`jayy`). The API stores only the key's SHA-256 digest; the browser keeps the key in sessionStorage. Locking removes access without erasing local counters. Username-only mode is available for local development only and is not authentication.
+On the backend, `app/main.py` mounts routes under `/api`. Accounts use normalized usernames and Argon2id password hashes stored in PostgreSQL. The API issues a signed, HTTP-only session cookie after login or confirmed registration; private routes derive identity from that validated session rather than browser-supplied identity headers. Existing database users without a password, including `jayy`, can only be initialized through the private admin command.
 
 Persistence is handled with SQLAlchemy models and Alembic migrations. `timers` store per-course metadata such as name, color, icon, archive status, and accumulated cycle totals. `sessions` store the start and end timestamps, computed duration, client timezone, and the derived `day_date` / `day_of_week` values used for reporting. Database constraints enforce important invariants, including unique timer names per user, non-negative durations, and a partial unique index that allows only one active session per user at a time.
 
 The backend code is organized around route modules, schema modules, and service modules. Route handlers in `app/api/` translate HTTP requests into typed schema payloads, while service functions in `app/services/` encapsulate database reads and writes. Reporting logic is implemented with aggregate SQL queries rather than client-side recomputation: daily totals, weekly totals, and rolling averages are derived from session data, and day summary rows are upserted for efficient reuse.
 
-On the frontend, `App.tsx` gates private pages and providers on validated authentication. `TimerRuntimeContext` persists counters, offsets, and adjustments in localStorage. The shared API client handles bearer credentials, bounded requests, and locking on HTTP 401. Network failures retain credentials and cached state; mutations are not automatically retried. Browser state is origin-specific and needs a separate transfer at cutover.
+On the frontend, `App.tsx` gates private pages and providers on a validated server session. Unknown usernames require explicit confirmation before public registration; an incorrect password never creates or changes an account. `TimerRuntimeContext` persists counters, offsets, adjustments, selections, and preferences under `coursetimers.accounts.<username>.*` keys. Logout keeps that account's saved browser state while preventing another account from reading it through the app. Network failures retain cached state, and mutations are not automatically retried.
+
+Registration is public: anyone who can reach the site can create a separate account. FocusArc intentionally does not include email verification, password-reset email, or social login.
 
 ## Hosted deployment
 
@@ -50,6 +52,16 @@ To run database migrations manually:
 ```bash
 docker compose exec api alembic upgrade head
 ```
+
+To initialize an existing local user that has no password, set the password in an environment variable so it is not passed as a command argument:
+
+```powershell
+$env:FOCUSARC_INITIAL_PASSWORD = Read-Host "Initial password"
+docker compose exec -e FOCUSARC_INITIAL_PASSWORD="$env:FOCUSARC_INITIAL_PASSWORD" api python -m app.admin set-initial-password --username jayy
+Remove-Item Env:FOCUSARC_INITIAL_PASSWORD
+```
+
+The command initializes a null password hash once. Later runs only verify the same password and never overwrite an existing hash.
 
 ## Repo Layout
 
