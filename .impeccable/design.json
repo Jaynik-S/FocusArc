@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-27T20:34:26Z",
+  "generatedAt": "2026-09-27T21:06:51Z",
   "title": "Design System: FocusArc",
   "extensions": {
     "colorMeta": {
@@ -133,6 +133,20 @@
       "ink-muted": {
         "role": "neutral",
         "displayName": "Ink Muted",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "ink-subtle": {
+        "role": "neutral",
+        "displayName": "Ink Subtle",
         "tonalRamp": [
           "oklch(15% 0.005 270)",
           "oklch(26% 0.005 270)",
@@ -523,7 +537,7 @@
       "refersTo": "text-input",
       "description": "Compact labeled input for timer and account forms.",
       "html": "<label class=\"ds-field\"><span>Name</span><input class=\"ds-field-input\" placeholder=\"BIO130\"></label>",
-      "css": ".ds-field { display: grid; gap: var(--space-2); color: var(--text-muted); font: 500 0.75rem/1.5 var(--font-body); } .ds-field-input { width: 100%; min-height: 2.25rem; padding: 0.45rem 0.625rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-primary); caret-color: var(--primary); font: 400 0.875rem/1.5 var(--font-body); transition: border-color var(--motion), background-color var(--motion), box-shadow var(--motion); } .ds-field-input:hover { border-color: var(--border-strong); } .ds-field-input:focus { border-color: var(--primary); background: var(--surface-1); outline: none; box-shadow: var(--focus-ring); }"
+      "css": ".ds-field { display: grid; gap: var(--space-2); color: var(--text-muted); font: 500 0.75rem/1.5 var(--font-body); } .ds-field-input { width: 100%; min-height: 2.25rem; padding: 0.45rem 0.625rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-primary); caret-color: var(--primary); font: 400 0.875rem/1.5 var(--font-body); transition: border-color var(--motion), background-color var(--motion), box-shadow var(--motion); } .ds-field-input:hover { border-color: var(--border-strong); } .ds-field-input:focus { border-color: var(--primary); background: var(--surface-1); outline: none; box-shadow: var(--focus-ring); } .ds-field-input::placeholder { color: var(--text-subtle); opacity: 1; }"
     },
     {
       "name": "Active Navigation",
@@ -545,31 +559,31 @@
       "name": "Panel",
       "kind": "card",
       "refersTo": "panel",
-      "description": "Hairline-separated container for secondary data.",
-      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><h2>History</h2></header><p class=\"ds-panel-body\">Study sessions appear here.</p></section>",
-      "css": ".ds-panel { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); color: var(--text-secondary); font: 400 0.875rem/1.5 var(--font-body); } .ds-panel-header { margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); } .ds-panel-header h2 { margin: 0; color: var(--text-primary); font: 600 1rem/1.3 var(--font-display); letter-spacing: -0.025em; } .ds-panel-body { margin: 0; padding-top: var(--space-4); }"
+      "description": "Hairline panel with flat, divided weekly statistics rows.",
+      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><h2>Weekly statistics</h2></header><div class=\"ds-panel-body\"><div class=\"ds-week-day\"><strong>Monday</strong><span>2h 15m</span></div><div class=\"ds-week-day\"><strong>Tuesday</strong><span>1h 40m</span></div></div></section>",
+      "css": ".ds-panel { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); color: var(--text-secondary); font: 400 0.875rem/1.5 var(--font-body); } .ds-panel-header { margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); } .ds-panel-header h2 { margin: 0; color: var(--text-primary); font: 600 1rem/1.3 var(--font-display); letter-spacing: -0.025em; } .ds-panel-body { padding-top: var(--space-4); } .ds-week-day { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); background: transparent; } .ds-week-day:first-child { border-top: 1px solid var(--border); } .ds-week-day strong { color: var(--text-primary); font: 600 0.8125rem var(--font-body); } .ds-week-day span { color: var(--text-muted); font: 400 0.6875rem var(--font-body); }"
     },
     {
       "name": "Timer Row",
       "kind": "button",
       "refersTo": "timer-row-active",
       "description": "Selected course in the sidebar, with its own color and tabular total.",
-      "html": "<button class=\"ds-timer-row\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-timer-name\"><i class=\"ds-timer-dot\" aria-hidden=\"true\"></i>BIO130</span><span class=\"ds-timer-total\">01:24:18</span></button>",
-      "css": ".ds-timer-row { display: grid; gap: 1px; width: 11rem; min-height: 2.75rem; padding: 0.45rem var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-secondary); text-align: left; cursor: pointer; transition: background-color var(--motion), border-color var(--motion); } .ds-timer-row:hover { background: var(--surface-hover); } .ds-timer-row:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-timer-name { display: flex; align-items: center; gap: var(--space-2); font: 500 0.8125rem var(--font-body); } .ds-timer-dot { width: 0.45rem; height: 0.45rem; flex: 0 0 auto; border-radius: 50%; background: var(--timer-color, #111827); } .ds-timer-total { padding-left: 1rem; color: var(--text-subtle); font: 400 0.6875rem var(--font-body); font-variant-numeric: tabular-nums; }"
+      "html": "<button class=\"ds-timer-row\" style=\"--timer-color: #8f9250\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-timer-name\"><i class=\"ds-timer-dot\" aria-hidden=\"true\"></i>BIO130</span><span class=\"ds-timer-total\">01:24:18</span></button>",
+      "css": ".ds-timer-row { display: grid; gap: 1px; width: 11rem; min-height: 2.75rem; padding: 0.45rem var(--space-2); border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-secondary); text-align: left; cursor: pointer; transition: background-color var(--motion), border-color var(--motion); } .ds-timer-row:hover { border-color: color-mix(in srgb, var(--border) 72%, transparent); background: var(--surface-2); } .ds-timer-row:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-timer-name { display: flex; align-items: center; gap: var(--space-2); font: 500 0.8125rem var(--font-body); } .ds-timer-dot { width: 0.45rem; height: 0.45rem; flex: 0 0 auto; border-radius: 50%; background: var(--timer-color, #111827); } .ds-timer-total { padding-left: 1rem; color: var(--text-subtle); font: 400 0.6875rem var(--font-body); font-variant-numeric: tabular-nums; } .ds-timer-row .ds-timer-name, .ds-timer-row .ds-timer-total { color: var(--text-primary); }"
     },
     {
-      "name": "Focus Timer Dial",
+      "name": "Focus Timer Workspace",
       "kind": "custom",
-      "description": "Course-colored circular progress and large stable elapsed time.",
-      "html": "<div class=\"ds-timer-dial\"><div class=\"ds-timer-face\"><output class=\"ds-timer-time\" aria-label=\"Elapsed time\">01:24:18</output></div></div>",
-      "css": ".ds-timer-dial { position: relative; display: grid; width: 15rem; aspect-ratio: 1; place-items: center; border-radius: 50%; background: conic-gradient(var(--accent, #111827) 110deg, var(--surface-3) 0deg); } .ds-timer-dial::after { position: absolute; inset: 0.5rem; border: 1px solid var(--border); border-radius: 50%; background: var(--canvas); content: \"\"; } .ds-timer-face { position: relative; z-index: 1; display: grid; place-items: center; } .ds-timer-time { color: color-mix(in srgb, var(--accent, #111827) 52%, #ffffff); font: 500 2.65rem/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }"
+      "description": "Tight course-colored timer stack with a thin dial, exact-HEX primary pill, and outlined adjustments.",
+      "html": "<div class=\"ds-timer-workspace\" style=\"--accent: #8f9250; --accent-contrast: #111827\"><span class=\"ds-timer-state\">Running</span><strong class=\"ds-timer-course\">BIO130</strong><div class=\"ds-timer-dial\"><div class=\"ds-timer-face\"><output class=\"ds-timer-time\" aria-label=\"Elapsed time\">01:24:18</output></div></div><div class=\"ds-timer-controls\"><button class=\"ds-timer-adjust\" type=\"button\">-10 min</button><button class=\"ds-timer-main\" type=\"button\">Pause</button><button class=\"ds-timer-adjust\" type=\"button\" disabled>+5 min</button></div></div>",
+      "css": ".ds-timer-workspace { display: grid; justify-items: center; gap: 0.75rem; font-family: var(--font-body); } .ds-timer-state { color: var(--text-subtle); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; } .ds-timer-course { color: color-mix(in srgb, var(--accent) 52%, #ffffff); font-size: 1.25rem; line-height: 1.2; } .ds-timer-dial { position: relative; display: grid; width: 15rem; aspect-ratio: 1; place-items: center; border-radius: 50%; background: conic-gradient(var(--accent) 110deg, var(--surface-3) 0deg); } .ds-timer-dial::after { position: absolute; inset: 0.4rem; border: 1px solid var(--border); border-radius: 50%; background: var(--canvas); content: \"\"; } .ds-timer-face { position: relative; z-index: 1; display: grid; place-items: center; } .ds-timer-time { color: color-mix(in srgb, var(--accent) 52%, #ffffff); font: 500 2.65rem/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; } .ds-timer-controls { display: grid; width: min(100%, 24rem); grid-template-columns: minmax(5rem, 1fr) auto minmax(5rem, 1fr); align-items: center; gap: var(--space-3); } .ds-timer-controls button { min-height: 2.25rem; padding: 0 0.75rem; border-radius: var(--radius-md); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: color var(--motion), border-color var(--motion), background-color var(--motion); } .ds-timer-adjust { width: 100%; max-width: 6.25rem; justify-self: center; border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 74%, transparent); color: var(--text-muted); } .ds-timer-adjust:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent) 9%, var(--surface-2)); color: var(--text-primary); } .ds-timer-adjust:disabled { border-color: color-mix(in srgb, var(--border) 70%, transparent); background: transparent; color: var(--text-subtle); opacity: 0.78; cursor: not-allowed; } .ds-timer-controls .ds-timer-main { min-width: 5.5rem; min-height: 2.625rem; padding: 0 1.4rem; justify-self: center; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: var(--accent-contrast); font-size: 0.875rem; } .ds-timer-main:hover { filter: brightness(1.08); } .ds-timer-controls button:focus-visible { outline: none; box-shadow: var(--focus-ring); }"
     },
     {
-      "name": "Modal Dialog",
+      "name": "FocusArc Brand Mark",
       "kind": "custom",
-      "description": "Focused editing surface with protected depth.",
-      "html": "<div class=\"ds-modal-overlay\"><section class=\"ds-modal\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Edit timer\"><header class=\"ds-modal-header\"><h2>Edit timer</h2></header><p>Update this course timer.</p></section></div>",
-      "css": ".ds-modal-overlay { display: grid; padding: var(--space-4); place-items: center; min-height: 15rem; background: var(--overlay); backdrop-filter: blur(8px); } .ds-modal { width: min(100%, 25rem); padding: var(--space-4); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); background: var(--surface-1); color: var(--text-muted); font: 400 0.8125rem/1.5 var(--font-body); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24); } .ds-modal-header { margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border); } .ds-modal-header h2 { margin: 0; color: var(--text-primary); font: 600 1rem/1.3 var(--font-display); letter-spacing: -0.025em; } .ds-modal p { margin: 0; }"
+      "description": "Product-specific progress-ring mark in the compact sidebar identity.",
+      "html": "<span class=\"ds-brand\"><span class=\"ds-brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 20 20\" focusable=\"false\"><circle class=\"ds-brand-track\" cx=\"10\" cy=\"10\" r=\"6\"></circle><circle class=\"ds-brand-arc\" cx=\"10\" cy=\"10\" r=\"6\"></circle><circle class=\"ds-brand-center\" cx=\"10\" cy=\"10\" r=\"1.15\"></circle></svg></span><span>FocusArc</span></span>",
+      "css": ".ds-brand { display: inline-flex; align-items: center; gap: 0.625rem; color: var(--text-primary); font: 600 0.9375rem var(--font-display); letter-spacing: -0.02em; } .ds-brand-mark { display: grid; width: 1.625rem; height: 1.625rem; place-items: center; border: 1px solid color-mix(in srgb, var(--primary) 76%, white); border-radius: var(--radius-sm); background: var(--primary); color: #fff; } .ds-brand-mark svg { width: 1rem; height: 1rem; overflow: visible; } .ds-brand-track, .ds-brand-arc { fill: none; stroke: currentColor; stroke-width: 1.5; } .ds-brand-track { opacity: 0.28; } .ds-brand-arc { stroke-dasharray: 28 38; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; } .ds-brand-center { fill: currentColor; }"
     }
   ],
   "narrative": {
@@ -578,7 +592,7 @@
     "keyCharacteristics": [
       "Compact, product-focused hierarchy for a small desktop window.",
       "Flat layered surfaces separated by hairlines.",
-      "One interface accent, with user-defined course colors confined to timer identity and data.",
+      "One interface accent, with user-defined course colors confined to timer identity, its primary control, and data.",
       "Short, subtle state transitions and visible keyboard focus."
     ],
     "rules": [

@@ -13,13 +13,32 @@ const parseHex = (value: string) => {
   return { r, g, b };
 };
 
+const linearizeChannel = (channel: number) => {
+  const normalized = channel / 255;
+  return normalized <= 0.04045
+    ? normalized / 12.92
+    : ((normalized + 0.055) / 1.055) ** 2.4;
+};
+
+const relativeLuminance = ({ r, g, b }: { r: number; g: number; b: number }) =>
+  0.2126 * linearizeChannel(r) +
+  0.7152 * linearizeChannel(g) +
+  0.0722 * linearizeChannel(b);
+
+const contrastRatio = (first: number, second: number) =>
+  (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+
+const DARK_TEXT = { r: 17, g: 24, b: 39 };
+
 export const getContrastColor = (value: string, fallback = "#111827") => {
   const rgb = parseHex(value);
   if (!rgb) {
     return fallback;
   }
-  const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
-  return luminance > 0.6 ? "#111827" : "#ffffff";
+  const backgroundLuminance = relativeLuminance(rgb);
+  const darkContrast = contrastRatio(backgroundLuminance, relativeLuminance(DARK_TEXT));
+  const lightContrast = contrastRatio(backgroundLuminance, 1);
+  return darkContrast >= lightContrast ? "#111827" : "#ffffff";
 };
 
 export const getMutedTextColor = (value: string) => {

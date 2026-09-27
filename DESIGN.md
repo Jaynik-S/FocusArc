@@ -11,7 +11,8 @@ colors:
   hairline-strong: "#34343a"
   ink: "#f7f8f8"
   ink-secondary: "#d0d6e0"
-  ink-muted: "#8a8f98"
+  ink-muted: "#9aa0aa"
+  ink-subtle: "#7f858e"
   linear-lavender: "#5e6ad2"
   linear-lavender-hover: "#737fdf"
   linear-lavender-soft: "rgba(94, 106, 210, 0.14)"
@@ -135,7 +136,7 @@ The interface takes Linear's near-black layers, fine cool-gray borders, restrain
 **Key Characteristics:**
 - Compact, product-focused hierarchy for a small desktop window.
 - Flat layered surfaces separated by hairlines.
-- One interface accent, with user-defined course colors confined to timer identity and data.
+- One interface accent, with user-defined course colors confined to timer identity, its primary control, and data.
 - Short, subtle state transitions and visible keyboard focus.
 
 ## Colors
@@ -152,7 +153,7 @@ The palette is a stepped neutral field with one restrained lavender application 
 - **Near-Black Canvas** (`canvas`, CSS `--canvas`): the dark workspace ground; `light-canvas` is its light counterpart.
 - **Charcoal Layers** (`surface-1`, `surface-2`, `surface-3`, `surface-hover`): sidebar and panels, fields and selected items, recessed tracks, and hover surfaces respectively. Light equivalents preserve the sequence.
 - **Cool Hairlines** (`hairline`, `hairline-strong`): quiet separation and stronger interactive borders; light counterparts follow the same roles.
-- **Off-White Ink** (`ink`, `ink-secondary`, `ink-muted`): heading, body, and secondary text. `ink-muted` also supplies the dark subtle-text role. Light mode has distinct `light-ink-subtle`.
+- **Off-White Ink** (`ink`, `ink-secondary`, `ink-muted`, `ink-subtle`): heading, body, quiet controls, and the smallest metadata respectively. Light mode preserves distinct muted and subtle text roles.
 - **Muted Danger** (`danger`, `danger-soft`): deletion hover and error surfaces, with darker light-theme values for legibility.
 
 **The One Accent Rule.** Lavender identifies interface action and focus; user-selected HEX colors identify a timer, its dial, its primary timer control, and related data only.
@@ -188,21 +189,21 @@ Surfaces are flat at rest. Stepped background tones and 1px borders establish co
 
 ## Shapes
 
-Controls and rows use the implemented small radius scale (`xs`, `sm`, `md`, `lg`) rather than ornamental outlines. Buttons and inputs use `md`; navigation uses `sm`; panels and modals use `lg`. The circular timer dial, course dots, slim data bars, and pill-shaped primary timer control are purposeful exceptions.
+Controls and rows use the implemented small radius scale (`xs`, `sm`, `md`, `lg`) rather than ornamental outlines. Buttons and inputs use `md`; navigation uses `sm`; panels and modals use `lg`. The circular timer dial, FocusArc progress-ring brand mark, course dots, slim data bars, and pill-shaped primary timer control are purposeful exceptions.
 
 ## Components
 
 ### Buttons
 
-Compact controls have a minimum 2rem height and restrained 160ms state transitions. Primary uses lavender with white text; secondary uses a layered surface and hairline; ghost stays quiet until hover. Active presses move 1px. Disabled controls remain visible at reduced opacity. The timer's Play/Pause button is a course-colored pill, while adjustment and edit actions stay subordinate. Keyboard focus uses the shared lavender ring.
+Compact controls have a minimum 2rem height and restrained 160ms state transitions. Application-level primary uses lavender with white text; secondary uses a layered surface and hairline; ghost stays quiet until hover. Active presses move 1px. Disabled controls remain visible at reduced opacity. The timer's Play/Pause pill uses the selected timer's exact saved HEX, with text chosen by WCAG relative-luminance contrast between `#111827` and `#ffffff`. The adjacent adjustment controls have an outlined resting state, a subtle course-color hover treatment, and a clearly muted disabled state. Keyboard focus uses the shared lavender ring.
 
 ### Inputs / Fields
 
-Labels sit above cool layered inputs with a hairline border. Hover strengthens the border; focus shifts the border to lavender and the fill to the panel surface, with the shared ring. Errors use the muted danger color and its soft background.
+Labels sit above cool layered inputs with a hairline border and subtle placeholders. Hover strengthens the border; focus shifts the border to lavender and the fill to the panel surface, with the shared ring. Errors use the muted danger color and its soft background.
 
 ### Navigation
 
-The sidebar's compact nav items sit in a tight vertical list; hover adds a surface layer, and the active item adds a slim lavender mark. On narrow widths, they form a horizontal row with an underline-style active mark. Timer selection follows the same density with a course-color dot and tabular total.
+The FocusArc mark is a small lavender square containing a white progress ring and center point. The sidebar's compact nav items sit in a tight vertical list; hover adds a surface layer, and the active item adds a slim lavender mark. On narrow widths, they form a horizontal row with an underline-style active mark. Timer selection follows the same density with a course-color dot and tabular total; the active row uses the stronger hairline.
 
 ### Chips
 
@@ -210,11 +211,11 @@ Filters are small bordered surface controls. The selected state uses a lavender 
 
 ### Cards / Containers
 
-Panels use the first surface layer, a hairline border, `lg` corners, and `--space-4` padding. Panel headers have their own bottom hairline. Session rows and weekly summaries use compact inner layers; course color enters session rows only as a low-strength tint and border mix.
+Panels use the first surface layer, a hairline border, `lg` corners, and `--space-4` padding. Panel headers have their own bottom hairline. Session rows use compact inner layers; course color enters them only as a low-strength tint and border mix. Weekly statistics are flat, divided rows with no nested card fill or rounded outline.
 
 ### Timer Dial
 
-The dial is a circular conic progress track driven by the selected course's HEX color. An inset canvas face keeps the elapsed time legible, with a readable course-color mix for the timer name and digits. Its width and type scale with available width and height, keeping the controls visible in the 900 × 700 working window.
+The dial is a thin circular conic progress track driven by the selected course's HEX color. An inset canvas face keeps the elapsed time legible, with a readable course-color mix for the timer name and digits. Its width and type scale with available width and height. The timer header, dial, and controls form a tight stack; the control row is capped at 24rem so it stays connected to the dial in the 900 × 700 working window.
 
 ### Dialogs
 

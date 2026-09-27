@@ -95,7 +95,13 @@ const Sidebar = ({ username }: SidebarProps) => {
     <aside className="sidebar" style={sidebarStyle} aria-label="FocusArc workspace">
       <div className="sidebar-brand">
         <NavLink className="brand-link" to="/timers" aria-label="FocusArc timers">
-          <span className="brand-mark" aria-hidden="true">F</span>
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 20 20" focusable="false">
+              <circle className="brand-mark-track" cx="10" cy="10" r="6" />
+              <circle className="brand-mark-arc" cx="10" cy="10" r="6" />
+              <circle className="brand-mark-center" cx="10" cy="10" r="1.15" />
+            </svg>
+          </span>
           <span>FocusArc</span>
         </NavLink>
       </div>
