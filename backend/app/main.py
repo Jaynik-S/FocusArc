@@ -54,7 +54,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         session_cookie="focusarc_session",
         max_age=configured.session_max_age_seconds,
         path="/api",
-        same_site="lax",
+        same_site="none" if configured.app_env == "prod" else "lax",
         https_only=configured.app_env == "prod",
     )
     application.include_router(router, prefix="/api")

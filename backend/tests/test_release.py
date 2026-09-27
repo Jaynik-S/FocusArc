@@ -205,4 +205,4 @@ def test_production_cookie_is_secure_and_http_only(engine, db_session):
     cookie = response.headers["set-cookie"].lower()
     assert "secure" in cookie
     assert "httponly" in cookie
-    assert "samesite=lax" in cookie
+    assert "samesite=none" in cookie
