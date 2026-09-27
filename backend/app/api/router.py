@@ -5,7 +5,8 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.auth import get_username, require_access
+from app.auth import get_current_username
+from app.api.auth import router as auth_router
 from app.api.end_day import router as end_day_router
 from app.api.stats import router as stats_router
 from app.api.sessions import router as sessions_router
@@ -16,7 +17,7 @@ from app.models.session import Session as SessionModel
 
 router = APIRouter()
 public_router = APIRouter()
-api_router = APIRouter(dependencies=[Depends(get_username)])
+api_router = APIRouter(dependencies=[Depends(get_current_username)])
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +26,7 @@ def health_check() -> dict:
     return {"status": "ok"}
 
 
-@public_router.get("/ready", dependencies=[Depends(require_access)])
+@public_router.get("/ready", dependencies=[Depends(get_current_username)])
 def readiness(db: Session = Depends(get_db)) -> dict:
     try:
         db.execute(text("SELECT 1"))
@@ -73,4 +74,5 @@ api_router.include_router(end_day_router)
 api_router.include_router(stats_router)
 api_router.include_router(totals_router)
 router.include_router(public_router)
+router.include_router(auth_router)
 router.include_router(api_router)
