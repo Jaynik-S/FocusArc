@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const PrimaryNav = () => {
   return (
-    <nav className="primary-nav">
+    <nav className="primary-nav" aria-label="Primary navigation">
       <NavLink
         className={({ isActive }) =>
           `nav-pill${isActive ? " nav-pill-active" : ""}`
@@ -29,6 +29,15 @@ const PrimaryNav = () => {
         title="History"
       >
         History
+      </NavLink>
+      <NavLink
+        className={({ isActive }) =>
+          `nav-pill${isActive ? " nav-pill-active" : ""}`
+        }
+        to="/stats"
+        title="Stats"
+      >
+        Stats
       </NavLink>
     </nav>
   );

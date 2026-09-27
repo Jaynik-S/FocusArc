@@ -9,7 +9,7 @@ const MainLayout = () => {
   return (
     <div className="app-layout">
       <Sidebar username={user?.username ?? ""} />
-      <main className="main-content">
+      <main className="main-content" id="main-content">
         <Outlet />
       </main>
     </div>

@@ -1,0 +1,627 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-27T21:06:51Z",
+  "title": "Design System: FocusArc",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "surface-1": {
+        "role": "neutral",
+        "displayName": "Surface 1",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Surface 2",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "surface-3": {
+        "role": "neutral",
+        "displayName": "Surface 3",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "surface-hover": {
+        "role": "neutral",
+        "displayName": "Surface Hover",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Ink Muted",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "ink-subtle": {
+        "role": "neutral",
+        "displayName": "Ink Subtle",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "linear-lavender": {
+        "role": "primary",
+        "displayName": "Linear Lavender",
+        "tonalRamp": [
+          "oklch(15% 0.075 275)",
+          "oklch(26% 0.095 275)",
+          "oklch(37% 0.125 275)",
+          "oklch(48% 0.145 275)",
+          "oklch(59% 0.155 275)",
+          "oklch(70% 0.135 275)",
+          "oklch(82% 0.09 275)",
+          "oklch(95% 0.025 275)"
+        ]
+      },
+      "linear-lavender-hover": {
+        "role": "primary",
+        "displayName": "Linear Lavender Hover",
+        "tonalRamp": [
+          "oklch(15% 0.075 275)",
+          "oklch(26% 0.095 275)",
+          "oklch(37% 0.125 275)",
+          "oklch(48% 0.145 275)",
+          "oklch(59% 0.155 275)",
+          "oklch(70% 0.135 275)",
+          "oklch(82% 0.09 275)",
+          "oklch(95% 0.025 275)"
+        ]
+      },
+      "linear-lavender-soft": {
+        "role": "primary",
+        "displayName": "Linear Lavender Soft",
+        "tonalRamp": [
+          "oklch(15% 0.075 275)",
+          "oklch(26% 0.095 275)",
+          "oklch(37% 0.125 275)",
+          "oklch(48% 0.145 275)",
+          "oklch(59% 0.155 275)",
+          "oklch(70% 0.135 275)",
+          "oklch(82% 0.09 275)",
+          "oklch(95% 0.025 275)"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "tonalRamp": [
+          "oklch(15% 0.07 25)",
+          "oklch(26% 0.095 25)",
+          "oklch(37% 0.12 25)",
+          "oklch(48% 0.145 25)",
+          "oklch(59% 0.15 25)",
+          "oklch(70% 0.13 25)",
+          "oklch(82% 0.085 25)",
+          "oklch(95% 0.025 25)"
+        ]
+      },
+      "danger-soft": {
+        "role": "semantic",
+        "displayName": "Danger Soft",
+        "tonalRamp": [
+          "oklch(15% 0.07 25)",
+          "oklch(26% 0.095 25)",
+          "oklch(37% 0.12 25)",
+          "oklch(48% 0.145 25)",
+          "oklch(59% 0.15 25)",
+          "oklch(70% 0.13 25)",
+          "oklch(82% 0.085 25)",
+          "oklch(95% 0.025 25)"
+        ]
+      },
+      "light-canvas": {
+        "role": "neutral",
+        "displayName": "Light Canvas",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-surface-1": {
+        "role": "neutral",
+        "displayName": "Light Surface 1",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-surface-2": {
+        "role": "neutral",
+        "displayName": "Light Surface 2",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-surface-3": {
+        "role": "neutral",
+        "displayName": "Light Surface 3",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-surface-hover": {
+        "role": "neutral",
+        "displayName": "Light Surface Hover",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-hairline": {
+        "role": "neutral",
+        "displayName": "Light Hairline",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-hairline-strong": {
+        "role": "neutral",
+        "displayName": "Light Hairline Strong",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "Light Ink",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-ink-secondary": {
+        "role": "neutral",
+        "displayName": "Light Ink Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-ink-muted": {
+        "role": "neutral",
+        "displayName": "Light Ink Muted",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-ink-subtle": {
+        "role": "neutral",
+        "displayName": "Light Ink Subtle",
+        "tonalRamp": [
+          "oklch(15% 0.005 270)",
+          "oklch(26% 0.005 270)",
+          "oklch(37% 0.005 270)",
+          "oklch(48% 0.005 270)",
+          "oklch(59% 0.005 270)",
+          "oklch(70% 0.005 270)",
+          "oklch(82% 0.005 270)",
+          "oklch(95% 0.005 270)"
+        ]
+      },
+      "light-lavender": {
+        "role": "primary",
+        "displayName": "Light Lavender",
+        "tonalRamp": [
+          "oklch(15% 0.075 275)",
+          "oklch(26% 0.095 275)",
+          "oklch(37% 0.125 275)",
+          "oklch(48% 0.145 275)",
+          "oklch(59% 0.155 275)",
+          "oklch(70% 0.135 275)",
+          "oklch(82% 0.09 275)",
+          "oklch(95% 0.025 275)"
+        ]
+      },
+      "light-lavender-hover": {
+        "role": "primary",
+        "displayName": "Light Lavender Hover",
+        "tonalRamp": [
+          "oklch(15% 0.075 275)",
+          "oklch(26% 0.095 275)",
+          "oklch(37% 0.125 275)",
+          "oklch(48% 0.145 275)",
+          "oklch(59% 0.155 275)",
+          "oklch(70% 0.135 275)",
+          "oklch(82% 0.09 275)",
+          "oklch(95% 0.025 275)"
+        ]
+      },
+      "light-lavender-soft": {
+        "role": "primary",
+        "displayName": "Light Lavender Soft",
+        "tonalRamp": [
+          "oklch(15% 0.075 275)",
+          "oklch(26% 0.095 275)",
+          "oklch(37% 0.125 275)",
+          "oklch(48% 0.145 275)",
+          "oklch(59% 0.155 275)",
+          "oklch(70% 0.135 275)",
+          "oklch(82% 0.09 275)",
+          "oklch(95% 0.025 275)"
+        ]
+      },
+      "light-danger": {
+        "role": "semantic",
+        "displayName": "Light Danger",
+        "tonalRamp": [
+          "oklch(15% 0.07 25)",
+          "oklch(26% 0.095 25)",
+          "oklch(37% 0.12 25)",
+          "oklch(48% 0.145 25)",
+          "oklch(59% 0.15 25)",
+          "oklch(70% 0.13 25)",
+          "oklch(82% 0.085 25)",
+          "oklch(95% 0.025 25)"
+        ]
+      },
+      "light-danger-soft": {
+        "role": "semantic",
+        "displayName": "Light Danger Soft",
+        "tonalRamp": [
+          "oklch(15% 0.07 25)",
+          "oklch(26% 0.095 25)",
+          "oklch(37% 0.12 25)",
+          "oklch(48% 0.145 25)",
+          "oklch(59% 0.15 25)",
+          "oklch(70% 0.13 25)",
+          "oklch(82% 0.085 25)",
+          "oklch(95% 0.025 25)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Compact page titles."
+      },
+      "timer": {
+        "displayName": "Timer",
+        "purpose": "Large, tabular elapsed time inside the dial."
+      }
+    },
+    "shadows": [
+      {
+        "name": "modal-focus",
+        "value": "0 16px 48px rgba(0, 0, 0, 0.24)",
+        "purpose": "Separate a focused modal from the dimmed workspace."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": "160ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Subtle control state transitions; reduced-motion preference shortens to 0.01ms."
+      },
+      {
+        "name": "page-in",
+        "value": "240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Short route entrance."
+      },
+      {
+        "name": "modal-in",
+        "value": "180ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Short dialog entrance."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "900px"
+      },
+      {
+        "name": "stacked-shell",
+        "value": "720px"
+      },
+      {
+        "name": "narrow",
+        "value": "480px"
+      },
+      {
+        "name": "short-window",
+        "value": "740px height"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Application-level primary action.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Create timer</button>",
+      "css": ".ds-btn-primary { min-height: 2rem; padding: 0.4rem 0.75rem; border: 1px solid color-mix(in srgb, var(--primary) 80%, white 8%); border-radius: var(--radius-md); background: var(--primary); color: #fff; font: 500 0.8125rem var(--font-body); cursor: pointer; transition: background-color var(--motion), transform var(--motion); } .ds-btn-primary:hover { background: var(--primary-hover); } .ds-btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet adjacent action, including dialog cancellation.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancel</button>",
+      "css": ".ds-btn-secondary { min-height: 2rem; padding: 0.4rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-secondary); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: background-color var(--motion), border-color var(--motion), transform var(--motion); } .ds-btn-secondary:hover { border-color: var(--border-strong); background: var(--surface-3); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-btn-secondary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Low-emphasis utility action.",
+      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Edit timer</button>",
+      "css": ".ds-btn-ghost { min-height: 2rem; padding: 0.4rem 0.75rem; border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: background-color var(--motion), color var(--motion), transform var(--motion); } .ds-btn-ghost:hover { background: var(--surface-2); color: var(--text-primary); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-btn-ghost:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "Compact labeled input for timer and account forms.",
+      "html": "<label class=\"ds-field\"><span>Name</span><input class=\"ds-field-input\" placeholder=\"BIO130\"></label>",
+      "css": ".ds-field { display: grid; gap: var(--space-2); color: var(--text-muted); font: 500 0.75rem/1.5 var(--font-body); } .ds-field-input { width: 100%; min-height: 2.25rem; padding: 0.45rem 0.625rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-primary); caret-color: var(--primary); font: 400 0.875rem/1.5 var(--font-body); transition: border-color var(--motion), background-color var(--motion), box-shadow var(--motion); } .ds-field-input:hover { border-color: var(--border-strong); } .ds-field-input:focus { border-color: var(--primary); background: var(--surface-1); outline: none; box-shadow: var(--focus-ring); } .ds-field-input::placeholder { color: var(--text-subtle); opacity: 1; }"
+    },
+    {
+      "name": "Active Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Current route in the compact workspace navigation.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-nav-item-active\" href=\"#timers\" aria-current=\"page\">Timers</a><a class=\"ds-nav-item\" href=\"#history\">History</a></nav>",
+      "css": ".ds-nav { display: grid; gap: 2px; width: 11rem; } .ds-nav-item { position: relative; display: flex; align-items: center; min-height: 2rem; padding: 0 var(--space-3); border-radius: var(--radius-sm); color: var(--text-muted); font: 500 0.8125rem var(--font-body); text-decoration: none; transition: color var(--motion), background-color var(--motion); } .ds-nav-item:hover { background: var(--surface-2); color: var(--text-secondary); } .ds-nav-item:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-nav-item-active { background: var(--surface-2); color: var(--text-primary); } .ds-nav-item-active::before { position: absolute; left: 0.35rem; width: 2px; height: 0.875rem; border-radius: 2px; background: var(--primary); content: \"\"; }"
+    },
+    {
+      "name": "Selected Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-active",
+      "description": "Selected compact filter for history or review views.",
+      "html": "<button class=\"ds-chip ds-chip-active\" type=\"button\" aria-pressed=\"true\">This week</button>",
+      "css": ".ds-chip { min-height: 1.875rem; padding: 0.3rem 0.65rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-muted); font: 500 0.75rem var(--font-body); cursor: pointer; transition: border-color var(--motion), background-color var(--motion); } .ds-chip:hover { border-color: var(--border-strong); } .ds-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-chip-active { border-color: color-mix(in srgb, var(--primary) 55%, var(--border)); background: var(--primary-soft); color: var(--text-primary); }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Hairline panel with flat, divided weekly statistics rows.",
+      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><h2>Weekly statistics</h2></header><div class=\"ds-panel-body\"><div class=\"ds-week-day\"><strong>Monday</strong><span>2h 15m</span></div><div class=\"ds-week-day\"><strong>Tuesday</strong><span>1h 40m</span></div></div></section>",
+      "css": ".ds-panel { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); color: var(--text-secondary); font: 400 0.875rem/1.5 var(--font-body); } .ds-panel-header { margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); } .ds-panel-header h2 { margin: 0; color: var(--text-primary); font: 600 1rem/1.3 var(--font-display); letter-spacing: -0.025em; } .ds-panel-body { padding-top: var(--space-4); } .ds-week-day { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); background: transparent; } .ds-week-day:first-child { border-top: 1px solid var(--border); } .ds-week-day strong { color: var(--text-primary); font: 600 0.8125rem var(--font-body); } .ds-week-day span { color: var(--text-muted); font: 400 0.6875rem var(--font-body); }"
+    },
+    {
+      "name": "Timer Row",
+      "kind": "button",
+      "refersTo": "timer-row-active",
+      "description": "Selected course in the sidebar, with its own color and tabular total.",
+      "html": "<button class=\"ds-timer-row\" style=\"--timer-color: #8f9250\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-timer-name\"><i class=\"ds-timer-dot\" aria-hidden=\"true\"></i>BIO130</span><span class=\"ds-timer-total\">01:24:18</span></button>",
+      "css": ".ds-timer-row { display: grid; gap: 1px; width: 11rem; min-height: 2.75rem; padding: 0.45rem var(--space-2); border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-secondary); text-align: left; cursor: pointer; transition: background-color var(--motion), border-color var(--motion); } .ds-timer-row:hover { border-color: color-mix(in srgb, var(--border) 72%, transparent); background: var(--surface-2); } .ds-timer-row:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-timer-name { display: flex; align-items: center; gap: var(--space-2); font: 500 0.8125rem var(--font-body); } .ds-timer-dot { width: 0.45rem; height: 0.45rem; flex: 0 0 auto; border-radius: 50%; background: var(--timer-color, #111827); } .ds-timer-total { padding-left: 1rem; color: var(--text-subtle); font: 400 0.6875rem var(--font-body); font-variant-numeric: tabular-nums; } .ds-timer-row .ds-timer-name, .ds-timer-row .ds-timer-total { color: var(--text-primary); }"
+    },
+    {
+      "name": "Focus Timer Workspace",
+      "kind": "custom",
+      "description": "Tight course-colored timer stack with a thin dial, exact-HEX primary pill, and outlined adjustments.",
+      "html": "<div class=\"ds-timer-workspace\" style=\"--accent: #8f9250; --accent-contrast: #111827\"><span class=\"ds-timer-state\">Running</span><strong class=\"ds-timer-course\">BIO130</strong><div class=\"ds-timer-dial\"><div class=\"ds-timer-face\"><output class=\"ds-timer-time\" aria-label=\"Elapsed time\">01:24:18</output></div></div><div class=\"ds-timer-controls\"><button class=\"ds-timer-adjust\" type=\"button\">-10 min</button><button class=\"ds-timer-main\" type=\"button\">Pause</button><button class=\"ds-timer-adjust\" type=\"button\" disabled>+5 min</button></div></div>",
+      "css": ".ds-timer-workspace { display: grid; justify-items: center; gap: 0.75rem; font-family: var(--font-body); } .ds-timer-state { color: var(--text-subtle); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; } .ds-timer-course { color: color-mix(in srgb, var(--accent) 52%, #ffffff); font-size: 1.25rem; line-height: 1.2; } .ds-timer-dial { position: relative; display: grid; width: 15rem; aspect-ratio: 1; place-items: center; border-radius: 50%; background: conic-gradient(var(--accent) 110deg, var(--surface-3) 0deg); } .ds-timer-dial::after { position: absolute; inset: 0.4rem; border: 1px solid var(--border); border-radius: 50%; background: var(--canvas); content: \"\"; } .ds-timer-face { position: relative; z-index: 1; display: grid; place-items: center; } .ds-timer-time { color: color-mix(in srgb, var(--accent) 52%, #ffffff); font: 500 2.65rem/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; } .ds-timer-controls { display: grid; width: min(100%, 24rem); grid-template-columns: minmax(5rem, 1fr) auto minmax(5rem, 1fr); align-items: center; gap: var(--space-3); } .ds-timer-controls button { min-height: 2.25rem; padding: 0 0.75rem; border-radius: var(--radius-md); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: color var(--motion), border-color var(--motion), background-color var(--motion); } .ds-timer-adjust { width: 100%; max-width: 6.25rem; justify-self: center; border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 74%, transparent); color: var(--text-muted); } .ds-timer-adjust:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent) 9%, var(--surface-2)); color: var(--text-primary); } .ds-timer-adjust:disabled { border-color: color-mix(in srgb, var(--border) 70%, transparent); background: transparent; color: var(--text-subtle); opacity: 0.78; cursor: not-allowed; } .ds-timer-controls .ds-timer-main { min-width: 5.5rem; min-height: 2.625rem; padding: 0 1.4rem; justify-self: center; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: var(--accent-contrast); font-size: 0.875rem; } .ds-timer-main:hover { filter: brightness(1.08); } .ds-timer-controls button:focus-visible { outline: none; box-shadow: var(--focus-ring); }"
+    },
+    {
+      "name": "FocusArc Brand Mark",
+      "kind": "custom",
+      "description": "Product-specific progress-ring mark in the compact sidebar identity.",
+      "html": "<span class=\"ds-brand\"><span class=\"ds-brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 20 20\" focusable=\"false\"><circle class=\"ds-brand-track\" cx=\"10\" cy=\"10\" r=\"6\"></circle><circle class=\"ds-brand-arc\" cx=\"10\" cy=\"10\" r=\"6\"></circle><circle class=\"ds-brand-center\" cx=\"10\" cy=\"10\" r=\"1.15\"></circle></svg></span><span>FocusArc</span></span>",
+      "css": ".ds-brand { display: inline-flex; align-items: center; gap: 0.625rem; color: var(--text-primary); font: 600 0.9375rem var(--font-display); letter-spacing: -0.02em; } .ds-brand-mark { display: grid; width: 1.625rem; height: 1.625rem; place-items: center; border: 1px solid color-mix(in srgb, var(--primary) 76%, white); border-radius: var(--radius-sm); background: var(--primary); color: #fff; } .ds-brand-mark svg { width: 1rem; height: 1rem; overflow: visible; } .ds-brand-track, .ds-brand-arc { fill: none; stroke: currentColor; stroke-width: 1.5; } .ds-brand-track { opacity: 0.28; } .ds-brand-arc { stroke-dasharray: 28 38; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; } .ds-brand-center { fill: currentColor; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Instrument",
+    "overview": "FocusArc behaves like a precise desk timer: present, readable, and composed. Its compact workspace supports an individual studying beside other material, with the active timer as the single point of emphasis. The atmosphere is calm, distraction-free, and quietly luxurious through alignment and restraint.\n\nThe interface takes Linear's near-black layers, fine cool-gray borders, restrained lavender, and clean type as a visual authority, then applies them to a personal study tool. Course colors give timers their own identity without turning the surrounding controls into decoration. Light mode preserves the same hierarchy with cool white and gray surfaces.",
+    "keyCharacteristics": [
+      "Compact, product-focused hierarchy for a small desktop window.",
+      "Flat layered surfaces separated by hairlines.",
+      "One interface accent, with user-defined course colors confined to timer identity, its primary control, and data.",
+      "Short, subtle state transitions and visible keyboard focus."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Lavender identifies interface action and focus; user-selected HEX colors identify a timer, its dial, its primary timer control, and related data only.",
+        "section": "colors"
+      },
+      {
+        "name": "The Legible Clock Rule",
+        "body": "Keep elapsed time stable through tabular numerals and make it visually dominant only in the timer workspace.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Prefer a surface step and fine border to a raised card shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the timer readable and controllable at 900 × 700.",
+      "Do use the stepped surfaces, hairlines, and compact spacing rhythm for secondary views.",
+      "Do preserve visible keyboard focus, tabular time values, and reduced-motion behavior.",
+      "Do use a course's chosen HEX only for that timer's identity, primary control, and related data."
+    ],
+    "donts": [
+      "Don't add decorative gradients, glows, or shadows to resting surfaces.",
+      "Don't use course colors as global control or navigation accents.",
+      "Don't enlarge secondary headings or cards until they compete with the active timer."
+    ]
+  }
+}

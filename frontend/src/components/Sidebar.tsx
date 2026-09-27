@@ -10,6 +10,7 @@ import { storageForAccount } from "../storage/accountStorage";
 import { isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
 import EndDayButton from "./EndDayButton";
+import PrimaryNav from "./PrimaryNav";
 import TimerFormModal from "./TimerFormModal";
 
 type SidebarProps = {
@@ -28,8 +29,7 @@ const getInitialTheme = (username: string) => {
   } catch {
     // Ignore storage errors; fall back to system preference.
   }
-  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-  return prefersDark ? "dark" : "light";
+  return "dark";
 };
 
 const Sidebar = ({ username }: SidebarProps) => {
@@ -72,10 +72,9 @@ const Sidebar = ({ username }: SidebarProps) => {
     if (!selectedTimer || !isValidHexColor(selectedTimer.color)) {
       return undefined;
     }
-    // Minimalistic: only pass accent color for indicators
     return {
       "--sidebar-accent": selectedTimer.color,
-    } as any;
+    } as CSSProperties;
   }, [selectedTimer]);
 
   const handleCreate = async (values: TimerFormValues) => {
@@ -93,17 +92,30 @@ const Sidebar = ({ username }: SidebarProps) => {
   };
 
   return (
-    <aside className="sidebar" style={sidebarStyle}>
-      <div className="sidebar-user" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><strong style={{ marginTop: -15, flex: 1 }}>{username || "Not set"}</strong><button className="link-button" type="button" onClick={() => void logout()} title="Sign out" style={{ fontSize: "0.875rem" }}>Logout</button></div>
-      <nav className="sidebar-nav">
-        <NavLink to="/history" className="sidebar-link">
-          History
+    <aside className="sidebar" style={sidebarStyle} aria-label="FocusArc workspace">
+      <div className="sidebar-brand">
+        <NavLink className="brand-link" to="/timers" aria-label="FocusArc timers">
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 20 20" focusable="false">
+              <circle className="brand-mark-track" cx="10" cy="10" r="6" />
+              <circle className="brand-mark-arc" cx="10" cy="10" r="6" />
+              <circle className="brand-mark-center" cx="10" cy="10" r="1.15" />
+            </svg>
+          </span>
+          <span>FocusArc</span>
         </NavLink>
-      </nav>
+      </div>
+      <div className="sidebar-user">
+        <span className="sidebar-username" title={username}>{username || "Not set"}</span>
+        <button className="link-button" type="button" onClick={() => void logout()}>
+          Sign out
+        </button>
+      </div>
+      <PrimaryNav />
       {syncError && <p className="error" role="status">{syncError}</p>}
-      <div className="sidebar-section">
+      <section className="sidebar-section" aria-labelledby="timer-list-heading">
         <div className="sidebar-section-header">
-            <span style={{ marginTop: -15 }}>Timers</span>
+          <span id="timer-list-heading">Timers</span>
           <button
             className="link-button"
             type="button"
@@ -113,12 +125,12 @@ const Sidebar = ({ username }: SidebarProps) => {
             New
           </button>
         </div>
-        <div className="timer-list">
+        <div className="timer-list" aria-label="Timers">
           {timersState.loading ? <div className="muted">Loading...</div> : null}
           {!timersState.loading && timers.length === 0 ? (
             <div className="muted">No timers yet.</div>
           ) : null}
-          {timers.map((timer, index) => {
+          {timers.map((timer) => {
             const isSelected = timer.id === selectedTimerId;
             const isRunning = activeSession?.timer_id === timer.id;
             const offsetSeconds = offsets[timer.id] ?? 0;
@@ -133,7 +145,7 @@ const Sidebar = ({ username }: SidebarProps) => {
                 key={timer.id}
                 className={`timer-row${isSelected ? " timer-row-active" : ""}`}
                 type="button"
-                style={{ animationDelay: `${index * 40}ms` }}
+                aria-pressed={isSelected}
                 onClick={() => {
                   setSelectedTimerId(timer.id);
                   navigate("/timers");
@@ -156,7 +168,7 @@ const Sidebar = ({ username }: SidebarProps) => {
           })}
         </div>
         {actionError ? <div className="error">{actionError}</div> : null}
-      </div>
+      </section>
       <div className="sidebar-section sidebar-endday">
         <div className="sidebar-endday-row">
           <button
