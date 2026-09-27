@@ -8,7 +8,7 @@ Local/personal web app to track time spent per course via multiple timers, sessi
 
 ```mermaid
 flowchart LR
-  U[Browser\nReact + Vite] -->|REST (JSON)\nX-Username header| API[FastAPI\nSQLAlchemy\nAlembic]
+  U[Browser\nReact + Vite] -->|REST (JSON)\nSigned session cookie| API[FastAPI\nSQLAlchemy\nAlembic]
   API --> DB[(Postgres)]
 ```
 
@@ -30,6 +30,7 @@ flowchart LR
 | Field | Type | Notes |
 |---|---|---|
 | `username` | `text` PK | Provided by user; normalized (trim); length constraint |
+| `password_hash` | `text` nullable | Argon2id hash; null only for existing accounts awaiting private setup |
 | `created_at` | `timestamptz` | default `now()` |
 
 Constraints / indexes:
@@ -107,9 +108,10 @@ Constraints / indexes:
 
 ### API conventions
 - Base URL: `/api`
-- Authentication: **username-only via request header** `X-Username: <string>`
-  - Backend rejects missing/blank username (`400`) and normalizes `trim()`.
-  - Backend auto-creates `users` row on first request (idempotent).
+- Authentication: normalized username/password login followed by a signed HTTP-only session cookie.
+  - The backend resolves identity from the validated session for every private route.
+  - Unknown usernames require explicit registration confirmation; existing usernames are never overwritten.
+  - Existing null-hash users require the private one-time admin setup command.
 - JSON everywhere, `Content-Type: application/json`
 - Error shape:
 ```json
@@ -336,12 +338,13 @@ Key rule: **only one active session per user**.
 
 ### Screen details
 
-#### `/` Username gate
+#### `/` Account gate
 - Components:
-  - `UsernameCard` (input + “Continue”)
-  - `RecentUsernames` (optional localStorage list)
+  - `AuthScreen` (username, password, and “Continue”)
+  - Explicit account-creation confirmation for unknown usernames
 - Behavior:
-  - Store username in `localStorage` and set on API client as `X-Username`.
+  - Send credentialed requests; never store a password or trust a browser-supplied username as identity.
+  - Namespace browser-local state under `coursetimers.accounts.<username>.*`.
 
 #### `/timers` (Today)
 - Components:
@@ -381,7 +384,7 @@ Key rule: **only one active session per user**.
   - Optional `BarChart` (lightweight): use `recharts` or `uPlot` only if needed; otherwise use CSS bars.
 
 ### Frontend state + API client
-- `apiClient.ts`: attaches `X-Username` header from `localStorage`.
+- `apiClient.ts`: uses `credentials: "include"`; HTTP 401 returns the application to sign-in.
 - Cache strategy: React Query (TanStack Query) to simplify fetching + invalidation.
 - Live timer display:
   - Poll `GET /api/active-session` every ~10–15s (or on focus).
@@ -521,17 +524,19 @@ GROUP BY t.id;
 - Acceptance checks:
   - Tables exist in Postgres; partial unique index for active session present.
 
-### 4) Username middleware/dependency
-- Goal: consistently require `X-Username` and auto-create user row.
+### 4) Account authentication dependency
+- Goal: consistently require a valid signed session and load its existing user row.
 - Files:
-  - Create: `backend/app/auth.py` (dependency `get_username()`)
+  - Create: `backend/app/auth.py` (dependency `get_current_username()`)
+  - Create: `backend/app/api/auth.py` (login, confirmed registration, session, logout)
   - Modify: `backend/app/api/router.py` to apply dependency per router
   - Add: `GET /api/me`
 - Commands:
   - `pytest` (can be empty initially; create test scaffold in Step 10)
 - Acceptance checks:
-  - Requests without `X-Username` return `400`.
-  - First request with new username creates `users` row.
+  - Requests without a valid session return `401`.
+  - Unknown login does not create a row until registration is explicitly confirmed.
+  - Wrong passwords do not create or modify accounts.
 
 ### 5) Timers CRUD API
 - Goal: create/list/update/archive timers.
@@ -724,7 +729,7 @@ GROUP BY t.id;
 - **Network loss while running**: timer still runs server-side; UI can show “offline” state and keep optimistic display; on reconnect, re-sync from server.
 - **Accidental username mismatch**: show current username in top bar and allow quick switch in `/` route; store recent usernames locally.
 - **Performance on large history**: start with indexed queries and date filtering; add pagination (`limit/offset`) if needed.
-- **Data correction**: no editing sessions in v1; if needed later, add admin-style edit endpoint guarded by username-only (still local use).
+- **Data correction**: no editing sessions in v1; if needed later, add an authenticated admin-style edit endpoint.
 
 ---
 

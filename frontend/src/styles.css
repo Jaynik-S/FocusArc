@@ -73,6 +73,46 @@ button { font-family: inherit; }
   min-height: 100vh;
 }
 
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-lg);
+}
+
+.auth-panel {
+  width: min(100%, 400px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.auth-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: 12px;
+  background: var(--highlight);
+}
+
+.auth-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.auth-public-note {
+  margin-top: var(--space-md);
+  font-size: 12px;
+}
+
 /* --- Sidebar --- */
 /* Completely transparent, fits the "one surface" rule */
 

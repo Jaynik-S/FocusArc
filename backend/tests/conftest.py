@@ -7,6 +7,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
 from app.db import get_db
+from app.api.auth import auth_limiter
 from app.main import app
 from app.models.base import Base
 
@@ -30,6 +31,13 @@ def _get_test_database_url() -> str:
 def engine():
     url = _get_test_database_url()
     return create_engine(url, pool_pre_ping=True)
+
+
+@pytest.fixture(autouse=True)
+def reset_auth_rate_limits():
+    auth_limiter.clear_all()
+    yield
+    auth_limiter.clear_all()
 
 
 @pytest.fixture

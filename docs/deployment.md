@@ -1,207 +1,240 @@
-# FocusArc deployment runbook
+# FocusArc production deployment runbook
 
-Updated 2026-09-20. Approved architecture: Render Static Site, Render Docker API, Neon PostgreSQL. The original plan's permission blockers are historical and resolved.
+Updated 2026-09-27. Architecture: Render Static Site, Render Docker Web Service, Neon PostgreSQL, and GitHub Actions. This runbook describes the username/password release; it does not claim that the branch is deployed.
 
-## Verified status
+Registration is public. Anyone who can reach FocusArc can create a separate account. Accounts do not share server data or browser-local counters. There is intentionally no email verification, password-reset email, or social login.
 
-| Area | Evidence and remaining work |
+## What the release changes
+
+- Alembic revision `0003_add_password_hash` adds nullable `users.password_hash` without changing existing timers or sessions.
+- Existing usernames with a null hash cannot be claimed by public registration. The release workflow privately initializes or verifies `jayy` before the new API is deployed.
+- Passwords are Argon2id hashes. The browser receives a signed HTTP-only cookie containing only the username.
+- The API, not the browser, resolves the authenticated username for every private query.
+- Legacy access-key variables, bearer headers, and username headers are removed.
+- Browser state moves to `coursetimers.accounts.<username>.*`. Matching legacy `jayy` keys migrate once after `jayy` signs in; logout does not delete them.
+
+## Required production settings
+
+### Render static site
+
+| Setting | Value |
 |---|---|
-| Checkout | Implementation commit 7208fbb9e5ea5e7520e1732363962d574e149143 is pushed to main. It extends user-updated 0cd507d, not the original September 17 branch. |
-| Backend | Locked Linux Python 3.11.16 image built; 34 tests pass, two upstream deprecation warnings; pip check clean. Authentication is checked before database access. |
-| Frontend | Linux Node 22 install, 12 tests and personal-mode production build pass. HTTP production API URL is rejected. |
-| Release configuration | Render JSON schema, actionlint, Compose config and four deployment unit tests pass. GitHub CI succeeded for 7208fbb; production Deploy correctly skipped while setup remains gated. |
-| Render | User confirmed Jay's workspace (tea-d0vvbb3ipnbc738bffv0). Static site created FIRST: srv-danqj9jm8hqs73c78tsg, https://focusarc.onrender.com. Auto-deploy off; no API created yet. |
-| Neon | Existing project sweet-art-50562983, branch br-weathered-queen-b54u6al3, AWS us-east-2, PostgreSQL 15. focusarc-production has revision 0002_add_cycle_totals but zero application rows. Restricted runtime role not yet created. |
-| Personal data | Last read-only source counts: 1 user, 7 timers, 155 sessions, 0 day summaries, 0 active sessions; owner jayy. No restore to Neon or browser-state transfer performed. |
+| Root directory | `frontend` |
+| Build command | `npm ci && npm run build` |
+| Publish directory | `dist` |
+| SPA rewrite | `/*` → `/index.html` |
+| `NODE_VERSION` | `22` |
+| `SKIP_INSTALL_DEPS` | `true` |
+| `VITE_API_BASE_URL` | Exact API HTTPS origin plus `/api`, with no trailing slash |
 
-Starting Docker Desktop resumed the existing local DB container through its restart policy. Do not claim the original volume was never started. No destructive test ran against original or rehearsal personal data.
+Delete `VITE_AUTH_MODE`; it is obsolete. Never put a password, session secret, database URL, or other secret in a `VITE_*` variable.
 
-## Backups and safety
+### Render API service
 
-Private backups remain outside Git in C:\Users\jay03\Jaynik\Backups\FocusArc:
-
-- focusarc-pgdata-20260917.tar.gz
-- focusarc-20260917.dump
-
-Physical archive SHA-256 reverified locally:
-83CF44C9E9B953B7971B718C996BC6C73D33479CD0590B93BEE101E858EEBE01.
-
-Original volume: focusarc_pgdata. Physical rehearsal copy: focusarc_migration_rehearsal_20260917. Neither is a test target. On September 20 the logical dump was restored successfully with PostgreSQL 15 into a NEW database focusarc_restore_test on the tmpfs test container. It contains 1 user, 7 timers, 155 sessions, 0 day summaries, no active sessions, owner jayy and revision 0002_add_cycle_totals. Restore command completed in approximately one second locally.
-
-**Cutover discrepancy:** read-only whole-row comparison against the running original database matched users and sessions, but not timers. Canonical JSON timer comparison also differs: sum(cycle_total_seconds) is 18287 in the September 17 backup and 0 in the current original. Neither was overwritten. Do not treat the old backup as a current snapshot or restore it into Neon without resolving which state is authoritative. Capture a fresh stopped-write snapshot for final cutover; preserve the historical backup separately. The rehearsal container is currently stopped and was not started for this comparison.
-
-**Resolved cutover choice (September 20):** user authorized the simplest cutover; current local database is authoritative. Created fresh private backup focusarc-cutover-20260920-0940.dump in the same external backup directory. SHA-256: 9F2D66C8F7606CD8577D261EDFFF52E04E50D45896E13D41DD88BE1EF18A2F3F. No active sessions or running local API/web containers at capture. Restored successfully into new disposable focusarc_cutover_verify database; canonical whole-row hashes for users, timers and sessions all match current source, with counts 1/7/155 and timer cycle sum 0. Historical backups unchanged. Use this fresh dump for cutover unless local writes resume, in which case recapture first.
-
-**Static resource creation:** [Dashboard](https://dashboard.render.com/static/srv-danqj9jm8hqs73c78tsg). Initial deployment dep-danqj9rm8hqs73c78uu0 ended build_failed as intended: build command starts with a VITE_API_BASE_URL presence guard, and that variable is deliberately absent until the actual API exists. The assigned URL is reserved, not a live application. Build uses repository root, then cd frontend; publish frontend/dist. NODE_VERSION=22, SKIP_INSTALL_DEPS=true and VITE_AUTH_MODE=personal are set. SPA rewrite remains to configure through Dashboard/API.
-
-**Published verification:** [successful CI run](https://github.com/Jaynik-S/FocusArc/actions/runs/35502977969) for 7208fbb9e5ea5e7520e1732363962d574e149143; [gated deployment run](https://github.com/Jaynik-S/FocusArc/actions/runs/35503027459) was skipped, not deployed. No Render CLI or RENDER_API_KEY is currently available locally. Docker creation requires Dashboard/API access; the connected plugin does not support it. User-owned Static and generated tracked frontend/tsconfig.tsbuildinfo remain outside the implementation commit.
-
-Fresh-schema migrations were independently verified in focusarc_migration_test on the same disposable tmpfs container: upgrade head twice, expected tables/columns, foreign keys and partial active-session unique index all passed. The disposable restored database contains personal backup data; do not expose its container or reuse it as a destructive pytest target.
-
-Tests drop/recreate tables. Their guard permits only database/user focusarc_test at explicit local/test hosts. Use the tmpfs focusarc-test-db container on focusarc-migration-test. Never pass .env.local or Neon credentials to pytest. Backups, browser exports, .env variants and .neon are ignored. The untracked Static artifact is user-owned and untouched.
-
-## Exact remaining setup
-
-### 1. Publish the secure source
-
-Review and stage only intended source/config/docs/tests, not private files or unrelated artifacts. Run the checks below, commit and push main, and wait for successful CI for its full SHA. Leave repository Actions variable PRODUCTION_DEPLOY_ENABLED unset/false during setup. Never expose the original insecure backend against personal data.
-
-### 2. Create the static site FIRST
-
-Confirm Jay's workspace to the connected Render tool. Check existing services before creating anything. In Render choose **New > Static Site**, connect Jaynik-S/FocusArc, branch main, and request the name **focusarc**. Record its actual assigned URL and service ID before creating the API. Creating it first requests https://focusarc.onrender.com but cannot guarantee availability; do not silently substitute a hostname.
-
-| Static setting | Value |
+| Variable | Value |
 |---|---|
-| Root | frontend |
-| Build | npm ci && npm run build |
-| Publish | dist |
-| Auto-deploy | Off |
-| Rewrite | /* to /index.html, action Rewrite |
-| NODE_VERSION | 22 |
-| SKIP_INSTALL_DEPS | true |
-| VITE_AUTH_MODE | personal |
-| VITE_API_BASE_URL | Actual API HTTPS origin plus /api, no trailing slash |
+| `APP_ENV` | `prod` |
+| `DATABASE_URL` | Neon pooled TLS URL for the restricted runtime role |
+| `RUN_MIGRATIONS` | `false` |
+| `CORS_ORIGINS` | Exact static-site HTTPS origin, without path or trailing slash |
+| `SESSION_SECRET` | New random value of at least 32 characters |
+| `SESSION_MAX_AGE_SECONDS` | `604800` |
+| `TZ` | `America/Toronto` |
+| `LOG_LEVEL` | `info` |
+| `DB_POOL_SIZE` / `DB_MAX_OVERFLOW` | `2` / `3` |
+| `DB_POOL_TIMEOUT` / `DB_CONNECT_TIMEOUT` | `15` / `10` |
 
-The plugin static-creation tool has no root argument: use build `cd frontend && npm ci && npm run build` and publish `frontend/dist` from repository root instead. Add the rewrite in Dashboard afterward. Until the API URL exists, leave VITE_API_BASE_URL absent so the initial build fails safely, then set it for the ordered release. Do not assume an API hostname.
+Delete `AUTH_MODE`, `OWNER_USERNAME`, and `PERSONAL_ACCESS_KEY_SHA256`. Do not put `jayy`'s password on Render. The running API uses only the restricted runtime database URL; GitHub Actions uses the migration-owner URL.
 
-render.yaml is a validated settings reference. YAML order does not guarantee creation order. Do not apply the full Blueprint before reserving the static site, or blindly apply it afterward and duplicate services.
+`render.yaml` marks `SESSION_SECRET` as `sync: false`, but this does not prompt again when updating an existing Blueprint-managed service. Enter the value directly in the existing API service's Render Dashboard before deployment.
 
-### 3. Prepare Neon and transfer database records
+The static site and API have separate `onrender.com` origins. Production cookies therefore use `SameSite=None; Secure`, and CORS permits credentials only from `CORS_ORIGINS`. `onrender.com` is a public suffix, so hosted browser acceptance is mandatory. If a browser or policy blocks cross-site cookies, attach same-site custom domains such as `app.example.com` and `api.example.com`, update `VITE_API_BASE_URL` and `CORS_ORIGINS`, and redeploy both services.
 
-The existing focusarc-production database is schema-initialized and empty. Do not restore a full schema dump over it using --clean. In the same production branch create a NEW EMPTY database, for example focusarc-hosted, owned by focusarc-production_owner.
+### GitHub production environment
 
-Before cutover stop any local timer and local API/web writes, record source counts/totals, export browser state, and take a fresh logical dump outside Git if data changed after September 17. Use PostgreSQL 15 `pg_restore --no-owner --no-acl --exit-on-error` into the new empty database. Supply its direct owner TLS connection through a private environment/connection file; never paste secrets in chat or logs. Do not run Alembic before a full schema restore. Then run `alembic upgrade head` using MIGRATION_DATABASE_URL.
+Environment secrets:
 
-Compare source/destination revision, owner jayy, UUIDs, counts, active sessions, per-timer cycle totals, summed durations and sample timestamps/day dates. The 1/7/155/0 baseline applies only if no later source writes occurred.
+- `MIGRATION_DATABASE_URL`: Neon direct owner TLS URL for Alembic and the one-time account initializer.
+- `RENDER_API_KEY`: Render API key with access to both services.
+- `PRODUCTION_AUTH_PASSWORD`: the chosen `jayy` password, 8–128 characters. Keep this stable for later releases; the initializer verifies it and refuses to overwrite a different hash.
 
-Create a separate login role focusarc_app with a securely generated password and no owner/admin memberships. As the owner, in the selected database apply:
+Environment variables:
 
-```sql
-REVOKE CREATE ON SCHEMA public FROM PUBLIC;
-GRANT CONNECT ON DATABASE "focusarc-hosted" TO focusarc_app;
-GRANT USAGE ON SCHEMA public TO focusarc_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE
-  users, timers, sessions, day_summaries TO focusarc_app;
-GRANT SELECT ON TABLE alembic_version TO focusarc_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO focusarc_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE "focusarc-production_owner" IN SCHEMA public
-  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO focusarc_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE "focusarc-production_owner" IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO focusarc_app;
-```
+- `PRODUCTION_AUTH_USERNAME=jayy`
+- `RENDER_API_SERVICE_ID=srv-...`
+- `RENDER_WEB_SERVICE_ID=srv-...`
+- `PRODUCTION_API_URL=https://<api-host>` without `/api`
+- `PRODUCTION_WEB_URL=https://<web-host>`
 
-Do not grant schema CREATE or ownership to the runtime role. Check effective privileges and prove forbidden DDL on an isolated scratch object, not a real table. Review grants after future migrations. Runtime uses the pooled Neon TLS endpoint; restore/migrations use the direct owner endpoint. SQLAlchemy accepts postgresql+psycopg://; PostgreSQL CLI utilities require postgresql://.
+Repository-level Actions variable:
 
-### 4. Create Docker API after the static site exists
+- `PRODUCTION_DEPLOY_ENABLED=true` only when provider setup and the backup are ready.
 
-In Render choose **New > Web Service**, same repo, secure tested main commit, Docker runtime, name focusarc-api, Ohio region, Free instance. Root directory empty; Docker context ./backend; Dockerfile ./backend/Dockerfile. Leave Docker command blank, health path /api/health, auto-deploy Off. The plugin web-service creation description excludes Docker creation: use Dashboard/API, not an unapproved native-Python substitute.
+Restrict the `production` environment to `main` and enable required approval if the GitHub plan supports it.
 
-| API environment | Value |
-|---|---|
-| APP_ENV / AUTH_MODE | prod / personal |
-| OWNER_USERNAME | jayy |
-| PERSONAL_ACCESS_KEY_SHA256 | SHA-256 hex digest of random private key |
-| DATABASE_URL | Pooled TLS URL for restricted focusarc_app role |
-| RUN_MIGRATIONS | false |
-| CORS_ORIGINS | Actual static HTTPS origin, without slash/path/wildcard |
-| TZ / LOG_LEVEL | America/Toronto / info |
-| DB_POOL_SIZE / DB_MAX_OVERFLOW | 2 / 3 |
-| DB_POOL_TIMEOUT / DB_CONNECT_TIMEOUT | 15 / 10 |
+## Exact release order
 
-Render supplies PORT; the image binds 0.0.0.0:$PORT. Never place migration-owner credentials on the running API. Generate at least 32 random bytes for the key (Python secrets.token_urlsafe(32)), save the original in a password manager, and compute its digest privately. ACCESS_KEY is obsolete. Never put credentials in VITE_*.
+1. Stop writes and take a current Neon backup or create a protected Neon branch/restore point. Record the existing Alembic revision and confirm the `jayy` row exists.
+2. Run all local checks on `user-password-auth`.
+3. Push the branch, review it, merge it to `main`, and wait for the exact `main` commit's CI run to pass.
+4. Update the Render settings above before deploying the new API. In particular, add `SESSION_SECRET`, set exact CORS, and remove legacy auth variables.
+5. Configure the GitHub production environment secrets/variables above.
+6. Enable `PRODUCTION_DEPLOY_ENABLED` and manually run the Deploy workflow with the successful CI commit's full 40-character SHA.
+7. The workflow runs `alembic upgrade head`, records revision `0003_add_password_hash`, then executes:
 
-Record actual IDs/origins; set frontend API URL and exact backend CORS. Initial resource creation may start a build even with auto-deploy off; use only secure tested source. This is not evidence of an ordered release.
+   ```text
+   python -m app.admin set-initial-password --username jayy
+   ```
 
-### 5. Configure GitHub
+   `PRODUCTION_AUTH_PASSWORD` is passed through `FOCUSARC_INITIAL_PASSWORD`, never as a command argument. The command sets a null hash once, verifies the same password on later releases, and fails instead of replacing a different password.
+8. The workflow deploys the exact backend SHA and smoke-tests health, unauthenticated denial, login, migration revision, `/me`, session identity, logout, and denial after logout.
+9. Only after the API smoke test passes, the workflow deploys the exact frontend SHA and checks the SPA routes and built assets.
+10. Complete the hosted browser checks below. Only then remove any locally saved legacy access key. The old Render auth variables should already be gone.
 
-In repository **Settings > Environments**, create production, restrict to main, and require approval if supported. Add environment secrets through GitHub's UI:
+Alembic never runs during production API startup. A failed migration, initializer, backend deploy, or backend smoke test prevents the frontend deploy.
 
-- MIGRATION_DATABASE_URL: selected database's direct owner TLS URL.
-- RENDER_API_KEY: Render API key for the confirmed workspace.
-- PERSONAL_ACCESS_KEY: original private key matching the API digest.
+## PowerShell checklist
 
-Add production environment variables:
-
-- RENDER_API_SERVICE_ID: Docker API srv-... ID.
-- RENDER_WEB_SERVICE_ID: static site srv-... ID.
-- PRODUCTION_API_URL: API HTTPS origin WITHOUT /api.
-- PRODUCTION_WEB_URL: static HTTPS origin.
-
-After setup/data verification, set repository-level Actions variable PRODUCTION_DEPLOY_ENABLED=true (not only environment-level). Open **Actions > Deploy > Run workflow**, choose main, and enter the successful CI commit's full SHA.
-
-The workflow checks main ancestry and successful CI before exposing production secrets, serializes production releases, migrates, deploys the exact backend SHA, verifies readiness/revision/owner and unauthenticated denial, then deploys the same frontend SHA and verifies routes/assets. Migration/backend failure blocks frontend. Record run URL, SHA, revision and both deploy IDs.
-
-### 6. Transfer browser state once
-
-Database backups do not capture displayed dial counters/preferences. Stop the active timer first. On the old localhost origin, use DevTools to download an allowlisted export:
-
-```js
-const keys = ['coursetimers.username', 'coursetimers.timerElapsed',
-  'coursetimers.timerOffsets', 'coursetimers.sessionAdjustments',
-  'coursetimers.selectedTimerId', 'coursetimers.theme'];
-const state = Object.fromEntries(keys.map(k => [k, localStorage.getItem(k)])
-  .filter(([, v]) => v !== null));
-const link = document.createElement('a');
-link.href = URL.createObjectURL(new Blob([JSON.stringify(state)], {type: 'application/json'}));
-link.download = 'focusarc-browser-state.json';
-link.click();
-URL.revokeObjectURL(link.href);
-```
-
-Check username jayy; save outside Git. Do not export sessionStorage, keys, stale active-session markers or all browser storage. On the new origin while locked, back up any existing destination values, then import with a local file picker:
-
-```js
-const allowed = new Set(['coursetimers.username', 'coursetimers.timerElapsed',
-  'coursetimers.timerOffsets', 'coursetimers.sessionAdjustments',
-  'coursetimers.selectedTimerId', 'coursetimers.theme']);
-const picker = document.createElement('input');
-picker.type = 'file'; picker.accept = '.json';
-picker.onchange = async () => {
-  const state = JSON.parse(await picker.files[0].text());
-  if (state['coursetimers.username'] !== 'jayy' ||
-      Object.entries(state).some(([k, v]) => !allowed.has(k) || typeof v !== 'string')) {
-    throw new Error('Unexpected browser-state export');
-  }
-  Object.entries(state).forEach(([k, v]) => localStorage.setItem(k, v));
-  location.reload();
-};
-picker.click();
-```
-
-Unlock, compare every counter/theme, then lock/unlock and refresh. Do not repeatedly import after hosted use begins. Keep local API/web stopped after cutover; use one authoritative database.
-
-### 7. Hosted acceptance
-
-Verify direct SPA routes, CORS, valid/invalid key, lock/reload, timer create/edit/archive/start/switch/stop, adjustments/negative clamp, Reset Totals preserving history, end-day separately, history/schedule/stats and Toronto midnight/DST. Verify cold-start/network recovery, background polling pause, five-minute suspension behavior and persistence across API restart. Account for rows created by write tests. These hosted checks have not been completed.
-
-## Local checks
-
-Compose config can be checked without starting the personal source stack: `docker compose config --quiet`. Compose retains its volume and explicit dev/local mode; do not casually start source writes during cutover.
-
-Backend tests use the image and disposable database only:
+Run from the repository root:
 
 ```powershell
-docker build -t focusarc-release-api ./backend
-docker run --rm --network focusarc-migration-test -e APP_ENV=dev -e AUTH_MODE=local -e DATABASE_URL=postgresql+psycopg://focusarc_test:focusarc_test@focusarc-test-db:5432/focusarc_test -e TEST_DATABASE_URL=postgresql+psycopg://focusarc_test:focusarc_test@focusarc-test-db:5432/focusarc_test --mount type=bind,source=C:/Users/jay03/Jaynik/Projects/FocusArc/backend/tests,target=/app/tests,readonly --entrypoint python focusarc-release-api -m pytest -q
-py -3.11-arm64 -m unittest discover -s scripts/tests -v
+git switch user-password-auth
+git status --short
+
+docker compose config --quiet
+docker build -t focusarc-auth-release ./backend
+
+Push-Location frontend
+npm ci
+npm test
+npm run build
+Pop-Location
+
+py -3 -m unittest discover -s scripts/tests -v
 ```
 
-Frontend: Node 22, npm ci, npm test, npm run build with VITE_AUTH_MODE=personal and valid HTTPS /api URL. CI uses https://api.example.invalid/api only as a build fixture.
+The backend suite must use a disposable database whose database and role are both named `focusarc_test`; never point pytest at Neon or a personal database. The GitHub CI workflow provisions this automatically. For the local Docker test database described in the development plan:
 
-Vite 6.4.3 is a targeted patched major for audited Vite 5 file-access issues. Two moderate React Router findings remain (untrusted navigation targets and SSR error deserialization); reviewed app uses fixed internal destinations and client-only BrowserRouter. Audit is not clean; do not force unrelated major upgrades blindly.
+```powershell
+$backendPath = (Resolve-Path .\backend).Path
+docker run --rm --network focusarc-auth-test `
+  -v "${backendPath}:/app" -w /app `
+  -e APP_ENV=dev `
+  -e DATABASE_URL=postgresql+psycopg://focusarc_test:focusarc_test@focusarc-test-db:5432/focusarc_test `
+  -e TEST_DATABASE_URL=postgresql+psycopg://focusarc_test:focusarc_test@focusarc-test-db:5432/focusarc_test `
+  --entrypoint python focusarc-auth-release -m pytest -ra
+```
 
-## Backups, diagnosis and rollback
+Generate the Render session secret locally, copy it directly into Render, then remove the shell variable:
 
-Keep weekly private dumps (four weekly copies), plus cutover and pre-migration backups. Restore to a new disposable DB and compare data before accepting migration. Account-specific provider retention remains to verify.
+```powershell
+$sessionSecretBytes = New-Object byte[] 48
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($sessionSecretBytes)
+$sessionSecret = [Convert]::ToBase64String($sessionSecretBytes)
+$sessionSecret
+Remove-Variable sessionSecret, sessionSecretBytes
+```
 
-Inspect the failing GitHub step, Render deploy ID/logs and Neon connections/usage. Public /api/health does not touch the DB; authenticated /api/ready checks connectivity/readable revision. Release smoke requires the expected revision. Production docs/OpenAPI are disabled.
+Push the feature branch:
 
-Rotate keys by updating Render digest and GitHub smoke secret together, restarting API, then re-entering the key in browsers. Never include keys in frontend environment variables.
+```powershell
+git push -u origin user-password-auth
+```
 
-Rollback only to a verified secure, schema-compatible release. Keep migrations additive; never automatically downgrade on deploy failure. For recovery stop writes, restore into a NEW DB, compare, switch URLs and deploy compatible code. Never resume a stale local database after hosted writes without first transferring authoritative data back.
+After review and merge, update local `main`, capture the tested SHA, and confirm its CI run passed:
 
-## Outstanding acceptance gates
+```powershell
+git switch main
+git pull --ff-only
+$releaseSha = git rev-parse HEAD
+$releaseSha
+gh run list --workflow ci.yml --commit $releaseSha
+```
 
-Real production deployment, runtime-role privilege proof, Neon restore, final cutover, browser-state transfer and hosted acceptance remain pending. GitHub CI and local logical restore are verified, not hosted restoration. Static URL assignment is verified, but no live application or deployed release SHA is claimed. The historical implementation-plan checkboxes must not be marked complete merely because code exists.
+Optional GitHub CLI setup (the UI is equally valid). These commands prompt for secret values instead of placing them on the command line:
 
-References: [Render Blueprint specification](https://render.com/docs/blueprint-spec), [exact-commit deploy API](https://api-docs.render.com/reference/create-deploy), [GitHub settings](https://github.com/Jaynik-S/FocusArc/settings), [Render Dashboard](https://dashboard.render.com/).
+```powershell
+gh secret set MIGRATION_DATABASE_URL --env production
+gh secret set RENDER_API_KEY --env production
+gh secret set PRODUCTION_AUTH_PASSWORD --env production
+
+gh variable set PRODUCTION_AUTH_USERNAME --env production --body "jayy"
+gh variable set RENDER_API_SERVICE_ID --env production --body "srv-REPLACE"
+gh variable set RENDER_WEB_SERVICE_ID --env production --body "srv-REPLACE"
+gh variable set PRODUCTION_API_URL --env production --body "https://REPLACE.onrender.com"
+gh variable set PRODUCTION_WEB_URL --env production --body "https://focusarc.onrender.com"
+gh variable set PRODUCTION_DEPLOY_ENABLED --body "true"
+```
+
+Start and monitor the gated release only after the exact SHA has successful CI:
+
+```powershell
+gh workflow run deploy.yml --ref main -f sha=$releaseSha
+gh run list --workflow deploy.yml --limit 5
+gh run watch
+```
+
+Do not paste database URLs, passwords, API keys, or session secrets into terminal command arguments, Git, issue comments, or chat.
+
+## Neon verification
+
+Use the Neon SQL editor or `psql` with the direct owner URL after the workflow migration:
+
+```sql
+SELECT version_num FROM alembic_version;
+SELECT username, password_hash IS NOT NULL AS password_configured
+FROM users
+WHERE username = 'jayy';
+```
+
+Expected revision: `0003_add_password_hash`. Expected result: one `jayy` row with `password_configured = true`. Do not select or copy the hash itself. Existing timer/session row counts and totals must match the pre-release record.
+
+For runtime least privilege, retain the existing restricted role: `SELECT/INSERT/UPDATE/DELETE` on application tables, `SELECT` on `alembic_version`, sequence use where required, and no schema ownership or `CREATE` privilege. Review grants after applying the migration.
+
+## Hosted browser acceptance
+
+Use the Render static-site URL in a normal browser:
+
+1. Confirm the page shows Username, Password, and Continue.
+2. Sign in as `jayy`; confirm the existing timers, history, statistics, and saved counters appear.
+3. In a private window, enter `jayy` with a wrong password. Confirm it shows an error and never offers account creation.
+4. Enter a genuinely unused username. Confirm the exact question “This username isn’t registered. Create a new account?” appears and that Cancel creates nothing. Only press Create account if you intentionally want that permanent public account.
+5. Start/stop a timer, reload, and verify the state persists.
+6. Click Logout. Confirm the timer UI disappears, direct private routes show the sign-in screen, and `jayy`'s counters return after signing back in.
+7. If testing a second account, verify it cannot see `jayy` timers, sessions, history, statistics, theme, selected timer, or counters; then switch back and confirm `jayy` data is unchanged.
+8. Leave the app idle past the configured expiry only in a dedicated expiry test environment, or use the automated backend test. Confirm the next private request returns to sign-in.
+9. In browser DevTools, confirm requests use cookies and do not send `Authorization` or `X-Username`. Confirm the session cookie is HttpOnly, Secure, and SameSite=None in production.
+
+Public registration is intentionally available to every visitor who can reach the site. Rate limiting is basic and per API process; keep the API at one worker unless rate limiting is moved to shared storage.
+
+## Browser-state migration
+
+On first authenticated render, the frontend checks the legacy `coursetimers.username`. It copies legacy timer/preference keys only when that value exactly matches the authenticated username and only when the new destination key is empty. It then removes those migrated legacy keys. Data with a different or missing recorded owner is left untouched, preventing accidental assignment to the wrong account.
+
+New keys use this shape:
+
+```text
+coursetimers.accounts.jayy.timers
+coursetimers.accounts.jayy.timerElapsed
+coursetimers.accounts.jayy.timerOffsets
+coursetimers.accounts.jayy.sessionAdjustments
+coursetimers.accounts.jayy.activeSession
+coursetimers.accounts.jayy.lastActiveAt
+coursetimers.accounts.jayy.selectedTimerId
+coursetimers.accounts.jayy.theme
+```
+
+Logout preserves these values. It does not preserve or expose a login session.
+
+## Failure and rollback
+
+- Do not rerun a failed deployment blindly. Inspect the failed GitHub step and the exact Render deploy ID first.
+- Migration `0003` is additive and nullable, so the prior API can run with it if the new deployment fails. Do not downgrade automatically.
+- If the initializer reports that the password is already set, verify that the GitHub secret contains the original chosen password. The tool intentionally refuses to reset it.
+- Rolling back the frontend and API does not remove the nullable column or password hash. Keep the pre-release backup until hosted acceptance is complete.
+- Rotating `SESSION_SECRET` invalidates every session immediately. Rotate only deliberately, then sign in again.
+- A public `/api/health` response proves only that the process is running. Authenticated `/api/ready` and the release smoke test prove database reachability and the expected migration revision.
+
+## Current completion boundary
+
+Code, tests, migration, local configuration, release automation, and this runbook are prepared on `user-password-auth`. Merge, provider configuration, production migration, deployment, and hosted browser acceptance remain manual. Do not describe the hosted change as live until the exact deployed SHA and browser flow have been verified.

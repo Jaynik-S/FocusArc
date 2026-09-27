@@ -1,82 +1,104 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
-import {
-  getAccessKey,
-  setAccessKey,
-  clearAccessKey,
-  apiFetch, AuthenticationError, getUsername, setUsername, PERSONAL_MODE, LOCK_EVENT,
-} from "../api/apiClient";
+import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
+
+import { apiFetch, ApiError, AUTHENTICATION_REQUIRED_EVENT } from "../api/apiClient";
+
+export type AuthUser = { username: string };
+export type AuthStatus = "checking" | "anonymous" | "authenticated";
+export type LoginResult = "authenticated" | "registration_required";
 
 interface AuthContextType {
-  locked: boolean;
-  checking: boolean;
-  error: string;
-  unlock: (key: string) => Promise<boolean>;
-  lock: () => void;
+  status: AuthStatus;
+  user: AuthUser | null;
+  login: (username: string, password: string) => Promise<LoginResult>;
+  register: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [locked, setLocked] = useState(PERSONAL_MODE);
-  const [checking, setChecking] = useState(PERSONAL_MODE && Boolean(getAccessKey()));
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState<AuthStatus>("checking");
+  const [user, setUser] = useState<AuthUser | null>(null);
   const generation = useRef(0);
 
-  const unlock = async (key: string, signal?: AbortSignal): Promise<boolean> => {
-    const attempt = ++generation.current;
-    setChecking(true);
-    setError("");
-    setAccessKey(key);
-    try {
-      const owner = await apiFetch<{ username: string }>("/me", { signal });
-      if (attempt !== generation.current || signal?.aborted || getAccessKey() !== key) return false;
-      if (typeof owner.username !== "string" || !owner.username) throw new Error("The API returned an invalid owner identity.");
-      const previous = getUsername();
-      const hasCounters = ["timerElapsed", "timerOffsets", "sessionAdjustments", "activeSession", "timers"]
-        .some((suffix) => localStorage.getItem(`coursetimers.${suffix}`) !== null);
-      if ((previous && previous !== owner.username) || (!previous && hasCounters)) {
-        throw new Error("This browser has timer data for a different or unknown owner. Export the coursetimers.* entries from browser local storage, then use a separate browser profile or deliberately clear those entries before unlocking. No counters were changed.");
-      }
-      setUsername(owner.username);
-      setLocked(false);
-      return true;
-    } catch (cause) {
-      if (signal?.aborted || attempt !== generation.current) return false;
-      setError(cause instanceof AuthenticationError ? "Invalid access key. Enter your current key." : cause instanceof Error ? cause.message : "Cannot reach the API. Your saved key and timer counters have been retained; try again.");
-      return false;
-    } finally {
-      if (attempt === generation.current) setChecking(false);
-    }
-  };
-
   useEffect(() => {
+    const attempt = ++generation.current;
     const controller = new AbortController();
-    const onLock = () => {
-      ++generation.current;
-      setLocked(true);
-      setChecking(false);
-      setError("Authentication required. Enter your current access key.");
+    const checkSession = async () => {
+      try {
+        const current = await apiFetch<AuthUser>("/auth/session", {
+          signal: controller.signal,
+          suppressAuthenticationEvent: true,
+        });
+        if (attempt !== generation.current || controller.signal.aborted) return;
+        setUser(current);
+        setStatus("authenticated");
+      } catch {
+        if (attempt !== generation.current || controller.signal.aborted) return;
+        setUser(null);
+        setStatus("anonymous");
+      }
     };
-    window.addEventListener(LOCK_EVENT, onLock);
-    const saved = getAccessKey();
-    if (PERSONAL_MODE && saved) void unlock(saved, controller.signal);
+    const requireAuthentication = () => {
+      ++generation.current;
+      setUser(null);
+      setStatus("anonymous");
+    };
+
+    window.addEventListener(AUTHENTICATION_REQUIRED_EVENT, requireAuthentication);
+    void checkSession();
     return () => {
       controller.abort();
       ++generation.current;
-      window.removeEventListener(LOCK_EVENT, onLock);
+      window.removeEventListener(AUTHENTICATION_REQUIRED_EVENT, requireAuthentication);
     };
   }, []);
 
-  const lock = () => {
+  const login = async (username: string, password: string): Promise<LoginResult> => {
+    try {
+      const authenticated = await apiFetch<AuthUser>("/auth/login", {
+        method: "POST",
+        body: { username, password },
+        suppressAuthenticationEvent: true,
+      });
+      ++generation.current;
+      setUser(authenticated);
+      setStatus("authenticated");
+      return "authenticated";
+    } catch (cause) {
+      if (cause instanceof ApiError && cause.code === "username_not_registered") {
+        return "registration_required";
+      }
+      throw cause;
+    }
+  };
+
+  const register = async (username: string, password: string) => {
+    const authenticated = await apiFetch<AuthUser>("/auth/register", {
+      method: "POST",
+      body: { username, password, confirm: true },
+      suppressAuthenticationEvent: true,
+    });
     ++generation.current;
-    clearAccessKey();
-    setLocked(true);
-    setChecking(false);
-    setError("");
+    setUser(authenticated);
+    setStatus("authenticated");
+  };
+
+  const logout = async () => {
+    ++generation.current;
+    try {
+      await apiFetch<void>("/auth/logout", {
+        method: "POST",
+        suppressAuthenticationEvent: true,
+      });
+    } finally {
+      setUser(null);
+      setStatus("anonymous");
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ locked, checking, error, unlock, lock }}>
+    <AuthContext.Provider value={{ status, user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -84,8 +106,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };

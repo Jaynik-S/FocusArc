@@ -1,18 +1,18 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
+import { storageForAccount } from "../storage/accountStorage";
+
 type TimerSelectionContextValue = {
   selectedTimerId: string | null;
   setSelectedTimerId: (timerId: string | null) => void;
 };
 
-const SELECTED_TIMER_STORAGE_KEY = "coursetimers.selectedTimerId";
-
-const readStoredSelectedTimer = () => {
+const readStoredSelectedTimer = (username: string) => {
   if (typeof window === "undefined") {
     return null;
   }
   try {
-    return localStorage.getItem(SELECTED_TIMER_STORAGE_KEY);
+    return storageForAccount(username).getItem("selectedTimerId");
   } catch {
     return null;
   }
@@ -24,11 +24,13 @@ const TimerSelectionContext = createContext<TimerSelectionContextValue | undefin
 
 export const TimerSelectionProvider = ({
   children,
+  username,
 }: {
   children: React.ReactNode;
+  username: string;
 }) => {
   const [selectedTimerId, setSelectedTimerId] = useState<string | null>(() => {
-    const stored = readStoredSelectedTimer();
+    const stored = readStoredSelectedTimer(username);
     return stored || null;
   });
 
@@ -38,14 +40,14 @@ export const TimerSelectionProvider = ({
     }
     try {
       if (selectedTimerId) {
-        localStorage.setItem(SELECTED_TIMER_STORAGE_KEY, selectedTimerId);
+        storageForAccount(username).setItem("selectedTimerId", selectedTimerId);
       } else {
-        localStorage.removeItem(SELECTED_TIMER_STORAGE_KEY);
+        storageForAccount(username).removeItem("selectedTimerId");
       }
     } catch {
       // Ignore storage errors.
     }
-  }, [selectedTimerId]);
+  }, [selectedTimerId, username]);
 
   const value = useMemo(
     () => ({ selectedTimerId, setSelectedTimerId }),

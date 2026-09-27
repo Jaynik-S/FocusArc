@@ -20,8 +20,6 @@ services:
         value: "22"
       - key: SKIP_INSTALL_DEPS
         value: "true"
-      - key: VITE_AUTH_MODE
-        value: personal
       - key: VITE_API_BASE_URL
         sync: false
   - type: web
@@ -38,10 +36,6 @@ services:
     envVars:
       - key: APP_ENV
         value: prod
-      - key: AUTH_MODE
-        value: personal
-      - key: OWNER_USERNAME
-        value: jayy
       - key: RUN_MIGRATIONS
         value: "false"
       - key: TZ
@@ -58,7 +52,9 @@ services:
         value: "10"
       - key: DATABASE_URL
         sync: false
-      - key: PERSONAL_ACCESS_KEY_SHA256
+      - key: SESSION_SECRET
         sync: false
+      - key: SESSION_MAX_AGE_SECONDS
+        value: "604800"
       - key: CORS_ORIGINS
         sync: false

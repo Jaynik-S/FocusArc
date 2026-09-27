@@ -26,10 +26,9 @@ jobs:
         ports: ["5432:5432"]
     env:
       APP_ENV: dev
-      AUTH_MODE: local
       DATABASE_URL: postgresql+psycopg://focusarc_test:focusarc_test@localhost:5432/focusarc_test
       TEST_DATABASE_URL: postgresql+psycopg://focusarc_test:focusarc_test@localhost:5432/focusarc_test
-      VITE_AUTH_MODE: personal
+      SESSION_SECRET: ci-only-session-secret-at-least-32-characters
       VITE_API_BASE_URL: https://api.example.invalid/api
     steps:
       - uses: actions/checkout@v4

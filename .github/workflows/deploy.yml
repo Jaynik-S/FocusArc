@@ -77,7 +77,8 @@ jobs:
         env:
           MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          PERSONAL_ACCESS_KEY: ${{ secrets.PERSONAL_ACCESS_KEY }}
+          PRODUCTION_AUTH_PASSWORD: ${{ secrets.PRODUCTION_AUTH_PASSWORD }}
+          PRODUCTION_AUTH_USERNAME: ${{ vars.PRODUCTION_AUTH_USERNAME }}
           RENDER_API_SERVICE_ID: ${{ vars.RENDER_API_SERVICE_ID }}
           RENDER_WEB_SERVICE_ID: ${{ vars.RENDER_WEB_SERVICE_ID }}
           PRODUCTION_API_URL: ${{ vars.PRODUCTION_API_URL }}
@@ -85,7 +86,8 @@ jobs:
         run: |
           python - <<'PY'
           import os
-          names = ['MIGRATION_DATABASE_URL', 'RENDER_API_KEY', 'PERSONAL_ACCESS_KEY',
+          names = ['MIGRATION_DATABASE_URL', 'RENDER_API_KEY', 'PRODUCTION_AUTH_PASSWORD',
+                   'PRODUCTION_AUTH_USERNAME',
                    'RENDER_API_SERVICE_ID', 'RENDER_WEB_SERVICE_ID', 'PRODUCTION_API_URL', 'PRODUCTION_WEB_URL']
           missing = [name for name in names if not os.environ.get(name)]
           if missing: raise SystemExit('Missing release settings: ' + ', '.join(missing))
@@ -95,7 +97,6 @@ jobs:
         working-directory: backend
         env:
           APP_ENV: dev
-          AUTH_MODE: local
           DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
           MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
         run: |
@@ -109,6 +110,14 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write(f'revision={head}\n')
           PY
+      - name: Initialize or verify the existing production account password
+        working-directory: backend
+        env:
+          APP_ENV: dev
+          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+          FOCUSARC_INITIAL_PASSWORD: ${{ secrets.PRODUCTION_AUTH_PASSWORD }}
+          PRODUCTION_AUTH_USERNAME: ${{ vars.PRODUCTION_AUTH_USERNAME }}
+        run: python -m app.admin set-initial-password --username "$PRODUCTION_AUTH_USERNAME"
       - name: Deploy exact backend commit and wait for live deployment
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -117,10 +126,12 @@ jobs:
         run: python scripts/deploy_render.py "$SERVICE_ID" "$TESTED_SHA"
       - name: Verify backend before deploying frontend
         env:
-          PERSONAL_ACCESS_KEY: ${{ secrets.PERSONAL_ACCESS_KEY }}
+          PRODUCTION_AUTH_PASSWORD: ${{ secrets.PRODUCTION_AUTH_PASSWORD }}
+          PRODUCTION_AUTH_USERNAME: ${{ vars.PRODUCTION_AUTH_USERNAME }}
           API_URL: ${{ vars.PRODUCTION_API_URL }}
+          PRODUCTION_WEB_URL: ${{ vars.PRODUCTION_WEB_URL }}
           REVISION: ${{ steps.migrate.outputs.revision }}
-        run: python scripts/smoke_deployment.py api "$API_URL" --revision "$REVISION" --owner jayy
+        run: python scripts/smoke_deployment.py api "$API_URL" --revision "$REVISION" --username "$PRODUCTION_AUTH_USERNAME" --web-origin "$PRODUCTION_WEB_URL"
       - name: Deploy exact frontend commit and wait for live deployment
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
