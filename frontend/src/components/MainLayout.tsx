@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
 
-import { getUsername } from "../api/apiClient";
+import { useAuth } from "../contexts/AuthContext";
 import Sidebar from "./Sidebar";
 
 const MainLayout = () => {
-  const username = getUsername();
+  const { user } = useAuth();
 
   return (
     <div className="app-layout">
-      <Sidebar username={username} />
+      <Sidebar username={user?.username ?? ""} />
       <main className="main-content">
         <Outlet />
       </main>

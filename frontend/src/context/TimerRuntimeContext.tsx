@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { getUsername } from "../api/apiClient";
 import { useActiveSession } from "../hooks/useActiveSession";
+import { storageForAccount } from "../storage/accountStorage";
 
 type TimerRuntimeContextValue = {
   activeSession: ReturnType<typeof useActiveSession>["activeSession"];
@@ -19,16 +19,12 @@ type TimerRuntimeContextValue = {
   adjustOffset: (timerId: string, deltaSeconds: number) => void;
 };
 
-const ELAPSED_STORAGE_KEY = "coursetimers.timerElapsed";
-const OFFSETS_STORAGE_KEY = "coursetimers.timerOffsets";
-const SESSION_ADJUSTMENTS_STORAGE_KEY = "coursetimers.sessionAdjustments";
-
-const readStoredElapsed = () => {
+const readStoredElapsed = (username: string) => {
   if (typeof window === "undefined") {
     return {};
   }
   try {
-    const raw = localStorage.getItem(ELAPSED_STORAGE_KEY);
+    const raw = storageForAccount(username).getItem("timerElapsed");
     if (!raw) {
       return {};
     }
@@ -41,12 +37,12 @@ const readStoredElapsed = () => {
   }
 };
 
-const readStoredOffsets = () => {
+const readStoredOffsets = (username: string) => {
   if (typeof window === "undefined") {
     return {};
   }
   try {
-    const raw = localStorage.getItem(OFFSETS_STORAGE_KEY);
+    const raw = storageForAccount(username).getItem("timerOffsets");
     if (!raw) {
       return {};
     }
@@ -59,12 +55,12 @@ const readStoredOffsets = () => {
   }
 };
 
-const readStoredSessionAdjustments = () => {
+const readStoredSessionAdjustments = (username: string) => {
   if (typeof window === "undefined") {
     return {};
   }
   try {
-    const raw = localStorage.getItem(SESSION_ADJUSTMENTS_STORAGE_KEY);
+    const raw = storageForAccount(username).getItem("sessionAdjustments");
     if (!raw) {
       return {};
     }
@@ -83,18 +79,19 @@ const TimerRuntimeContext = createContext<TimerRuntimeContextValue | undefined>(
 
 export const TimerRuntimeProvider = ({
   children,
+  username,
 }: {
   children: React.ReactNode;
+  username: string;
 }) => {
-  const hasUsername = Boolean(getUsername());
   const { activeSession, elapsedSeconds, loading, busy, error, refresh, startTimer, stopTimer } =
-    useActiveSession(hasUsername);
+    useActiveSession(username);
   const [elapsedByTimer, setElapsedByTimer] = useState<Record<string, number>>(
-    () => readStoredElapsed()
+    () => readStoredElapsed(username)
   );
-  const [offsets, setOffsets] = useState<Record<string, number>>(() => readStoredOffsets());
+  const [offsets, setOffsets] = useState<Record<string, number>>(() => readStoredOffsets(username));
   const [sessionAdjustments, setSessionAdjustments] = useState<Record<string, number>>(
-    () => readStoredSessionAdjustments()
+    () => readStoredSessionAdjustments(username)
   );
   const sessionAdjustmentSeconds = activeSession ? sessionAdjustments[activeSession.id] ?? 0 : 0;
 
@@ -103,36 +100,35 @@ export const TimerRuntimeProvider = ({
       return;
     }
     try {
-      localStorage.setItem(ELAPSED_STORAGE_KEY, JSON.stringify(elapsedByTimer));
+      storageForAccount(username).setItem("timerElapsed", JSON.stringify(elapsedByTimer));
     } catch {
       // Ignore storage errors.
     }
-  }, [elapsedByTimer]);
+  }, [elapsedByTimer, username]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
     try {
-      localStorage.setItem(OFFSETS_STORAGE_KEY, JSON.stringify(offsets));
+      storageForAccount(username).setItem("timerOffsets", JSON.stringify(offsets));
     } catch {
       // Ignore storage errors.
     }
-  }, [offsets]);
+  }, [offsets, username]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
     try {
-      localStorage.setItem(
-        SESSION_ADJUSTMENTS_STORAGE_KEY,
-        JSON.stringify(sessionAdjustments)
+      storageForAccount(username).setItem(
+        "sessionAdjustments", JSON.stringify(sessionAdjustments)
       );
     } catch {
       // Ignore storage errors.
     }
-  }, [sessionAdjustments]);
+  }, [sessionAdjustments, username]);
 
   const adjustOffset = useCallback(
     (timerId: string, deltaSeconds: number) => {
@@ -171,13 +167,14 @@ export const TimerRuntimeProvider = ({
       return;
     }
     try {
-      localStorage.removeItem(ELAPSED_STORAGE_KEY);
-      localStorage.removeItem(OFFSETS_STORAGE_KEY);
-      localStorage.removeItem(SESSION_ADJUSTMENTS_STORAGE_KEY);
+      const storage = storageForAccount(username);
+      storage.removeItem("timerElapsed");
+      storage.removeItem("timerOffsets");
+      storage.removeItem("sessionAdjustments");
     } catch {
       // Ignore storage errors.
     }
-  }, []);
+  }, [username]);
 
   const applyElapsedToTimer = useCallback((timerId: string, deltaSeconds: number) => {
     if (!timerId || deltaSeconds <= 0) {

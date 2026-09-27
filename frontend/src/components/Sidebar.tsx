@@ -6,7 +6,7 @@ import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
 import { useAuth } from "../contexts/AuthContext";
-import { PERSONAL_MODE } from "../api/apiClient";
+import { storageForAccount } from "../storage/accountStorage";
 import { isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
 import EndDayButton from "./EndDayButton";
@@ -16,14 +16,12 @@ type SidebarProps = {
   username: string;
 };
 
-const THEME_STORAGE_KEY = "coursetimers.theme";
-
-const getInitialTheme = () => {
+const getInitialTheme = (username: string) => {
   if (typeof window === "undefined") {
     return "light" as const;
   }
   try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    const stored = storageForAccount(username).getItem("theme");
     if (stored === "dark" || stored === "light") {
       return stored;
     }
@@ -36,11 +34,11 @@ const getInitialTheme = () => {
 
 const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
-  const timersState = useTimers(isReady);
+  const timersState = useTimers();
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
   const { activeSession, elapsedSeconds, offsets, elapsedByTimer, error: syncError } = useTimerRuntime();
-  const { lock } = useAuth();
-  const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme());
+  const { logout } = useAuth();
+  const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme(username));
   const [createOpen, setCreateOpen] = useState(false);
   const [actionError, setActionError] = useState("");
   const navigate = useNavigate();
@@ -57,11 +55,11 @@ const Sidebar = ({ username }: SidebarProps) => {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     try {
-      localStorage.setItem(THEME_STORAGE_KEY, theme);
+      storageForAccount(username).setItem("theme", theme);
     } catch {
       // Ignore storage errors.
     }
-  }, [theme]);
+  }, [theme, username]);
 
   const timers = timersState.timers;
   const selectedTimer = useMemo(
@@ -96,7 +94,7 @@ const Sidebar = ({ username }: SidebarProps) => {
 
   return (
     <aside className="sidebar" style={sidebarStyle}>
-      <div className="sidebar-user" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><strong style={{ marginTop: -15, flex: 1 }}>{username || "Not set"}</strong>{PERSONAL_MODE && <button className="link-button" type="button" onClick={lock} title="Lock application" style={{ fontSize: "0.875rem" }}>Lock</button>}</div>
+      <div className="sidebar-user" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><strong style={{ marginTop: -15, flex: 1 }}>{username || "Not set"}</strong><button className="link-button" type="button" onClick={() => void logout()} title="Sign out" style={{ fontSize: "0.875rem" }}>Logout</button></div>
       <nav className="sidebar-nav">
         <NavLink to="/history" className="sidebar-link">
           History

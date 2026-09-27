@@ -10,7 +10,7 @@ import { formatDuration } from "../utils/time";
 
 const TimersPage = () => {
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
-  const timersState = useTimers(true);
+  const timersState = useTimers();
   const [editingTimer, setEditingTimer] = useState<Timer | null>(null);
   const [actionError, setActionError] = useState("");
   const {

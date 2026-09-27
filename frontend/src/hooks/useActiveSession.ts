@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { apiFetch, AuthenticationError } from "../api/apiClient";
 import { Session } from "../api/types";
+import { storageForAccount } from "../storage/accountStorage";
 import { getClientTimezone } from "../utils/date";
 
-const ACTIVE_SESSION_STORAGE_KEY = "coursetimers.activeSession";
-const LAST_ACTIVE_STORAGE_KEY = "coursetimers.lastActiveAt";
 const SUSPEND_GRACE_MS = 5 * 60 * 1000;
 
 type LastActiveSnapshot = {
@@ -13,12 +12,12 @@ type LastActiveSnapshot = {
   lastActiveAt: number;
 };
 
-const readStoredActiveSession = () => {
+const readStoredActiveSession = (username: string) => {
   if (typeof window === "undefined") {
     return null;
   }
   try {
-    const raw = localStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+    const raw = storageForAccount(username).getItem("activeSession");
     if (!raw) {
       return null;
     }
@@ -38,12 +37,12 @@ const readStoredActiveSession = () => {
   }
 };
 
-const readStoredLastActive = (): LastActiveSnapshot | null => {
+const readStoredLastActive = (username: string): LastActiveSnapshot | null => {
   if (typeof window === "undefined") {
     return null;
   }
   try {
-    const raw = localStorage.getItem(LAST_ACTIVE_STORAGE_KEY);
+    const raw = storageForAccount(username).getItem("lastActiveAt");
     if (!raw) {
       return null;
     }
@@ -57,13 +56,13 @@ const readStoredLastActive = (): LastActiveSnapshot | null => {
   }
 };
 
-const writeStoredLastActive = (sessionId: string, lastActiveAt: number) => {
+const writeStoredLastActive = (username: string, sessionId: string, lastActiveAt: number) => {
   if (typeof window === "undefined") {
     return;
   }
   try {
-    localStorage.setItem(
-      LAST_ACTIVE_STORAGE_KEY,
+    storageForAccount(username).setItem(
+      "lastActiveAt",
       JSON.stringify({ sessionId, lastActiveAt })
     );
   } catch {
@@ -71,19 +70,20 @@ const writeStoredLastActive = (sessionId: string, lastActiveAt: number) => {
   }
 };
 
-const clearStoredLastActive = () => {
+const clearStoredLastActive = (username: string) => {
   if (typeof window === "undefined") {
     return;
   }
   try {
-    localStorage.removeItem(LAST_ACTIVE_STORAGE_KEY);
+    storageForAccount(username).removeItem("lastActiveAt");
   } catch {
     // Ignore storage errors.
   }
 };
 
-export const useActiveSession = (enabled = true) => {
-  const stored = enabled ? readStoredActiveSession() : null;
+export const useActiveSession = (username = "") => {
+  const enabled = Boolean(username);
+  const stored = enabled ? readStoredActiveSession(username) : null;
   const [activeSession, setActiveSession] = useState<Session | null>(
     stored?.activeSession ?? null
   );
@@ -187,27 +187,27 @@ export const useActiveSession = (enabled = true) => {
     }
     try {
       if (activeSession) {
-        localStorage.setItem(
-          ACTIVE_SESSION_STORAGE_KEY,
+        storageForAccount(username).setItem(
+          "activeSession",
           JSON.stringify({ activeSession, elapsedSeconds })
         );
       } else {
-        localStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+        storageForAccount(username).removeItem("activeSession");
       }
     } catch {
       // Ignore storage errors.
     }
-  }, [activeSession, elapsedSeconds, enabled]);
+  }, [activeSession, elapsedSeconds, enabled, username]);
 
   useEffect(() => {
     if (!enabled || !activeSession) {
       lastActiveRef.current = null;
       lastPersistedRef.current = null;
       autoStopRef.current = false;
-      clearStoredLastActive();
+      clearStoredLastActive(username);
       return;
     }
-    const storedLastActive = readStoredLastActive();
+    const storedLastActive = readStoredLastActive(username);
     if (storedLastActive?.sessionId === activeSession.id) {
       lastActiveRef.current = storedLastActive.lastActiveAt;
     } else {
@@ -216,9 +216,9 @@ export const useActiveSession = (enabled = true) => {
     lastPersistedRef.current = null;
     autoStopRef.current = false;
     if (lastActiveRef.current) {
-      writeStoredLastActive(activeSession.id, lastActiveRef.current);
+      writeStoredLastActive(username, activeSession.id, lastActiveRef.current);
     }
-  }, [activeSession?.id, enabled]);
+  }, [activeSession?.id, enabled, username]);
 
   const startTimer = useCallback(
     async (timerId: string, stoppedAdjustmentSeconds: number = 0) => {
@@ -278,7 +278,7 @@ export const useActiveSession = (enabled = true) => {
     const persistLastActive = (timestamp: number) => {
       lastActiveRef.current = timestamp;
       if (!lastPersistedRef.current || timestamp - lastPersistedRef.current > 15000) {
-        writeStoredLastActive(activeSession.id, timestamp);
+        writeStoredLastActive(username, activeSession.id, timestamp);
         lastPersistedRef.current = timestamp;
       }
     };
@@ -299,7 +299,7 @@ export const useActiveSession = (enabled = true) => {
     tick();
     const interval = window.setInterval(tick, 1000);
     return () => window.clearInterval(interval);
-  }, [activeSession, enabled, stopTimer]);
+  }, [activeSession, enabled, stopTimer, username]);
 
   return useMemo(
     () => ({

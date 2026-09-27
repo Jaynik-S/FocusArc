@@ -1,72 +1,33 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import { getUsername, PERSONAL_MODE } from "./api/apiClient";
+import { AuthScreen } from "./components/AuthScreen";
 import MainLayout from "./components/MainLayout";
-import { LockScreen } from "./components/LockScreen";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { TimerRuntimeProvider } from "./context/TimerRuntimeContext";
 import { TimerSelectionProvider } from "./context/TimerSelectionContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import HistoryPage from "./routes/HistoryPage";
 import SchedulePage from "./routes/SchedulePage";
 import StatsPage from "./routes/StatsPage";
 import TimersPage from "./routes/TimersPage";
-import UsernameGate from "./routes/UsernameGate";
+import { migrateLegacyAccountStorage } from "./storage/accountStorage";
 
-const RequireUsername = ({ children }: { children: React.ReactNode }) => {
-  const hasUsername = Boolean(getUsername());
-  if (!hasUsername) {
-    return <Navigate to="/" replace />;
-  }
-  return children;
-};
-
-const AppRoutes = () => {
-  const { locked } = useAuth();
-  // Local username entry navigates to /timers; rerender the runtime gate then.
-  useLocation();
-
-  if (locked) {
-    return <LockScreen />;
-  }
-
+const AuthenticatedApp = ({ username }: { username: string }) => {
+  const [storageReady] = useState(() => {
+    migrateLegacyAccountStorage(username);
+    return true;
+  });
+  if (!storageReady) return null;
   return (
-    <TimerRuntimeProvider>
-      <TimerSelectionProvider>
+    <TimerRuntimeProvider username={username}>
+      <TimerSelectionProvider username={username}>
         <Routes>
           <Route element={<MainLayout />}>
-            <Route path="/" element={PERSONAL_MODE ? <Navigate to="/timers" replace /> : <UsernameGate />} />
-            <Route
-              path="/timers"
-              element={
-                <RequireUsername>
-                  <TimersPage />
-                </RequireUsername>
-              }
-            />
-            <Route
-              path="/schedule"
-              element={
-                <RequireUsername>
-                  <SchedulePage />
-                </RequireUsername>
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <RequireUsername>
-                  <HistoryPage />
-                </RequireUsername>
-              }
-            />
-            <Route
-              path="/stats"
-              element={
-                <RequireUsername>
-                  <StatsPage />
-                </RequireUsername>
-              }
-            />
+            <Route path="/" element={<Navigate to="/timers" replace />} />
+            <Route path="/timers" element={<TimersPage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/stats" element={<StatsPage />} />
             <Route path="*" element={<Navigate to="/timers" replace />} />
           </Route>
         </Routes>
@@ -75,12 +36,13 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => {
-  return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
-  );
+const AppRoutes = () => {
+  const { status, user } = useAuth();
+  if (status === "checking") return <main className="auth-page"><p>Checking session…</p></main>;
+  if (status === "anonymous" || !user) return <AuthScreen />;
+  return <AuthenticatedApp key={user.username} username={user.username} />;
 };
+
+const App = () => <AuthProvider><AppRoutes /></AuthProvider>;
 
 export default App;

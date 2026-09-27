@@ -2,18 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
 import { Timer } from "../api/types";
+import { useAuth } from "../contexts/AuthContext";
+import { storageForAccount } from "../storage/accountStorage";
 
 const sortTimers = (timers: Timer[]) =>
   [...timers].sort((a, b) => a.created_at.localeCompare(b.created_at));
 
-const TIMERS_STORAGE_KEY = "coursetimers.timers";
-
-const readStoredTimers = () => {
+const readStoredTimers = (username: string) => {
   if (typeof window === "undefined") {
     return [];
   }
   try {
-    const raw = localStorage.getItem(TIMERS_STORAGE_KEY);
+    const raw = storageForAccount(username).getItem("timers");
     if (!raw) {
       return [];
     }
@@ -32,9 +32,12 @@ export type TimerFormValues = {
   color: string;
 };
 
-export const useTimers = (enabled = true) => {
+export const useTimers = () => {
+  const { user } = useAuth();
+  const username = user?.username ?? "";
+  const enabled = Boolean(username);
   const [timers, setTimers] = useState<Timer[]>(() =>
-    enabled ? readStoredTimers() : []
+    enabled ? readStoredTimers(username) : []
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,22 +73,22 @@ export const useTimers = (enabled = true) => {
     if (timers.length > 0) {
       return;
     }
-    const stored = readStoredTimers();
+    const stored = readStoredTimers(username);
     if (stored.length > 0) {
       setTimers(stored);
     }
-  }, [enabled, loading, timers.length]);
+  }, [enabled, loading, timers.length, username]);
 
   useEffect(() => {
     if (!enabled || loading) {
       return;
     }
     try {
-      localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
+      storageForAccount(username).setItem("timers", JSON.stringify(timers));
     } catch {
       // Ignore storage errors.
     }
-  }, [timers, enabled, loading]);
+  }, [timers, enabled, loading, username]);
 
   const createTimer = useCallback(async (payload: TimerFormValues) => {
     const timer = await apiFetch<Timer>("/timers", {
