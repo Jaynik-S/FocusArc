@@ -8,9 +8,7 @@ RUN npm ci
 COPY . /app
 
 ARG VITE_API_BASE_URL=http://localhost:8000/api
-ARG VITE_AUTH_MODE=local
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-ENV VITE_AUTH_MODE=${VITE_AUTH_MODE}
 RUN npm run build
 
 FROM nginx:alpine

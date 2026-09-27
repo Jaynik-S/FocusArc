@@ -1,5 +1,6 @@
-"""Read-only production checks; credentials are never written to output."""
+"""Production smoke checks; credentials are never written to output."""
 import argparse
+import http.cookiejar
 import json
 import os
 import re
@@ -15,14 +16,21 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def origin(value):
     parsed = urllib.parse.urlsplit(value)
-    if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ("", "/"):
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+        or parsed.path not in ("", "/")
+    ):
         raise ValueError("Smoke checks require an HTTPS origin without path or credentials")
     return value.rstrip("/")
 
 
-def fetch(url, key=None):
-    headers = {"Authorization": "Bearer " + key} if key else {}
-    request = urllib.request.Request(url, headers=headers)
+def fetch(url):
+    request = urllib.request.Request(url)
     try:
         with urllib.request.build_opener(NoRedirect()).open(request, timeout=90) as response:
             return response.headers.get("Content-Type", ""), response.read()
@@ -32,26 +40,75 @@ def fetch(url, key=None):
         raise RuntimeError("Smoke request failed: connection unavailable") from None
 
 
-def check_api(url, key, revision, owner):
-    base = origin(url)
-    if not key:
-        raise ValueError("PERSONAL_ACCESS_KEY is required")
-    for path, expected in [("health", {"status": "ok"}), ("ready", {"revision": revision}), ("me", {"username": owner})]:
-        content_type, body = fetch(base + "/api/" + path, key if path != "health" else None)
+class ApiSmokeClient:
+    def __init__(self, base, opener=None):
+        self.base = base
+        self.opener = opener or urllib.request.build_opener(
+            NoRedirect(), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
+        )
+
+    def request(self, path, *, method="GET", payload=None, expected=200):
+        body = json.dumps(payload).encode() if payload is not None else None
+        headers = {"Content-Type": "application/json"} if body is not None else {}
+        request = urllib.request.Request(
+            self.base + "/api/" + path.lstrip("/"),
+            data=body,
+            headers=headers,
+            method=method,
+        )
+        try:
+            with self.opener.open(request, timeout=90) as response:
+                status = response.status
+                content_type = response.headers.get("Content-Type", "")
+                response_body = response.read()
+        except urllib.error.HTTPError as exc:
+            status = exc.code
+            content_type = exc.headers.get("Content-Type", "")
+            response_body = exc.read()
+        except (urllib.error.URLError, TimeoutError):
+            raise RuntimeError("Smoke request failed: connection unavailable") from None
+
+        if status != expected:
+            raise RuntimeError(f"{path} returned HTTP {status}; expected {expected}")
+        if expected == 204:
+            return None
         if "application/json" not in content_type:
             raise RuntimeError(f"{path} did not return JSON")
-        data = json.loads(body)
-        if any(data.get(k) != v for k, v in expected.items()):
-            raise RuntimeError(f"{path} returned unexpected state")
-    request = urllib.request.Request(base + "/api/me")
-    try:
-        urllib.request.build_opener(NoRedirect()).open(request, timeout=90).close()
-    except urllib.error.HTTPError as exc:
-        if exc.code != 401:
-            raise RuntimeError("Unauthenticated access did not return 401") from None
-    else:
-        raise RuntimeError("Unauthenticated personal data access was allowed")
-    print("API health, authenticated readiness/revision/owner, and unauthenticated denial verified")
+        try:
+            return json.loads(response_body)
+        except (TypeError, json.JSONDecodeError):
+            raise RuntimeError(f"{path} returned invalid JSON") from None
+
+
+def check_api(url, password, revision, username, *, opener=None):
+    base = origin(url)
+    if not username:
+        raise ValueError("PRODUCTION_AUTH_USERNAME is required")
+    if not password:
+        raise ValueError("PRODUCTION_AUTH_PASSWORD is required")
+    client = ApiSmokeClient(base, opener=opener)
+
+    if client.request("health") != {"status": "ok"}:
+        raise RuntimeError("health returned unexpected state")
+    client.request("auth/session", expected=401)
+
+    login = client.request(
+        "auth/login",
+        method="POST",
+        payload={"username": username, "password": password},
+    )
+    if login.get("username") != username:
+        raise RuntimeError("login returned unexpected identity")
+    ready = client.request("ready")
+    if ready.get("revision") != revision:
+        raise RuntimeError("ready returned an unexpected migration revision")
+    for path in ("me", "auth/session"):
+        if client.request(path).get("username") != username:
+            raise RuntimeError(f"{path} returned unexpected identity")
+
+    client.request("auth/logout", method="POST", expected=204)
+    client.request("auth/session", expected=401)
+    print("API health, login, revision, identity, logout, and unauthenticated denial verified")
 
 
 def check_web(url):
@@ -76,11 +133,16 @@ if __name__ == "__main__":
     parser.add_argument("kind", choices=["api", "web"])
     parser.add_argument("url")
     parser.add_argument("--revision")
-    parser.add_argument("--owner", default="jayy")
+    parser.add_argument("--username", default=os.environ.get("PRODUCTION_AUTH_USERNAME", ""))
     args = parser.parse_args()
     try:
         if args.kind == "api":
-            check_api(args.url, os.environ.get("PERSONAL_ACCESS_KEY", ""), args.revision, args.owner)
+            check_api(
+                args.url,
+                os.environ.get("PRODUCTION_AUTH_PASSWORD", ""),
+                args.revision,
+                args.username,
+            )
         else:
             check_web(args.url)
     except (ValueError, RuntimeError, TimeoutError) as exc:

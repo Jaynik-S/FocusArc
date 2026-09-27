@@ -10,9 +10,11 @@ with engine.connect() as connection:
     assert connection.execute(text('SELECT version_num FROM alembic_version')).scalar_one() == head
     inspector = inspect(connection)
     assert {'users', 'timers', 'sessions', 'day_summaries', 'alembic_version'} <= set(inspector.get_table_names())
+    password_hash = next(c for c in inspector.get_columns('users') if c['name'] == 'password_hash')
+    assert password_hash['nullable'] is True
     assert 'cycle_total_seconds' in {c['name'] for c in inspector.get_columns('timers')}
     active = next(i for i in inspector.get_indexes('sessions') if i['name'] == 'ux_sessions_one_active_per_user')
     assert active['unique'] and 'end_at IS NULL' in str(active['dialect_options']['postgresql_where'])
     assert inspector.get_foreign_keys('sessions') and inspector.get_foreign_keys('timers')
 engine.dispose()
-print('Migration revision, tables, cycle totals, foreign keys and active-session uniqueness verified')
+print('Migration revision, nullable password hashes, tables, cycle totals, foreign keys and active-session uniqueness verified')
