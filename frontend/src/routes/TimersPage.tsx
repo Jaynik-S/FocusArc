@@ -114,6 +114,7 @@ const TimersPage = () => {
     <div className="page minimal-page">
       <div
         className="timer-view"
+        aria-labelledby="timer-heading"
         style={
           {
               "--accent": accentColor,
@@ -121,10 +122,11 @@ const TimersPage = () => {
             } as CSSProperties
           }
         >
-        <div className="timer-meta">
-          <strong className="timer-name">
+        <div className="timer-view-header">
+          <span className="timer-state">{isActive ? "Running" : "Ready"}</span>
+          <h1 className="timer-name" id="timer-heading">
             {selectedTimer ? selectedTimer.name : "Select a timer"}
-          </strong>
+          </h1>
         </div>
         <div
           className="timer-dial"
@@ -140,7 +142,9 @@ const TimersPage = () => {
               style={{ transform: `translateX(-50%) rotate(${progressAngle}deg)` }}
             />
             <div className="timer-center" />
-            <div className="timer-time">{formatDuration(displaySeconds)}</div>
+            <output className="timer-time" role="timer" aria-label="Elapsed time">
+              {formatDuration(displaySeconds)}
+            </output>
           </div>
         </div>
         <div className="timer-controls">

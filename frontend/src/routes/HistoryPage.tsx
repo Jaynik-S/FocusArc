@@ -155,7 +155,7 @@ const HistoryPage = () => {
       </div>
       <div className="panel">
         <div className="panel-header">
-            <h3 style={{ fontSize: '22px', marginBottom: '4px' }}>Totals</h3>
+          <h2>Totals</h2>
         </div>
         <div className="panel-body">
           {summaryRows.length ? (
@@ -164,7 +164,12 @@ const HistoryPage = () => {
                 <div
                   className="history-summary-chip"
                   key={row.id}
-                  style={{ background: row.color, color: row.textColor }}
+                  style={
+                    {
+                      "--timer-color": row.color,
+                      "--timer-contrast": row.textColor,
+                    } as CSSProperties
+                  }
                 >
                   <span className="history-summary-label">{row.name}</span>
                   <span className="history-summary-value">
@@ -180,7 +185,7 @@ const HistoryPage = () => {
       </div>
       <div className="panel">
         <div className="panel-header">
-          <h3 style={{ fontSize: '22px', marginBottom: '4px' }}>Sessions</h3>
+          <h2>Sessions</h2>
         </div>
         <div className="panel-body">
           {sessionsState.loading ? <div>Loading sessions...</div> : null}
@@ -197,15 +202,13 @@ const HistoryPage = () => {
                 key={row.id}
                 style={
                   {
-                    background: row.color,
-                    color: row.textColor,
-                    borderColor: row.color,
+                    "--timer-color": row.color,
                     "--session-muted": row.mutedColor,
                   } as CSSProperties
                 }
               >
                 <div className="session-name">
-                  <span className="dot" style={{ background: row.textColor }} />
+                  <span className="dot" style={{ background: row.color }} />
                   {row.name}
                 </div>
                 <div className="session-date-duration">

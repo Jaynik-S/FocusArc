@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
 import { ResetTotalsResponse } from "../api/types";
@@ -13,6 +13,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const titleId = useId();
   const { activeAdjustmentSeconds, refresh, resetRuntimeState } = useTimerRuntime();
 
   const handleConfirm = async () => {
@@ -45,10 +46,10 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
         Reset Totals
       </button>
       {open ? (
-        <div className="modal-overlay" role="dialog" aria-modal="true">
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
           <div className="modal">
             <div className="modal-header">
-              <h3>Reset totals?</h3>
+              <h2 id={titleId}>Reset totals?</h2>
               <button
                 className="ghost"
                 type="button"

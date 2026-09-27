@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useId, useState } from "react";
 
 import { TimerFormValues } from "../hooks/useTimers";
 import { isValidHexColor } from "../utils/color";
@@ -29,6 +29,7 @@ const TimerFormModal = ({
     initialValues ?? getDefaults()
   );
   const [error, setError] = useState("");
+  const titleId = useId();
 
   useEffect(() => {
     if (isOpen) {
@@ -61,10 +62,10 @@ const TimerFormModal = ({
   };
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true">
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className="modal">
         <div className="modal-header">
-          <h3>{title}</h3>
+          <h2 id={titleId}>{title}</h2>
           <button className="ghost" type="button" onClick={onClose}>
             Close
           </button>
