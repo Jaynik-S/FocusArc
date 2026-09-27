@@ -49,6 +49,17 @@ afterEach(() => {
 });
 
 describe("account authentication", () => {
+  it("uses a username pattern that modern browsers can compile", async () => {
+    fetchMock.mockResolvedValue(json({}, 401));
+
+    renderGate();
+
+    const input = await screen.findByLabelText("Username");
+    const pattern = input.getAttribute("pattern");
+    expect(pattern).toBeTruthy();
+    expect(() => new RegExp(`^(?:${pattern})$`, "v")).not.toThrow();
+  });
+
   it("uses cookies and never browser-supplied identity headers", async () => {
     fetchMock.mockResolvedValue(json({ username: "jayy" }));
 

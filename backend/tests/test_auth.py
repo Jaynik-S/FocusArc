@@ -49,7 +49,10 @@ def test_registration_requires_literal_confirmation():
         RegisterRequest(username="new-user", password="password1", confirm=False)
 
 
-def test_password_migration_preserves_existing_user(engine):
+def test_password_migration_preserves_existing_user(engine, monkeypatch):
+    monkeypatch.setenv(
+        "MIGRATION_DATABASE_URL", engine.url.render_as_string(hide_password=False)
+    )
     config = Config("alembic.ini")
     try:
         Base.metadata.drop_all(engine)
@@ -189,3 +192,17 @@ def test_admin_never_overwrites_an_existing_password(
     assert db_session.get(User, "jayy").password_hash == original
     captured = capsys.readouterr()
     assert "different1" not in captured.out + captured.err
+
+
+def test_admin_does_not_echo_an_invalid_password(engine, monkeypatch, capsys):
+    invalid_password = "secret7"
+    monkeypatch.setenv(
+        "DATABASE_URL", engine.url.render_as_string(hide_password=False)
+    )
+    monkeypatch.setenv("FOCUSARC_INITIAL_PASSWORD", invalid_password)
+
+    assert admin_main(["set-initial-password", "--username", "jayy"]) == 2
+
+    captured = capsys.readouterr()
+    assert invalid_password not in captured.out + captured.err
+    assert "Invalid account setup input" in captured.err

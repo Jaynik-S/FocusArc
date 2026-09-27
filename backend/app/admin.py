@@ -51,8 +51,8 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         credentials = LoginRequest(username=args.username, password=_read_password())
-    except (ValidationError, ValueError) as exc:
-        print(f"Invalid account setup input: {exc}", file=sys.stderr)
+    except (ValidationError, ValueError):
+        print("Invalid account setup input", file=sys.stderr)
         return 2
 
     engine = create_engine(normalize_database_url(database_url), pool_pre_ping=True)

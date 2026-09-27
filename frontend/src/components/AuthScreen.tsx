@@ -64,7 +64,7 @@ export const AuthScreen = () => {
               autoFocus
               disabled={pending || confirmRegistration}
               maxLength={32}
-              pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,31}"
+              pattern={"[A-Za-z0-9][A-Za-z0-9._\\-]{0,31}"}
               required
               value={username}
               onChange={(event) => setUsername(event.target.value)}
