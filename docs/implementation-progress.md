@@ -17,9 +17,18 @@ Updated 2026-09-27. Work is implemented on `user-password-auth`; this document d
 
 ## Verified locally
 
-- Backend tests run only against a disposable PostgreSQL database.
-- Frontend component/unit tests and production TypeScript/Vite build pass.
-- Deployment orchestration/smoke unit tests pass.
-- Compose configuration validates.
+- 63 backend tests passed against the disposable `focusarc_test` PostgreSQL database.
+- 16 frontend component/unit tests and the production TypeScript/Vite build passed.
+- 7 deployment orchestration/smoke tests passed.
+- Fresh API and frontend Docker images built; `pip check`, production settings validation,
+  Compose configuration, and Render/GitHub YAML parsing passed.
+- A disposable browser run verified explicit registration confirmation, wrong-password
+  rejection, logout, timer recovery after signing back in, empty state for a second account,
+  account-namespaced local storage, cookie authentication, and absence of browser-supplied
+  identity headers. Its containers, database, generated artifacts, and temporary browser
+  tooling were removed afterward.
+- A migration rehearsal from revision `0002` preserved an existing null-password `jayy`
+  row, upgraded to `0003_add_password_hash`, initialized its Argon2id hash once, and verified
+  the same password idempotently. The rehearsal database was removed afterward.
 
 See [deployment.md](deployment.md) for the current production checklist and exact manual steps. Provider configuration, merge to `main`, production migration, deployment, and hosted browser acceptance remain manual and are not yet claimed complete.
