@@ -41,15 +41,18 @@ def fetch(url):
 
 
 class ApiSmokeClient:
-    def __init__(self, base, opener=None):
+    def __init__(self, base, request_origin, opener=None):
         self.base = base
+        self.request_origin = request_origin
         self.opener = opener or urllib.request.build_opener(
             NoRedirect(), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
         )
 
     def request(self, path, *, method="GET", payload=None, expected=200):
         body = json.dumps(payload).encode() if payload is not None else None
-        headers = {"Content-Type": "application/json"} if body is not None else {}
+        headers = {"Origin": self.request_origin}
+        if body is not None:
+            headers["Content-Type"] = "application/json"
         request = urllib.request.Request(
             self.base + "/api/" + path.lstrip("/"),
             data=body,
@@ -80,13 +83,14 @@ class ApiSmokeClient:
             raise RuntimeError(f"{path} returned invalid JSON") from None
 
 
-def check_api(url, password, revision, username, *, opener=None):
+def check_api(url, password, revision, username, web_origin, *, opener=None):
     base = origin(url)
+    request_origin = origin(web_origin)
     if not username:
         raise ValueError("PRODUCTION_AUTH_USERNAME is required")
     if not password:
         raise ValueError("PRODUCTION_AUTH_PASSWORD is required")
-    client = ApiSmokeClient(base, opener=opener)
+    client = ApiSmokeClient(base, request_origin, opener=opener)
 
     if client.request("health") != {"status": "ok"}:
         raise RuntimeError("health returned unexpected state")
@@ -134,6 +138,7 @@ if __name__ == "__main__":
     parser.add_argument("url")
     parser.add_argument("--revision")
     parser.add_argument("--username", default=os.environ.get("PRODUCTION_AUTH_USERNAME", ""))
+    parser.add_argument("--web-origin", default=os.environ.get("PRODUCTION_WEB_URL", ""))
     args = parser.parse_args()
     try:
         if args.kind == "api":
@@ -142,6 +147,7 @@ if __name__ == "__main__":
                 os.environ.get("PRODUCTION_AUTH_PASSWORD", ""),
                 args.revision,
                 args.username,
+                args.web_origin,
             )
         else:
             check_web(args.url)

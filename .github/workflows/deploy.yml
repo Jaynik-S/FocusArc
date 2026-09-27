@@ -129,8 +129,9 @@ jobs:
           PRODUCTION_AUTH_PASSWORD: ${{ secrets.PRODUCTION_AUTH_PASSWORD }}
           PRODUCTION_AUTH_USERNAME: ${{ vars.PRODUCTION_AUTH_USERNAME }}
           API_URL: ${{ vars.PRODUCTION_API_URL }}
+          PRODUCTION_WEB_URL: ${{ vars.PRODUCTION_WEB_URL }}
           REVISION: ${{ steps.migrate.outputs.revision }}
-        run: python scripts/smoke_deployment.py api "$API_URL" --revision "$REVISION" --username "$PRODUCTION_AUTH_USERNAME"
+        run: python scripts/smoke_deployment.py api "$API_URL" --revision "$REVISION" --username "$PRODUCTION_AUTH_USERNAME" --web-origin "$PRODUCTION_WEB_URL"
       - name: Deploy exact frontend commit and wait for live deployment
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}

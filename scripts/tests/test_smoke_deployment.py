@@ -48,7 +48,12 @@ class ApiSmokeTests(unittest.TestCase):
         ])
 
         smoke_deployment.check_api(
-            "https://api.example.test", "password123", "0003", "jayy", opener=opener
+            "https://api.example.test",
+            "password123",
+            "0003",
+            "jayy",
+            "https://web.example.test",
+            opener=opener,
         )
 
         paths = [request.full_url.removeprefix("https://api.example.test") for request in opener.requests]
@@ -59,14 +64,31 @@ class ApiSmokeTests(unittest.TestCase):
         login = opener.requests[2]
         self.assertEqual(login.get_method(), "POST")
         self.assertEqual(json.loads(login.data), {"username": "jayy", "password": "password123"})
+        self.assertEqual(login.headers["Origin"], "https://web.example.test")
         self.assertNotIn("Authorization", login.headers)
         self.assertEqual(opener.requests[6].get_method(), "POST")
 
     def test_password_is_required(self):
         with self.assertRaisesRegex(ValueError, "PRODUCTION_AUTH_PASSWORD"):
             smoke_deployment.check_api(
-                "https://api.example.test", "", "0003", "jayy", opener=FakeOpener([])
+                "https://api.example.test", "", "0003", "jayy", "https://web.example.test",
+                opener=FakeOpener([])
             )
+
+    def test_failed_login_never_includes_password_in_the_error(self):
+        password = "do-not-print-this-password"
+        opener = FakeOpener([
+            FakeResponse(200, {"status": "ok"}),
+            FakeResponse(401, {"detail": "Authentication required"}),
+            FakeResponse(401, {"detail": {"message": password}}),
+        ])
+
+        with self.assertRaises(RuntimeError) as denied:
+            smoke_deployment.check_api(
+                "https://api.example.test", password, "0003", "jayy",
+                "https://web.example.test", opener=opener
+            )
+        self.assertNotIn(password, str(denied.exception))
 
 
 if __name__ == "__main__":
