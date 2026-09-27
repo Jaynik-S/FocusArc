@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     log_level: Literal["critical", "error", "warning", "info", "debug", "trace"] = "info"
     cors_origins: str = "http://localhost:5173"
     database_url: str = "postgresql+psycopg://coursetimers:coursetimers@db:5432/coursetimers"
+    session_secret: str = "local-development-session-secret"
+    session_max_age_seconds: int = Field(default=604800, ge=60, le=2592000)
     
     # Personal access protection
     owner_username: str | None = None
@@ -42,6 +44,8 @@ class Settings(BaseSettings):
                 raise ValueError("Personal mode requires a SHA-256 hex digest")
         if self.app_env != "prod":
             return
+        if "session_secret" not in self.model_fields_set or len(self.session_secret) < 32:
+            raise ValueError("Production requires SESSION_SECRET with at least 32 characters")
         if self.auth_mode != "personal":
             raise ValueError("Production requires AUTH_MODE=personal")
         if "database_url" not in self.model_fields_set:

@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Backend API for FocusArc"
 requires-python = ">=3.10"
 dependencies = [
+  "argon2-cffi>=25.1",
   "fastapi>=0.110",
+  "itsdangerous>=2.2",
   "uvicorn[standard]>=0.23",
   "pydantic-settings>=2.2",
   "sqlalchemy>=2.0",

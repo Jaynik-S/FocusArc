@@ -62,10 +62,26 @@ def test_production_rejects_local_defaults():
         Settings(_env_file=None, app_env="prod").validate_production()
 
 
+def test_production_requires_explicit_strong_session_secret():
+    common = dict(
+        _env_file=None,
+        app_env="prod",
+        auth_mode="personal",
+        owner_username="jayy",
+        personal_access_key_sha256="a" * 64,
+        database_url="postgres://user:pass@db.neon.tech/db?sslmode=require",
+        cors_origins="https://focusarc.onrender.com",
+    )
+    for session_secret in (None, "too-short"):
+        values = common if session_secret is None else common | {"session_secret": session_secret}
+        with pytest.raises(ValueError, match="SESSION_SECRET"):
+            Settings(**values).validate_production()
+
+
 def test_production_requires_tls_and_exact_https_origin():
     good = dict(_env_file=None, app_env="prod", auth_mode="personal", owner_username="jayy",
                 personal_access_key_sha256="a" * 64, database_url="postgres://user:p%40ss@db.neon.tech/db?sslmode=require",
-                cors_origins="https://focusarc.onrender.com")
+                cors_origins="https://focusarc.onrender.com", session_secret="s" * 32)
     Settings(**good).validate_production()
     for change in ({"database_url": "postgresql://user:pass@db.neon.tech/db"},
                    {"cors_origins": "https://*.onrender.com"}, {"auth_mode": "local"}):
