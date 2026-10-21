@@ -41,6 +41,8 @@ The hosted services are deployed independently so the frontend remains lightweig
 
 Typical uses include tracking study hours across several courses, reviewing how time was distributed during a week, and comparing planned work with recorded sessions.
 
+![stats](docs/stats-visuals.png)
+
 ## 🛠️ Technical details
 
 ### 🖥️ Frontend
