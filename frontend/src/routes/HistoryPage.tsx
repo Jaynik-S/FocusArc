@@ -1,13 +1,16 @@
-import { CSSProperties, useMemo, useState } from "react";
+import { CSSProperties, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useSessions } from "../hooks/useSessions";
-import { useTimers } from "../hooks/useTimers";
+import { useReportingTimers } from "../hooks/useReportingTimers";
 import { getContrastColor, getMutedTextColor } from "../utils/color";
 import {
-  formatDateShort,
+  formatCivilDate,
   formatTime,
   getClientTimezone,
   getLocalDateString,
+  isCivilDate,
+  validateAnalyticsRange,
 } from "../utils/date";
 import { formatDuration } from "../utils/time";
 
@@ -18,17 +21,26 @@ const getDateOffset = (days: number) => {
 };
 
 const HistoryPage = () => {
-  const clientTz = useMemo(() => getClientTimezone(), []);
-  const [fromDate, setFromDate] = useState(() =>
-    getLocalDateString(getDateOffset(-1), clientTz)
-  );
-  const [toDate, setToDate] = useState(() =>
-    getLocalDateString(getDateOffset(0), clientTz)
-  );
-  const [selectedTimerId, setSelectedTimerId] = useState<string | null>(null);
-
-  const timersState = useTimers();
-  const sessionsState = useSessions(fromDate, toDate, selectedTimerId);
+  const [params, setParams] = useSearchParams();
+  const activityMode = params.get("date_basis") === "activity";
+  const requestedZone = activityMode ? params.get("client_tz") ?? getClientTimezone() : getClientTimezone();
+  const zoneValid = useMemo(() => {
+    try { new Intl.DateTimeFormat("en", { timeZone: requestedZone }); return true; } catch { return false; }
+  }, [requestedZone]);
+  const clientTz = zoneValid ? requestedZone : getClientTimezone();
+  const fromDate = params.get("from") ?? getLocalDateString(getDateOffset(-1), clientTz);
+  const toDate = params.get("to") ?? getLocalDateString(getDateOffset(0), clientTz);
+  const selectedTimerId = params.get("timer_id");
+  const updateFilter = (key: string, value: string | null) => setParams((current) => {
+    const next = new URLSearchParams(current);
+    if (value === null) next.delete(key); else next.set(key, value);
+    return next;
+  });
+  const rangeError = !zoneValid ? "The linked time zone is invalid. Switch to saved-date history to continue." : activityMode
+    ? validateAnalyticsRange(fromDate, toDate, getLocalDateString(new Date(), clientTz))
+    : !isCivilDate(fromDate) || !isCivilDate(toDate) || fromDate > toDate ? "Choose a valid date range." : null;
+  const timersState = useReportingTimers();
+  const sessionsState = useSessions(fromDate, toDate, selectedTimerId, { dateBasis: activityMode ? "activity" : "saved", clientTz, enabled: !rangeError });
 
   const timerMap = useMemo(() => {
     return new Map(timersState.timers.map((timer) => [timer.id, timer]));
@@ -41,34 +53,32 @@ const HistoryPage = () => {
         const timer = timerMap.get(session.timer_id);
         const start = new Date(session.start_at);
         const end = session.end_at ? new Date(session.end_at) : new Date();
-        const durationSeconds =
+        const durationSeconds = activityMode ? session.range_recorded_seconds ?? 0 :
           session.duration_seconds ??
           Math.max(0, Math.floor((end.getTime() - start.getTime()) / 1000));
         return {
           id: session.id,
-          name: timer?.name ?? "Timer",
+          name: `${timer?.name ?? "Timer"}${timer?.is_archived ? " (archived)" : ""}`,
           color: timer?.color ?? "#1d4ed8",
           textColor: getContrastColor(timer?.color ?? "#1d4ed8"),
           mutedColor: getMutedTextColor(timer?.color ?? "#1d4ed8"),
-          dateLabel: formatDateShort(
-            new Date(`${session.day_date}T00:00:00`),
-            clientTz
-          ),
+          dateLabel: formatCivilDate(activityMode ? getLocalDateString(start, clientTz) : session.day_date),
           timeLabel: `${formatTime(start, clientTz)} - ${formatTime(
             end,
             clientTz
-          )}`,
+          )}${activityMode && getLocalDateString(start, clientTz) !== getLocalDateString(end, clientTz) ? ` (${formatCivilDate(getLocalDateString(end, clientTz))})` : ""}`,
           durationLabel: formatDuration(durationSeconds),
+          fullSessionLabel: activityMode ? `${formatDuration(session.duration_seconds ?? 0)} full session` : null,
         };
       });
-  }, [sessionsState.sessions, timerMap, clientTz]);
+  }, [sessionsState.sessions, timerMap, clientTz, activityMode]);
 
   const totalsByTimer = useMemo(() => {
     const totals = new Map<string, number>();
     sessionsState.sessions.forEach((session) => {
       const start = new Date(session.start_at);
       const end = session.end_at ? new Date(session.end_at) : new Date();
-      const durationSeconds =
+      const durationSeconds = activityMode ? session.range_recorded_seconds ?? 0 :
         session.duration_seconds ??
         Math.max(0, Math.floor((end.getTime() - start.getTime()) / 1000));
       totals.set(
@@ -77,7 +87,7 @@ const HistoryPage = () => {
       );
     });
     return totals;
-  }, [sessionsState.sessions]);
+  }, [sessionsState.sessions, activityMode]);
 
   const summaryRows = useMemo(() => {
     if (selectedTimerId) {
@@ -95,7 +105,7 @@ const HistoryPage = () => {
         },
       ];
     }
-    return timersState.timers.map((timer) => ({
+    return timersState.timers.filter((timer) => !timer.is_archived || totalsByTimer.has(timer.id)).map((timer) => ({
       id: timer.id,
       name: timer.name,
       totalSeconds: totalsByTimer.get(timer.id) ?? 0,
@@ -112,6 +122,9 @@ const HistoryPage = () => {
           <p className="muted">Review sessions by date and timer.</p>
         </div>
       </div>
+      {activityMode ? <div className="analytics-history-note"><p className="analytics-help">Activity dates in {clientTz}. Completed sessions only; durations show the time allocated within this range.</p><button className="link-button" onClick={() => setParams((current) => { const next = new URLSearchParams(current); next.delete("date_basis"); next.delete("client_tz"); return next; })}>View saved-date history</button></div> : null}
+      {rangeError ? <p className="error" role="alert">{rangeError}</p> : null}
+      {timersState.error ? <p className="error" role="alert">{timersState.error} <button className="link-button" onClick={timersState.reload}>Retry courses</button></p> : null}
       <div className="panel">
         <div className="filter-block">
           <label className="field">
@@ -119,7 +132,7 @@ const HistoryPage = () => {
             <input
               type="date"
               value={fromDate}
-              onChange={(event) => setFromDate(event.target.value)}
+              onChange={(event) => updateFilter("from", event.target.value)}
             />
           </label>
           <label className="field">
@@ -127,7 +140,7 @@ const HistoryPage = () => {
             <input
               type="date"
               value={toDate}
-              onChange={(event) => setToDate(event.target.value)}
+              onChange={(event) => updateFilter("to", event.target.value)}
             />
           </label>
         </div>
@@ -135,7 +148,7 @@ const HistoryPage = () => {
           <button
             className={`chip ${selectedTimerId ? "" : "chip-active"}`}
             type="button"
-            onClick={() => setSelectedTimerId(null)}
+            onClick={() => updateFilter("timer_id", null)}
           >
             All timers
           </button>
@@ -146,9 +159,9 @@ const HistoryPage = () => {
                 selectedTimerId === timer.id ? "chip-active" : ""
               }`}
               type="button"
-              onClick={() => setSelectedTimerId(timer.id)}
+              onClick={() => updateFilter("timer_id", timer.id)}
             >
-              {timer.name}
+              {timer.name}{timer.is_archived ? " (archived)" : ""}
             </button>
           ))}
         </div>
@@ -158,7 +171,7 @@ const HistoryPage = () => {
           <h2>Totals</h2>
         </div>
         <div className="panel-body">
-          {summaryRows.length ? (
+          {sessionsState.loading ? <p>Loading totals...</p> : summaryRows.length ? (
             <div className="history-summary-grid">
               {summaryRows.map((row) => (
                 <div
@@ -190,9 +203,9 @@ const HistoryPage = () => {
         <div className="panel-body">
           {sessionsState.loading ? <div>Loading sessions...</div> : null}
           {sessionsState.error ? (
-            <div className="error">{sessionsState.error}</div>
+            <div className="error" role="alert">{sessionsState.error} <button className="link-button" onClick={sessionsState.reload}>Retry sessions</button></div>
           ) : null}
-          {!sessionsState.loading && rows.length === 0 ? (
+          {!rangeError && !sessionsState.error && !sessionsState.loading && rows.length === 0 ? (
             <div>No sessions in this range.</div>
           ) : null}
           <div className="session-list">
@@ -214,7 +227,7 @@ const HistoryPage = () => {
                 <div className="session-date-duration">
                   {row.dateLabel} · {row.timeLabel}
                 </div>
-                <div className="session-time">{row.durationLabel}</div>
+                <div className="session-time">{row.durationLabel}{row.fullSessionLabel ? <div className="analytics-help">{row.fullSessionLabel}</div> : null}</div>
               </div>
             ))}
           </div>
