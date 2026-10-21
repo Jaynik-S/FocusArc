@@ -35,6 +35,7 @@ The hosted services are deployed independently so the frontend remains lightweig
 - **Study sessions:** start, stop, switch, and adjust active sessions.
 - **History and schedules:** review recorded sessions by day or week.
 - **Progress reports:** track daily totals, weekly totals, averages, and course-level progress.
+- **Advanced analytics:** explore a 90/365-day activity calendar, hourly timer activity, weekly trends, and study consistency. Filter by course (including archived courses) or a custom range, then open a calendar day in History.
 - **State recovery:** preserve timer display state across refreshes and separate it by account.
 - **User accounts:** register and sign in with a username and password, then log out without exposing another account's local state.
 
@@ -62,6 +63,10 @@ Typical uses include tracking study hours across several courses, reviewing how 
 ### 🗄️ Database model
 
 PostgreSQL stores users, timers, sessions, and day summaries. Timers hold course metadata and accumulated totals; sessions hold timestamps, durations, time zones, and reporting dates. Aggregate SQL queries produce daily and weekly statistics without rebuilding reports entirely in the browser.
+
+The Stats **Overview** allocates completed sessions across local dates in the displayed time zone. Recorded totals include manual duration adjustments; the hourly chart shows elapsed timer activity. The **Reports** tab preserves the original saved-date reports. See [analytics calculations, API, tests, and demo setup](docs/analytics.md).
+
+For a populated local account (`demo` / `demo12345`) and step-by-step local testing, Neon checks, and Render deployment, see the [analytics demo and release guide](docs/analytics-demo-release.md).
 
 ## ☁️ Hosting and deployment
 

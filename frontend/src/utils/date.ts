@@ -82,3 +82,29 @@ export const formatDateShort = (date: Date, timeZone?: string) => {
     day: "numeric",
   }).format(date);
 };
+
+/** Civil-date arithmetic is deliberately independent of DST and the host zone. */
+export const isCivilDate = (value: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  Number.isFinite(Date.parse(`${value}T00:00:00Z`)) &&
+  new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+
+export const shiftCivilDate = (value: string, days: number) => {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+export const civilDayCount = (from: string, to: string) =>
+  Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000) + 1;
+
+export const validateAnalyticsRange = (from: string, to: string, today: string) => {
+  if (!isCivilDate(from) || !isCivilDate(to)) return "Choose valid start and end dates.";
+  if (from > to) return "The start date must not be after the end date.";
+  if (civilDayCount(from, to) > 365) return "Choose a range of 365 days or fewer.";
+  if (to > today) return "The end date must not be after today.";
+  return null;
+};
+
+export const formatCivilDate = (value: string, options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" }) =>
+  new Intl.DateTimeFormat("en-US", { ...options, timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));

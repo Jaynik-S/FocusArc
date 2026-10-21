@@ -27,8 +27,9 @@ The primary operating context is an approximately 900 x 700 desktop window kept 
 - Preserve timer creation, editing, archiving, starting, stopping, time adjustment, selection, totals reset, authentication, routing, persistence, and reporting behavior.
 - Preserve custom timer HEX colors and their use in timer identity and data displays.
 - Preserve the Timers, History, Schedule, and Stats information architecture unless a small usability improvement does not change behavior.
+- Stats includes an analytics Overview and the original Reports. Overview shares course/date filters across its activity calendar, hourly distribution, weekly trends, and consistency metrics; archived courses remain available for historical reporting.
 - Keep the full interface usable without horizontal scrolling at 900 x 700 and adapt to narrower desktop/tablet widths.
-- Keep the existing React 18, TypeScript, Vite, and CSS architecture; do not change backend contracts or data handling for the redesign.
+- Keep the existing React 18, TypeScript, Vite, and CSS architecture. Analytics extends the authenticated API while preserving existing timer, authentication, reporting, and persistence contracts.
 
 ## Brand Commitments
 

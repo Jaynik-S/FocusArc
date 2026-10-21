@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { apiFetch, AuthenticationError } from "../api/apiClient";
+import { notifyStudyDataChanged } from "../api/dataEvents";
 import { Session } from "../api/types";
 import { storageForAccount } from "../storage/accountStorage";
 import { getClientTimezone } from "../utils/date";
@@ -239,6 +240,7 @@ export const useActiveSession = (username = "") => {
           },
         });
         setActiveSession(response.active_session);
+        if (response.stopped_session) notifyStudyDataChanged();
       } finally {
         setBusy(false);
       }
@@ -253,7 +255,7 @@ export const useActiveSession = (username = "") => {
       }
       setBusy(true);
       try {
-        await apiFetch<{ stopped_session: Session | null }>("/stop", {
+        const response = await apiFetch<{ stopped_session: Session | null }>("/stop", {
           method: "POST",
           body: {
             stopped_at_client: stoppedAtClient ?? new Date().toISOString(),
@@ -261,6 +263,7 @@ export const useActiveSession = (username = "") => {
           },
         });
         setActiveSession(null);
+        if (response.stopped_session) notifyStudyDataChanged();
       } finally {
         setBusy(false);
       }

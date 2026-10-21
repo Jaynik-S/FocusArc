@@ -74,3 +74,46 @@ export type AveragesResponse = {
   days: number;
   averages: AverageEntry[];
 };
+
+export type AnalyticsDay = {
+  day_date: string;
+  recorded_seconds: number;
+  timed_seconds: number;
+  session_count: number;
+};
+
+export type AnalyticsWeek = {
+  week_start: string;
+  recorded_seconds: number;
+  active_days: number;
+  is_partial: boolean;
+};
+
+export type AnalyticsResponse = {
+  range: { from: string; to: string; client_tz: string };
+  summary: {
+    recorded_seconds: number;
+    timed_seconds: number;
+    session_count: number;
+    active_days: number;
+    day_count: number;
+    consistency_percent: number;
+    average_seconds_per_day: number;
+  };
+  daily: AnalyticsDay[];
+  weekly: AnalyticsWeek[];
+  hourly: { hour: number; timed_seconds: number }[];
+  comparison: {
+    previous_week_start: string;
+    current_week_start: string;
+    previous_seconds: number;
+    current_seconds: number;
+    delta_seconds: number;
+    delta_percent: number | null;
+  } | null;
+};
+
+export type ActivitySession = Session & {
+  range_recorded_seconds: number;
+  range_timed_seconds: number;
+};
