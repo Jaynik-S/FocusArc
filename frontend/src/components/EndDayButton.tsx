@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
+import { notifyStudyDataChanged } from "../api/dataEvents";
 import { ResetTotalsResponse } from "../api/types";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
 
@@ -25,6 +26,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
         body: { adjustment_seconds: activeAdjustmentSeconds },
       });
       resetRuntimeState();
+      notifyStudyDataChanged();
       refresh(true);
       onEnded(response);
       setOpen(false);

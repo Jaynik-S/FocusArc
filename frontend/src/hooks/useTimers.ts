@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
+import { notifyStudyDataChanged } from "../api/dataEvents";
 import { Timer } from "../api/types";
 import { useAuth } from "../contexts/AuthContext";
 import { storageForAccount } from "../storage/accountStorage";
@@ -96,6 +97,7 @@ export const useTimers = () => {
       body: payload,
     });
     setTimers((prev) => sortTimers([...prev, timer]));
+    notifyStudyDataChanged();
     return timer;
   }, []);
 
@@ -108,6 +110,7 @@ export const useTimers = () => {
       setTimers((prev) =>
         sortTimers(prev.map((item) => (item.id === id ? timer : item)))
       );
+      notifyStudyDataChanged();
       return timer;
     },
     []
@@ -116,6 +119,7 @@ export const useTimers = () => {
   const archiveTimer = useCallback(async (id: string) => {
     await apiFetch<void>(`/timers/${id}`, { method: "DELETE" });
     setTimers((prev) => prev.filter((item) => item.id !== id));
+    notifyStudyDataChanged();
   }, []);
 
   return useMemo(
