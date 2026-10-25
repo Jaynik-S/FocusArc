@@ -25,6 +25,15 @@ from app.services import sessions as sessions_service
 router = APIRouter(tags=["sessions"])
 
 
+@router.get("/timers/{timer_id}/latest-session")
+def latest_timer_session(timer_id: UUID, request: Request, db: Session = Depends(get_db)) -> SessionOut | None:
+    try:
+        session = sessions_service.latest_timer_session(db, request.state.username, timer_id)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Timer not found")
+    return SessionOut.model_validate(session) if session else None
+
+
 @router.post("/sessions/{session_id}/adjust")
 def adjust_session(session_id: UUID, payload: AdjustSessionRequest, request: Request,
                    db: Session = Depends(get_db)) -> SessionOut:

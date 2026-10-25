@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import DayTimeline from "../components/DayTimeline";
 import { useScheduleDay } from "../hooks/useScheduleDay";
-import { useTimers } from "../hooks/useTimers";
+import { useReportingTimers } from "../hooks/useReportingTimers";
 import {
   formatDateShort,
   formatWeekday,
@@ -15,7 +15,7 @@ const SchedulePage = () => {
   const [dayDate, setDayDate] = useState(() =>
     getLocalDateString(new Date(), clientTz)
   );
-  const timersState = useTimers();
+  const timersState = useReportingTimers();
   const daySchedule = useScheduleDay(dayDate);
 
   const dateObj = useMemo(() => new Date(`${dayDate}T00:00:00`), [dayDate]);
@@ -35,7 +35,7 @@ const SchedulePage = () => {
       <div className="page-header">
         <div>
           <h1>Schedule</h1>
-          <p className="muted">Day view only.</p>
+          <p className="muted">Select a session to adjust its duration.</p>
         </div>
         <div className="schedule-nav">
           <button className="ghost" type="button" onClick={() => shiftDay(-1)}>
@@ -52,6 +52,8 @@ const SchedulePage = () => {
         {daySchedule.loading ? <div>Loading day view...</div> : null}
         {daySchedule.error ? <div className="error">{daySchedule.error}</div> : null}
         <DayTimeline
+          key={dayDate}
+          dayDate={dayDate}
           sessions={daySchedule.sessions}
           timers={timersState.timers}
           timeZone={clientTz}

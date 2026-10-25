@@ -8,6 +8,8 @@ type SessionBlockProps = {
   label: string;
   timeRange: string;
   style: CSSProperties;
+  onSelect: () => void;
+  selected: boolean;
 };
 
 const SessionBlock = ({
@@ -16,16 +18,23 @@ const SessionBlock = ({
   label,
   timeRange,
   style,
+  onSelect,
+  selected,
 }: SessionBlockProps) => {
   return (
-    <div
+    <button
+      type="button"
       className="session-block"
+      onClick={onSelect}
+      aria-label={`${label}, ${timeRange}`}
+      aria-pressed={selected}
+      title={`${label}: ${timeRange}`}
       style={{ ...style, borderColor: color }}
       data-session={session.id}
     >
       <div className="session-block-title">{label}</div>
       <div className="session-block-meta">{timeRange}</div>
-    </div>
+    </button>
   );
 };
 

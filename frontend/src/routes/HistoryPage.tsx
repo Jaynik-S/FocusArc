@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 
 import { useSessions } from "../hooks/useSessions";
 import { useReportingTimers } from "../hooks/useReportingTimers";
+import { useSessionAdjustment } from "../hooks/useSessionAdjustment";
+import SessionAdjustmentControls from "../components/SessionAdjustmentControls";
 import { getContrastColor, getMutedTextColor } from "../utils/color";
 import {
   formatCivilDate,
@@ -21,6 +23,7 @@ const getDateOffset = (days: number) => {
 };
 
 const HistoryPage = () => {
+  const adjustment = useSessionAdjustment();
   const [params, setParams] = useSearchParams();
   const activityMode = params.get("date_basis") === "activity";
   const requestedZone = activityMode ? params.get("client_tz") ?? getClientTimezone() : getClientTimezone();
@@ -48,7 +51,7 @@ const HistoryPage = () => {
 
   const rows = useMemo(() => {
     return [...sessionsState.sessions]
-      .sort((a, b) => b.start_at.localeCompare(a.start_at))
+      .sort((a, b) => Date.parse(b.start_at) - Date.parse(a.start_at))
       .map((session) => {
         const timer = timerMap.get(session.timer_id);
         const start = new Date(session.start_at);
@@ -57,6 +60,7 @@ const HistoryPage = () => {
           session.duration_seconds ??
           Math.max(0, Math.floor((end.getTime() - start.getTime()) / 1000));
         return {
+          session,
           id: session.id,
           name: `${timer?.name ?? "Timer"}${timer?.is_archived ? " (archived)" : ""}`,
           color: timer?.color ?? "#1d4ed8",
@@ -124,6 +128,8 @@ const HistoryPage = () => {
       </div>
       {activityMode ? <div className="analytics-history-note"><p className="analytics-help">Activity dates in {clientTz}. Completed sessions only; durations show the time allocated within this range.</p><button className="link-button" onClick={() => setParams((current) => { const next = new URLSearchParams(current); next.delete("date_basis"); next.delete("client_tz"); return next; })}>View saved-date history</button></div> : null}
       {rangeError ? <p className="error" role="alert">{rangeError}</p> : null}
+      {adjustment.error ? <p className="error" role="alert">{adjustment.error}</p> : null}
+      {adjustment.status ? <p className="muted" role="status">{adjustment.status}</p> : null}
       {timersState.error ? <p className="error" role="alert">{timersState.error} <button className="link-button" onClick={timersState.reload}>Retry courses</button></p> : null}
       <div className="panel">
         <div className="filter-block">
@@ -227,7 +233,9 @@ const HistoryPage = () => {
                 <div className="session-date-duration">
                   {row.dateLabel} · {row.timeLabel}
                 </div>
-                <div className="session-time">{row.durationLabel}{row.fullSessionLabel ? <div className="analytics-help">{row.fullSessionLabel}</div> : null}</div>
+                <div className="session-time">{row.durationLabel}{row.fullSessionLabel ? <div className="analytics-help">{row.fullSessionLabel}</div> : null}
+                  {row.session.end_at ? <SessionAdjustmentControls busy={adjustment.busy} onAdjust={(delta) => void adjustment.adjust(row.session, delta)} /> : null}
+                </div>
               </div>
             ))}
           </div>

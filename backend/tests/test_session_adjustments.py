@@ -155,6 +155,16 @@ def test_adjusting_before_reset_does_not_repopulate_cycle_total(client, db_sessi
     assert saved(client)["duration_seconds"] == 2400
 
 
+def test_paused_timer_recovers_latest_session_after_refresh(client, db_session):
+    timer, model = seed(client, db_session)
+    response = client.get(f"/api/timers/{timer['id']}/latest-session")
+    assert response.status_code == 200
+    assert response.json()["id"] == str(model.id)
+    client.post("/api/auth/logout", json={})
+    _register(client, "bob")
+    assert client.get(f"/api/timers/{timer['id']}/latest-session").status_code == 404
+
+
 @pytest.mark.parametrize("start,zone,want_hours", [
     ("2026-03-08T07:05:00+00:00", "America/Toronto", {1: 300, 3: 2100}),
     ("2026-11-01T06:05:00+00:00", "America/Toronto", {1: 2400}),

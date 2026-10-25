@@ -240,6 +240,11 @@ button.timer-control-main:hover { filter: brightness(1.08); background: var(--ac
 .session-name { display: flex; min-width: 0; align-items: center; gap: var(--space-2); overflow: hidden; color: var(--text-primary); font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .session-date-duration { min-width: 0; overflow: hidden; color: var(--text-muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
 .session-time { color: var(--text-primary); font-size: 0.8125rem; font-variant-numeric: tabular-nums; font-weight: 600; }
+.session-adjustments { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.session-adjustments .ghost { min-height: 2rem; padding: 0.25rem 0.5rem; font-size: 0.6875rem; white-space: nowrap; }
+.schedule-session-editor { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border-bottom: 1px solid var(--border); font-size: 0.75rem; }
+.session-block[aria-pressed="true"] { background: var(--surface-3); outline: 2px solid var(--primary); outline-offset: 1px; z-index: 1; }
+.session-block { text-align: left; cursor: pointer; min-width: 0; }
 
 .schedule-nav { display: flex; align-items: center; gap: var(--space-2); }
 .schedule-date { min-width: 8.5rem; color: var(--text-secondary); font-size: 0.75rem; text-align: center; }

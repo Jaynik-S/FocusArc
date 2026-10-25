@@ -111,6 +111,15 @@ def get_active_session(db: Session, username: str) -> SessionModel | None:
     )
 
 
+def latest_timer_session(db: Session, username: str, timer_id: UUID) -> SessionModel | None:
+    timer = db.get(Timer, timer_id)
+    if timer is None or timer.username != username:
+        raise LookupError("timer_not_found")
+    return db.scalar(select(SessionModel).where(
+        SessionModel.username == username, SessionModel.timer_id == timer_id,
+    ).order_by(SessionModel.created_at.desc(), SessionModel.id.desc()).limit(1))
+
+
 def start_timer(
     db: Session,
     username: str,
