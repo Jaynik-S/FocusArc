@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 
 class SessionOut(BaseModel):
@@ -45,6 +45,12 @@ class StopTimerResponse(BaseModel):
 
 class SessionList(BaseModel):
     sessions: list[SessionOut]
+
+
+class AdjustSessionRequest(BaseModel):
+    delta_seconds: int = Field(strict=True, ge=-86400, le=86400)
+    expected_start_at: AwareDatetime
+    expected_end_at: AwareDatetime | None
 
 
 class DaySchedule(BaseModel):

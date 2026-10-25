@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
@@ -21,6 +22,7 @@ def reset_totals(
     payload: StopTimerRequest | None = None,
 ) -> ResetTotalsResponse:
     username = request.state.username
+    sessions_service.lock_study_data(db, username)
     adjustment_seconds = payload.adjustment_seconds if payload else None
     sessions_service.stop_active_session(db, username, adjustment_seconds)
 
@@ -28,7 +30,7 @@ def reset_totals(
         db.execute(
             update(Timer)
             .where(Timer.username == username)
-            .values(cycle_total_seconds=0)
+            .values(cycle_total_seconds=0, cycle_reset_at=datetime.now(timezone.utc))
         )
 
     timers = db.execute(
