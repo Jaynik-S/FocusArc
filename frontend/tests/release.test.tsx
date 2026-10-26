@@ -81,6 +81,7 @@ describe("account-scoped active session polling", () => {
 
   it("waits for completion before scheduling another poll and pauses hidden tabs", async () => {
     vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-25T16:00:00Z"));
     let resolve!: (response: Response) => void;
     fetchMock.mockImplementationOnce(() => new Promise((done) => { resolve = done; }))
       .mockImplementation(async () => json(study()));
