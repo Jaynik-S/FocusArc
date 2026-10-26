@@ -3,18 +3,20 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createEnvironmentScene, environmentPalette, type EnvironmentId } from "../utils/screensaverAnimation";
 import { drawScreensaverEnvironment } from "../utils/drawScreensaverEnvironment";
 
-const ScreensaverEnvironment = ({ scene, color, active }: { scene: EnvironmentId; color: string; active: boolean }) => {
+const ScreensaverEnvironment = ({ scene, color, active, artwork = null }: { scene: EnvironmentId; color: string; active: boolean; artwork?: HTMLCanvasElement | null }) => {
   const canvas = useRef<HTMLCanvasElement>(null);
   const model = useMemo(() => createEnvironmentScene(scene), [scene]);
   const palette = useMemo(() => environmentPalette(color, scene === "sky-garden"), [color, scene]);
   const paletteRef = useRef(palette);
+  const artworkRef = useRef(artwork);
   const paintCurrent = useRef<(() => void) | null>(null);
   const clock = useRef({ scene, seconds: 0 });
   const [motion, setMotion] = useState("paused");
   useLayoutEffect(() => {
     paletteRef.current = palette;
+    artworkRef.current = artwork;
     if (active) paintCurrent.current?.();
-  }, [palette, active]);
+  }, [palette, active, artwork]);
 
   useEffect(() => {
     if (!active) { setMotion("paused"); return; }
@@ -42,7 +44,7 @@ const ScreensaverEnvironment = ({ scene, color, active }: { scene: EnvironmentId
     };
     const repaint = () => {
       if (!document.hidden && !reduced && width > 0 && height > 0) {
-        drawScreensaverEnvironment(ctx, model, paletteRef.current, clock.current.seconds, width, height, dpr);
+        drawScreensaverEnvironment(ctx, model, paletteRef.current, clock.current.seconds, width, height, dpr, artworkRef.current);
       }
     };
     const stop = () => { if (frame) cancelAnimationFrame(frame); frame = 0; lastStamp = null; lastPaint = -Infinity; };

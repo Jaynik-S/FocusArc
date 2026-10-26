@@ -9,7 +9,7 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 const active = (id: string, timer_id = "course") => ({ id, timer_id });
 const initial = { username: "wallpapers", session: null as ReturnType<typeof active> | null, day: "2026-10-26", reset: 0 };
-const hook = (props = initial, strict = false) => renderHook(({ username, session, day, reset }) => useScreensaverWallpaper(username, session, day, reset), { initialProps: props, wrapper: strict ? StrictMode : undefined });
+const hook = (props = initial, strict = false) => renderHook(({ username, session }) => useScreensaverWallpaper(username, session), { initialProps: props, wrapper: strict ? StrictMode : undefined });
 
 it("gives every image equal initial intervals and every non-previous image equal next intervals", () => {
   const ids = SCREENSAVER_WALLPAPERS.map(item => item.id);
@@ -20,7 +20,7 @@ it("gives every image equal initial intervals and every non-previous image equal
   }
 });
 
-it("selects only on a logical study boundary and preserves pause/resume and rerenders", () => {
+it("chooses on every start or resume without repeating, but not on pause or timer rerenders", () => {
   const random = vi.spyOn(Math, "random").mockReturnValue(0);
   const view = hook();
   expect(random).not.toHaveBeenCalled();
@@ -28,45 +28,63 @@ it("selects only on a logical study boundary and preserves pause/resume and rere
   const first = view.result.current.id;
   view.rerender({ ...initial, session: active("first") });
   view.rerender({ ...initial, session: null });
-  view.rerender({ ...initial, session: active("resumed") });
-  expect(view.result.current.id).toBe(first);
   expect(random).toHaveBeenCalledTimes(1);
-  view.rerender({ ...initial, session: active("other", "another-course") });
+  view.rerender({ ...initial, session: active("resumed") });
   expect(view.result.current.id).not.toBe(first);
   expect(random).toHaveBeenCalledTimes(2);
+  const resumed = view.result.current.id;
+  view.rerender({ ...initial, session: active("other", "another-course") });
+  expect(view.result.current.id).not.toBe(resumed);
+  expect(random).toHaveBeenCalledTimes(3);
 });
 
 it("keeps a saved choice after refresh and scopes it to its account", () => {
   const random = vi.spyOn(Math, "random").mockReturnValue(0.9);
-  const view = hook({ ...initial, session: active("first") });
+  const view = hook();
+  view.rerender({ ...initial, session: active("first") });
   const first = view.result.current.id; view.unmount();
   const restored = hook({ ...initial, session: active("resumed") });
   expect(restored.result.current.id).toBe(first);
   expect(random).toHaveBeenCalledTimes(1);
   restored.unmount();
-  hook({ ...initial, username: "other-account", session: active("first") });
+  const other = hook({ ...initial, username: "other-account" });
+  other.rerender({ ...initial, username: "other-account", session: active("first") });
   expect(random).toHaveBeenCalledTimes(2);
 });
 
-it("starts a fresh choice after reset or a new study day without repeating the previous image", () => {
-  const random = vi.spyOn(Math, "random").mockReturnValue(0);
-  const view = hook({ ...initial, session: active("first") });
-  const first = view.result.current.id;
-  view.rerender({ ...initial, session: null, reset: 1 });
+it("does not treat mounting with an already running timer as another start", () => {
+  const random = vi.spyOn(Math, "random").mockReturnValue(.5);
+  const view = hook({ ...initial, session: active("restored") }, true);
+  view.rerender({ ...initial, session: active("restored") });
+  expect(random).not.toHaveBeenCalled();
+  view.rerender({ ...initial, session: null });
+  view.rerender({ ...initial, session: active("resumed") });
   expect(random).toHaveBeenCalledTimes(1);
+});
+
+it("does not choose on reset/day changes while running, and chooses on the next activation", () => {
+  const random = vi.spyOn(Math, "random").mockReturnValue(0);
+  const view = hook();
+  view.rerender({ ...initial, session: active("first") });
+  const first = view.result.current.id;
+  view.rerender({ ...initial, session: active("first"), day: "2026-10-27", reset: 1 });
+  expect(random).toHaveBeenCalledTimes(1);
+  expect(view.result.current.id).toBe(first);
+  view.rerender({ ...initial, session: null, reset: 1 });
   view.rerender({ ...initial, session: active("after-reset"), reset: 1 });
   expect(view.result.current.id).not.toBe(first);
   const second = view.result.current.id;
   view.rerender({ ...initial, session: active("after-reset"), reset: 1, day: "2026-10-27" });
-  expect(view.result.current.id).not.toBe(second);
-  expect(random).toHaveBeenCalledTimes(3);
+  expect(view.result.current.id).toBe(second);
+  expect(random).toHaveBeenCalledTimes(2);
 });
 
 it("draws once in StrictMode and survives corrupt or unavailable storage", () => {
   localStorage.setItem(accountStorageKey(initial.username, "screensaverWallpaper"), "broken");
   const random = vi.spyOn(Math, "random").mockReturnValue(0.5);
   const set = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("Storage full"); });
-  const view = hook({ ...initial, session: active("first") }, true);
+  const view = hook(initial, true);
+  view.rerender({ ...initial, session: active("first") });
   const selected = view.result.current.id;
   view.rerender({ ...initial, session: active("first") });
   expect(view.result.current.id).toBe(selected);
@@ -74,12 +92,26 @@ it("draws once in StrictMode and survives corrupt or unavailable storage", () =>
   expect(set).toHaveBeenCalled();
 });
 
-it("waits for a fresh activation when the stopped snapshot trails an explicit reset", () => {
+it("selects for a replacement session even if no paused snapshot was observed", () => {
   const random = vi.spyOn(Math, "random").mockReturnValue(0);
-  const view = hook({ ...initial, session: active("before-reset") });
+  const view = hook();
+  view.rerender({ ...initial, session: active("before-reset") });
   view.rerender({ ...initial, session: active("before-reset"), reset: 1 });
   view.rerender({ ...initial, session: active("before-reset"), reset: 1 });
   expect(random).toHaveBeenCalledTimes(1);
   view.rerender({ ...initial, session: active("after-reset"), reset: 1 });
+  expect(random).toHaveBeenCalledTimes(2);
+});
+
+it("handles repeated pause/resume of the same activation and reads old stored selections", () => {
+  localStorage.setItem(accountStorageKey(initial.username, "screensaverWallpaper"), JSON.stringify({ day: initial.day, timerId: "course", wallpaperId: "space" }));
+  const random = vi.spyOn(Math, "random").mockReturnValue(0);
+  const view = hook();
+  expect(view.result.current.id).toBe("space");
+  view.rerender({ ...initial, session: active("first") });
+  expect(view.result.current.id).toBe("forest");
+  view.rerender({ ...initial, session: null });
+  view.rerender({ ...initial, session: active("first") });
+  expect(view.result.current.id).toBe("space");
   expect(random).toHaveBeenCalledTimes(2);
 });

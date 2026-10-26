@@ -75,7 +75,7 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREEN
     <section ref={layer} className="screensaver" data-open={isOpen} data-wallpaper={wallpaper.id} data-ink={ink} role="dialog" aria-modal={isOpen || undefined}
       aria-label="Timer screensaver" aria-hidden={!isOpen}>
       <ScreensaverWallpaper color={timer?.color ?? "#5e6ad2"} source={wallpaper.source} onVisibleFrame={setVisibleFrame} />
-      <ScreensaverEnvironment key={visibleWallpaper.id} scene={visibleWallpaper.id} color={visibleFrame.color} active={isOpen} />
+      <ScreensaverEnvironment key={visibleWallpaper.id} scene={visibleWallpaper.id} color={visibleFrame.color} artwork={visibleFrame.artwork ?? null} active={isOpen} />
       <button className="screensaver-exit" type="button" ref={exit} onClick={onExit} aria-label="Exit screensaver">
         <span aria-hidden="true">↙</span> Exit screensaver <kbd>Esc</kbd>
       </button>

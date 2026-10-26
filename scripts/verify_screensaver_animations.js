@@ -13,12 +13,17 @@ async page => {
     const context = await browser.newContext({ viewport: { width: 900, height: 700 } });
     await context.addInitScript(({ random, wallpapers }) => {
       Math.random = () => random;
-      window.animationMetrics = { frames: 0, costs: [], jobs: 0, mismatches: [] };
+      window.animationMetrics = { frames: 0, costs: [], jobs: 0, landscapeSamples: 0, mismatches: [] };
       const NativeWorker = window.Worker;
       window.Worker = class extends NativeWorker { postMessage(...args) { window.animationMetrics.jobs++; super.postMessage(...args); } };
       const starts = new WeakMap(); const depths = new WeakMap();
       const prototype = CanvasRenderingContext2D.prototype;
       const clear = prototype.clearRect; const save = prototype.save; const restore = prototype.restore;
+      const drawImage = prototype.drawImage;
+      prototype.drawImage = function(...args) {
+        if (this.canvas.classList.contains('screensaver-environment')) window.animationMetrics.landscapeSamples++;
+        return drawImage.apply(this,args);
+      };
       prototype.clearRect = function(...args) { if (this.canvas.classList.contains('screensaver-environment')) starts.set(this, performance.now()); return clear.apply(this,args); };
       prototype.save = function(...args) { if (this.canvas.classList.contains('screensaver-environment')) depths.set(this,(depths.get(this)||0)+1); return save.apply(this,args); };
       prototype.restore = function(...args) {
@@ -66,11 +71,18 @@ async page => {
       await view.locator('.screensaver-environment[data-scene="'+wallpaper.id+'"][data-motion="running"][data-color="#A8D5BA"]').waitFor();
       await view.evaluate(()=>{window.retainedEnvironment=document.querySelector('.screensaver-environment');});
       const first=await snapshot();const before=await metrics();const started=Date.now();
+      await effect.evaluate(canvas=>{window.animationFirstPixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;});
       await view.screenshot({path:'.deployment-private/animation-'+wallpaper.id+'-start.png'});
       await view.waitForTimeout(4200);
       const later=await snapshot();const steady=await metrics();
+      const changedPixels = await effect.evaluate(canvas=>{
+        const current=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;const first=window.animationFirstPixels;let changed=0;
+        for(let i=0;i<current.length;i+=4)if(Math.abs(current[i]-first[i])+Math.abs(current[i+1]-first[i+1])+Math.abs(current[i+2]-first[i+2])+Math.abs(current[i+3]-first[i+3])>12)changed++;
+        delete window.animationFirstPixels;return changed;
+      });
       assert(first.hash!==later.hash && later.visible>20,'Motion is missing: '+wallpaper.id);
       assert(steady.jobs===before.jobs,'Animation triggered static recoloring');
+      if(wallpaper.id!=='space')assert(steady.landscapeSamples>before.landscapeSamples,'Painted landscape is not moving');
       const fps=(steady.frames-before.frames)/((Date.now()-started)/1000);
       assert(fps>15 && fps<40,'Unexpected animation draw rate: '+fps);
       await view.screenshot({path:'.deployment-private/animation-'+wallpaper.id+'-sage.png'});
@@ -107,17 +119,21 @@ async page => {
       await view.locator('.screensaver-environment[data-motion="paused"]').waitFor({state:'attached'});
       const paused=(await metrics()).frames;await view.waitForTimeout(350);assert((await metrics()).frames===paused,'Exited screensaver kept rendering');
       await view.getByRole('button',{name:'Pause',exact:true}).click();await view.getByRole('button',{name:'Play',exact:true}).click();
-      await view.locator('.screensaver-environment[data-motion="running"]').waitFor();
-      assert(await effect.evaluate(el=>el===window.retainedEnvironment),'Same-world resume recreated the animation');
+      await view.waitForFunction(previous=>{
+        const art=document.querySelector('.screensaver-wallpaper');const effect=document.querySelector('.screensaver-environment');
+        return art?.getAttribute('data-render-state')==='ready' && effect?.getAttribute('data-motion')==='running' && effect?.getAttribute('data-scene')!==previous;
+      },wallpaper.id);
+      assert(await effect.evaluate(el=>el!==window.retainedEnvironment),'Resume kept the previous wallpaper animation');
+      const resumedScene=await effect.getAttribute('data-scene');
       if(index===0){
         await view.getByRole('button',{name:'Exit screensaver',exact:true}).click();
         await view.getByRole('button',{name:/^Another study /}).click();await view.getByRole('button',{name:'Play',exact:true}).click();
-        await view.waitForFunction(()=>document.querySelector('.screensaver-wallpaper')?.getAttribute('data-render-state')==='ready' && document.querySelector('.screensaver-environment')?.getAttribute('data-scene')!=='space');
+        await view.waitForFunction(previous=>document.querySelector('.screensaver-wallpaper')?.getAttribute('data-render-state')==='ready' && document.querySelector('.screensaver-environment')?.getAttribute('data-scene')!==previous,resumedScene);
         assert(await effect.evaluate(el=>el!==window.retainedEnvironment),'New displayed artwork reused old scene buffer');
       }
       const final=await metrics();assert(final.mismatches.length===0,'Effect/artwork mismatch: '+JSON.stringify(final.mismatches));
       const costs=final.costs.slice().sort((a,b)=>a-b);
-      report.cases.push({scene:wallpaper.id,colors:['#A8D5BA','#42216F','#FFFFFF','#FF5733','#000000'],fps:Number(fps.toFixed(1)),averageDrawMs:Number((costs.reduce((a,b)=>a+b,0)/costs.length).toFixed(2)),p95DrawMs:Number(costs[Math.floor(costs.length*.95)].toFixed(2)),visiblePixels:later.visible,noStaticReprocessing:true,hiddenReducedExitStopped:true,paletteAndSceneSynchronized:true});
+      report.cases.push({scene:wallpaper.id,resumedScene,colors:['#A8D5BA','#42216F','#FFFFFF','#FF5733','#000000'],fps:Number(fps.toFixed(1)),averageDrawMs:Number((costs.reduce((a,b)=>a+b,0)/costs.length).toFixed(2)),p95DrawMs:Number(costs[Math.floor(costs.length*.95)].toFixed(2)),visiblePixels:later.visible,changedPixels,landscapeSampling:wallpaper.id!=='space',noStaticReprocessing:true,hiddenReducedExitStopped:true,paletteAndSceneSynchronized:true});
     } catch(error){
       const state = await view.evaluate(()=>({effect:document.querySelector('.screensaver-environment')?.dataset,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,hidden:document.hidden,visibility:document.visibilityState,frames:window.animationMetrics?.frames}));
       await view.screenshot({path:'.deployment-private/animation-failure.png'});throw new Error(String(error)+' State: '+JSON.stringify(state)+' Completed: '+JSON.stringify(report));

@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { MASTER_SCREENSAVER, normalizeScreensaverColor } from "../utils/screensaverRecolor";
 import { renderScreensaver } from "../utils/screensaverRenderer";
 
-export type VisibleWallpaperFrame = { source: string; color: string };
+export type VisibleWallpaperFrame = { source: string; color: string; artwork?: HTMLCanvasElement | null };
 export const ORIGINAL_ARTWORK_COLOR = "#377DC2";
 
 const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER, onVisibleSource, onVisibleFrame }: {
@@ -17,7 +17,7 @@ const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER, onVisibleSou
   // Ink follows the actual retained canvas or raw fallback before the browser paints.
   useLayoutEffect(() => { onVisibleSource?.(painted?.source ?? source); }, [painted?.source, source, onVisibleSource]);
   useLayoutEffect(() => {
-    onVisibleFrame?.({ source: painted?.source ?? source, color: painted?.hex ?? ORIGINAL_ARTWORK_COLOR });
+    onVisibleFrame?.({ source: painted?.source ?? source, color: painted?.hex ?? ORIGINAL_ARTWORK_COLOR, artwork: painted ? canvas.current : null });
   }, [painted?.source, painted?.hex, source, onVisibleFrame]);
 
   useEffect(() => {

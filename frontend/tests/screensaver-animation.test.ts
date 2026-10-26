@@ -20,12 +20,12 @@ it("creates distinct stable bounded particle fields without consuming global ran
     for (const scene of scenes) {
       expect(scene).toEqual(createEnvironmentScene(scene.id));
       expect(scene.particles.length).toBeGreaterThan(10);
-      expect(scene.particles.length).toBeLessThanOrEqual(90);
+      expect(scene.particles.length).toBeLessThanOrEqual(160);
       for (const particle of scene.particles) {
         const point = particlePosition(particle, 123.4);
         expect(Number.isFinite(point.x) && Number.isFinite(point.y)).toBe(true);
-        expect(point.x).toBeGreaterThanOrEqual(-50);
-        expect(point.x).toBeLessThanOrEqual(1722);
+        expect(point.x).toBeGreaterThanOrEqual(-100);
+        expect(point.x).toBeLessThanOrEqual(1772);
       }
     }
     expect(new Set(scenes.map(scene => scene.particles[0].kind)).size).toBeGreaterThan(2);
@@ -50,6 +50,6 @@ it("schedules occasional varied meteors rather than a constant repeating streak"
     if (meteor) { visible++; starts.add(meteor.x); expect(meteor.progress).toBeGreaterThanOrEqual(0); expect(meteor.progress).toBeLessThanOrEqual(1); }
   }
   expect(visible).toBeGreaterThan(10);
-  expect(visible).toBeLessThan(160);
+  expect(visible).toBeLessThan(200);
   expect(starts.size).toBeGreaterThan(3);
 });

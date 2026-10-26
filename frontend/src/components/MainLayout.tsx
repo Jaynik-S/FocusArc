@@ -11,10 +11,10 @@ import Sidebar from "./Sidebar";
 
 const MainLayout = () => {
   const { user } = useAuth();
-  const { activeSession, snapshotTimers, elapsedByTimer, elapsedSeconds, today, wallpaperResetRevision = 0 } = useTimerRuntime();
+  const { activeSession, snapshotTimers, elapsedByTimer, elapsedSeconds } = useTimerRuntime();
   const { selectedTimerId } = useSelectedTimer();
   const { isOpen, exit } = useScreensaverMode(activeSession?.id ?? null);
-  const wallpaper = useScreensaverWallpaper(user?.username ?? "", activeSession, today, wallpaperResetRevision);
+  const wallpaper = useScreensaverWallpaper(user?.username ?? "", activeSession);
   const normalView = useRef<HTMLDivElement>(null);
   const timerId = activeSession?.timer_id ?? selectedTimerId;
   const timer = snapshotTimers.find((item) => item.id === timerId) ?? null;

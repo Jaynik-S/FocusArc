@@ -1,4 +1,4 @@
-// Real local API checks for every randomly selectable artwork and logical study boundaries.
+// Real local API checks for every randomly selectable artwork and every start/resume.
 // Requires disposable API :8002 and Vite :5175; never targets production.
 async page => {
   const origin = page.url().split('/').slice(0, 3).join('/');
@@ -60,25 +60,27 @@ async page => {
       await view.setViewportSize({ width: 900, height: 700 });
       await pause();
       await view.getByRole('button', { name: 'Play', exact: true }).click(); await ready();
-      assert(await screen.getAttribute('data-wallpaper') === wallpaper.id, 'Pause/resume changed artwork');
+      const resumedWallpaper = await screen.getAttribute('data-wallpaper');
+      assert(resumedWallpaper !== wallpaper.id, 'Pause/resume repeated the previous artwork');
       assert((await state()).active_session.id !== firstSession, 'Existing saved-session resume semantics changed');
       await view.getByRole('button', { name: 'Exit screensaver', exact: true }).click();
       const running = (await state()).active_session.id;
       await view.reload();
       await view.getByRole('button', { name: 'Pause', exact: true }).waitFor();
       assert(await screen.getAttribute('data-open') === 'false', 'Refresh reopened screensaver');
-      assert(await screen.getAttribute('data-wallpaper') === wallpaper.id, 'Refresh lost saved artwork');
+      assert(await screen.getAttribute('data-wallpaper') === resumedWallpaper, 'Refresh lost saved artwork');
       assert((await state()).active_session.id === running, 'Refresh changed running session');
       await view.getByRole('button', { name: 'Pause', exact: true }).click();
       await view.getByRole('button', { name: 'Play', exact: true }).waitFor();
       await view.getByRole('button', { name: 'Play', exact: true }).click(); await ready();
-      assert(await screen.getAttribute('data-wallpaper') === wallpaper.id, 'Exit/refresh/re-entry changed artwork');
+      const reenteredWallpaper = await screen.getAttribute('data-wallpaper');
+      assert(reenteredWallpaper !== resumedWallpaper, 'Exit/refresh/resume repeated the previous artwork');
       await pause();
       if (index === 0) {
         await choose('Wallpaper Study B');
         await view.getByRole('button', { name: 'Play', exact: true }).click(); await ready();
         const next = await screen.getAttribute('data-wallpaper');
-        assert(next !== wallpaper.id, 'Timer switch repeated previous wallpaper');
+        assert(next !== reenteredWallpaper, 'Timer switch repeated previous wallpaper');
         await view.getByRole('button', { name: 'Exit screensaver', exact: true }).click();
         await view.getByRole('button', { name: 'Reset cycle counters', exact: true }).click();
         await view.getByRole('button', { name: 'Confirm', exact: true }).click();
@@ -87,7 +89,7 @@ async page => {
         assert(await screen.getAttribute('data-wallpaper') !== next, 'Reset did not begin a new artwork choice');
         await pause();
       }
-      report.cases.push({ id: wallpaper.id, whiteAndPurple: true, narrowFits: true, sameTimerResumeStable: true, refreshStableAndNormal: true });
+      report.cases.push({ id: wallpaper.id, whiteAndPurple: true, narrowFits: true, sameTimerResumeRerandomized: true, refreshStableAndNormal: true });
     } catch (error) {
       await view.screenshot({ path: '.deployment-private/wallpaper-rotation-failure.png' });
       throw new Error(String(error) + ' Completed: ' + JSON.stringify(report));
