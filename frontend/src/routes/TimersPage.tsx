@@ -105,6 +105,10 @@ const TimersPage = () => {
   };
 
   const handleUpdate = async (values: TimerFormValues) => {
+    if (!synced || controlsBusy) {
+      setActionError("Reconnect and sync before editing a timer.");
+      return;
+    }
     if (!editingTimer) {
       return;
     }
@@ -118,7 +122,7 @@ const TimersPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!selectedTimer) {
+    if (!selectedTimer || !synced || controlsBusy) {
       return;
     }
     setActionError("");
@@ -203,10 +207,11 @@ const TimersPage = () => {
               className="link-button"
               type="button"
               onClick={() => setEditingTimer(selectedTimer)}
+              disabled={controlsBusy || !synced}
             >
               Edit timer
             </button>
-            <button className="link-button" type="button" onClick={handleDelete}>
+            <button className="link-button" type="button" onClick={handleDelete} disabled={controlsBusy || !synced}>
               Delete timer
             </button>
           </div>

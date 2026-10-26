@@ -50,6 +50,8 @@ it("disables timer commands while shared state is stale", () => {
   render(router(<TimerSelectionProvider username="sync-ui"><TimersPage /></TimerSelectionProvider>));
   expect(screen.getByRole("heading", { name: "Running course" })).toBeTruthy();
   expect((screen.getByRole("button", { name: "Pause" }) as HTMLButtonElement).disabled).toBe(true);
+  expect((screen.getByRole("button", { name: "Edit timer" }) as HTMLButtonElement).disabled).toBe(true);
+  expect((screen.getByRole("button", { name: "Delete timer" }) as HTMLButtonElement).disabled).toBe(true);
   expect(screen.getByRole("status").textContent).toMatch(/sync|offline/i);
 });
 

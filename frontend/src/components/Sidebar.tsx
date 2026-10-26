@@ -36,7 +36,7 @@ const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
   const timersState = useTimers();
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
-  const { activeSession, elapsedSeconds, offsets, elapsedByTimer, error: syncError, synced = true } = useTimerRuntime();
+  const { activeSession, elapsedSeconds, offsets, elapsedByTimer, error: syncError, synced = true, busy: timerBusy = false } = useTimerRuntime();
   const { logout } = useAuth();
   const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme(username));
   const [createOpen, setCreateOpen] = useState(false);
@@ -78,6 +78,10 @@ const Sidebar = ({ username }: SidebarProps) => {
   }, [selectedTimer]);
 
   const handleCreate = async (values: TimerFormValues) => {
+    if (!synced || timerBusy) {
+      setActionError("Reconnect and sync before creating a timer.");
+      return;
+    }
     setActionError("");
     try {
       await timersState.createTimer(values);
@@ -121,7 +125,7 @@ const Sidebar = ({ username }: SidebarProps) => {
             className="link-button"
             type="button"
             onClick={() => setCreateOpen(true)}
-            disabled={!isReady}
+            disabled={!isReady || !synced || timerBusy}
           >
             New
           </button>
