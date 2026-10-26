@@ -12,3 +12,5 @@ Artwork: use the supplied mockups as edit targets in the built-in image generati
 
 - Inspection complete. MainLayout stays mounted across routes, and StudyReady only mounts it after the first authoritative snapshot, so its initial session ID is a reliable refresh baseline.
 - Baseline: 79/80 frontend tests pass. The polling test crosses a hardcoded midnight boundary when run near/after October 25 midnight; freeze that test's clock within its fixture day.
+- Stage 1 complete (`49a9770`): activation and HEX palette rules verified; 85 frontend tests passed.
+- Stage 2 complete: immersive layer, clean PNG artwork, shared commands, keyboard/focus handling and responsive styles; 90 frontend tests and production build passed. Inspected the actual 900×700 Chrome rendering. Three polling tests now pin their fake clock inside the fixture day to avoid midnight-triggered refreshes.

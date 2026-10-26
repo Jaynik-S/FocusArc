@@ -102,6 +102,7 @@ describe("account-scoped active session polling", () => {
 
   it("backs off transient failures while retaining the last authoritative snapshot", async () => {
     vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-25T16:00:00Z"));
     const session = { id: "session", timer_id: "timer", start_at: new Date().toISOString() };
     fetchMock.mockResolvedValueOnce(json(study(session))).mockResolvedValueOnce(json({})).mockRejectedValue(new Error("Offline"));
     const { result } = renderHook(() => useActiveSession("jayy"));
@@ -117,6 +118,7 @@ describe("account-scoped active session polling", () => {
 
   it("never lets a saved browser inactivity timestamp stop the account timer", async () => {
     vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-25T16:00:00Z"));
     const now = Date.now();
     const session = { id: "session", timer_id: "timer", start_at: new Date(now - 600_000).toISOString() };
     localStorage.setItem(key("activeSession"), JSON.stringify({ activeSession: session, elapsedSeconds: 0 }));
