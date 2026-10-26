@@ -53,4 +53,4 @@ Run `scripts/verify_screensaver.js` against the disposable local API on port 800
 
 The mapping is tuned to this cool-blue master. A substantially different source illustration may need mask tuning. Protected warm details retain their original colors; extreme targets are deliberately compressed to preserve the illustration. Nearby HEX values may appear very similar. Unsupported Canvas/worker environments show the original master instead of a recolored scene.
 
-Artwork remains static. Additional animation layers can sit above the wallpaper without changing pixel processing or timer ownership.
+The artwork remains a static, cached frame. [Scene-specific animation overlays](screensaver-animations.md) now sit above it without changing pixel processing or timer ownership. They follow the source and HEX reported by the committed visible frame.

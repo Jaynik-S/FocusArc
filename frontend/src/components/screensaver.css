@@ -1,4 +1,4 @@
-/* A separate static artwork layer leaves room for future illustrated motion. */
+/* Static artwork, decorative motion and interactive controls have separate layers. */
 .screensaver {
   --screensaver-ink: #fff3dc;
   --screensaver-shadow: 0 2px 15px #071322, 0 1px 3px #071322;

@@ -39,19 +39,19 @@ export const drawScreensaverEnvironment = (
     const breath = .5 + .5 * Math.sin(time * p.frequency * 2 + p.phase);
     const alpha = edge * quiet(x, y);
     if (p.kind === "firefly") {
-      const brightness = (.08 + .65 * breath * breath) * alpha;
-      glow(ctx, x, y, p.size * 5, palette.warm, brightness * .65);
-      ctx.globalAlpha = brightness; ctx.fillStyle = palette.cream; ctx.beginPath(); ctx.arc(x, y, p.size * .65, 0, tau); ctx.fill();
+      const brightness = (.10 + .72 * breath * breath) * alpha;
+      glow(ctx, x, y, p.size * 6, palette.warm, brightness * .65);
+      ctx.globalAlpha = brightness; ctx.fillStyle = palette.cream; ctx.beginPath(); ctx.arc(x, y, p.size * .85, 0, tau); ctx.fill();
     } else if (p.kind === "petal") {
       ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(time * .4 + p.phase) * .9 + p.phase);
       ctx.scale(.55 + Math.abs(Math.sin(time * .31 + p.phase)) * .45, 1);
-      ctx.globalAlpha = alpha * (.35 + p.depth * .35); ctx.fillStyle = palette.petal; ctx.beginPath();
+      ctx.globalAlpha = alpha * (.4 + p.depth * .35); ctx.fillStyle = palette.petal; ctx.beginPath();
       ctx.moveTo(-p.size, 0); ctx.bezierCurveTo(0, -p.size * .8, p.size * 1.1, -p.size * .4, p.size, 0);
       ctx.bezierCurveTo(0, p.size * .7, -p.size * .9, p.size * .4, -p.size, 0); ctx.fill(); ctx.restore();
     } else {
       const snow = p.kind === "snow";
-      ctx.globalAlpha = alpha * (snow ? .18 + p.depth * .48 : .08 + breath * .26);
-      ctx.fillStyle = snow ? palette.cream : palette.accent; ctx.beginPath(); ctx.arc(x, y, p.size * (snow ? 1 : .7), 0, tau); ctx.fill();
+      ctx.globalAlpha = alpha * (snow ? .18 + p.depth * .48 : .12 + breath * .34);
+      ctx.fillStyle = snow ? palette.cream : palette.accent; ctx.beginPath(); ctx.arc(x, y, p.size * (snow ? 1 : .85), 0, tau); ctx.fill();
       if (snow && p.depth > .88 && Math.sin(time * .7 + p.phase) > .98) sparkle(ctx, x, y, p.size, palette.cream, alpha * .4);
     }
   }
@@ -59,12 +59,15 @@ export const drawScreensaverEnvironment = (
   scene.stars.forEach(([nx, ny], index) => {
     const { x, y } = point(nx, ny);
     const brightness = .08 + .38 * (.5 + .5 * Math.sin(time * (.37 + index * .071) + index * 1.7)) ** 3;
+    // Painted star centers are already white: breathe light beyond their edges
+    // so twinkling remains visible without dimming or repainting the artwork.
+    if (scene.id === "space") glow(ctx, x, y, index === 1 || index === 2 ? 65 : 30, palette.cream, brightness * .18);
     sparkle(ctx, x, y, 2.1 + index % 3, palette.cream, brightness);
   });
   scene.lights.forEach(([nx, ny, radius], index) => {
     const { x, y } = point(nx, ny);
     const flutter = .5 + .3 * Math.sin(time * 1.7 + index) + .15 * Math.sin(time * 3.1 + index * 2.3);
-    glow(ctx, x, y, radius, palette.warm, .06 + .10 * flutter, scene.id === "village" ? .65 : 1);
+    glow(ctx, x, y, radius, palette.warm, .07 + .14 * flutter, scene.id === "village" ? .65 : 1);
   });
   scene.reflections.forEach(([nx, ny], index) => {
     const { x, y } = point(nx, ny);
@@ -95,7 +98,7 @@ export const drawScreensaverEnvironment = (
       sparkle(ctx, x, y, 2.4, palette.cream, Math.sin(t * Math.PI) * .3);
     }
   } else if (scene.id === "sky-garden") {
-    const angle = time * .12; const cx = ARTWORK.width * .79; const cy = ARTWORK.height * .225;
+    const angle = time * .12 + 2.1; const cx = ARTWORK.width * .79; const cy = ARTWORK.height * .225;
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(-.28);
     ctx.globalAlpha = .2; ctx.strokeStyle = palette.warm; ctx.lineWidth = 1.3;
     ctx.beginPath(); ctx.ellipse(0, 0, 135, 91, 0, angle - .24, angle); ctx.stroke();
@@ -116,7 +119,7 @@ export const drawScreensaverEnvironment = (
   } else if (scene.id === "village") {
     for (let i = 0; i < 3; i++) {
       const { x, y } = point(.56 + i * .15 + Math.sin(time * .06 + i) * .055, .71 + i * .055);
-      glow(ctx, x, y, 22 + i * 3, palette.accent, .035 + Math.sin(time * .13 + i) * .012, 6.5);
+      glow(ctx, x, y, 22 + i * 3, palette.accent, .045 + Math.sin(time * .13 + i) * .016, 6.5);
     }
   }
   ctx.restore(); ctx.globalAlpha = 1;

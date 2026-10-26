@@ -57,4 +57,4 @@ This generates `.deployment-private/screensaver-wallpapers-comparison.png` witho
 
 ![Sky garden overlay at 900×700](screenshots/screensaver-sky-garden-900.png)
 
-The feature has three commits: catalog/artwork comparison; study selection and overlay integration; final browser checks and documentation. No backend, schema, dependency or animation changes, and no production deployment.
+The original five-wallpaper feature has three commits: catalog/artwork comparison; study selection and overlay integration; final browser checks and documentation. That stage had no backend, schema, dependency or animation changes, and no production deployment. A subsequent [animation layer](screensaver-animations.md) adds scene-specific movement while retaining this selection and static recoloring pipeline.

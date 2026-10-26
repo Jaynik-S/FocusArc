@@ -6,9 +6,9 @@ const state = vi.hoisted(() => ({ draw: vi.fn(), create: vi.fn((id: string) => (
 vi.mock("../src/utils/drawScreensaverEnvironment", () => ({ drawScreensaverEnvironment: state.draw }));
 vi.mock("../src/utils/screensaverAnimation", async original => ({ ...await original<object>(), createEnvironmentScene: state.create }));
 const frames = new Map<number, FrameRequestCallback>(); let nextFrame = 0;
-let reduced = false; let mediaChanged: (() => void) | undefined;
+let reduced = false; let mediaChanged: ((event: MediaQueryListEvent) => void) | undefined;
 const clear = vi.fn(); const disconnect = vi.fn();
-const media = { get matches() { return reduced; }, addEventListener: (_: string, callback: () => void) => { mediaChanged = callback; }, removeEventListener: vi.fn() };
+const media = { get matches() { return reduced; }, addEventListener: (_: string, callback: (event: MediaQueryListEvent) => void) => { mediaChanged = callback; }, removeEventListener: vi.fn() };
 beforeEach(() => {
   frames.clear(); nextFrame = 0; reduced = false;
   Object.defineProperty(document, "hidden", { configurable: true, value: false });
@@ -55,9 +55,24 @@ it("respects reduced motion changes and cancels resources on exit/unmount", () =
   const view = render(<ScreensaverEnvironment scene="village" color="#FF0000" active />);
   expect(frames.size).toBe(0);
   expect(state.draw).not.toHaveBeenCalled();
-  reduced = false; act(() => mediaChanged?.()); step(0);
+  reduced = false; act(() => mediaChanged?.({ matches: false } as MediaQueryListEvent)); step(0);
   expect(state.draw).toHaveBeenCalledTimes(1);
   view.rerender(<ScreensaverEnvironment scene="village" color="#FF0000" active={false} />);
   expect(frames.size).toBe(0);
   view.unmount(); expect(disconnect).toHaveBeenCalled(); expect(media.removeEventListener).toHaveBeenCalled();
+});
+
+it("reads the native preference once and uses change events to stop and resume", () => {
+  const reads = vi.spyOn(media, "matches", "get");
+  render(<ScreensaverEnvironment scene="forest" color="#A8D5BA" active />);
+  step(0); step(40); step(80);
+  expect(reads).toHaveBeenCalledTimes(1);
+  const draws = state.draw.mock.calls.length;
+  reduced = true; act(() => mediaChanged?.({ matches: true } as MediaQueryListEvent));
+  expect(frames.size).toBe(0);
+  expect(clear).toHaveBeenCalled();
+  step(120); expect(state.draw).toHaveBeenCalledTimes(draws);
+  reduced = false; act(() => mediaChanged?.({ matches: false } as MediaQueryListEvent)); step(160);
+  expect(state.draw).toHaveBeenCalledTimes(draws + 1);
+  expect(reads).toHaveBeenCalledTimes(1);
 });
