@@ -1,6 +1,6 @@
 # Dynamic HEX screensaver recoloring
 
-Each timer's exact six-digit HEX now derives a palette for the supplied `master-screensaver.png`. Preset selection and CSS hue filters have been removed. Timer state, daily elapsed time, controls, activation, dismissal and persistence still belong to the existing shared timer runtime.
+Each timer's exact six-digit HEX derives a palette for the selected illustration. The engine now supports [all five supplied wallpapers with stable study selection](screensaver-wallpapers.md). Preset-color selection and CSS hue filters have been removed. Timer state, daily elapsed time, controls, activation, dismissal and persistence still belong to the existing shared timer runtime.
 
 ![Eight requested HEX colors](screenshots/screensaver-color-comparison.png)
 
@@ -19,7 +19,7 @@ The Oklab conversion matrices follow [Björn Ottosson's public-domain reference]
 
 ## Rendering and file map
 
-- `frontend/public/screensaver/master-screensaver.png`: unmodified copy of the supplied clean master; sole production source. Legacy blue/orange/purple files remain as reference assets and are unused by the renderer.
+- `frontend/public/screensaver/master-screensaver*.png`: unmodified copies of the five supplied clean masters, centralized in `utils/screensaverWallpapers.ts`. Legacy blue/orange/purple files remain as unused reference assets. All five use this same mapper without image-specific processing profiles.
 - `frontend/src/workers/screensaver.worker.ts`: fetch/decode the master, prepare its pixel channels, render through OffscreenCanvas and return a PNG Blob. Source decoding/preparation is shared between colors.
 - `frontend/src/utils/screensaverRenderer.ts`: one shared module worker, concurrent-request deduplication, source/normalized-HEX cache keys and an eight-entry Blob LRU. A 20-second timeout or worker crash releases jobs safely. Idle workers terminate after 15 seconds, releasing source buffers. No object URLs or DOM nodes are cached.
 - `frontend/src/components/ScreensaverWallpaper.tsx`: effects depend only on source and normalized HEX. Decode a finished Blob, replace the visible Canvas in one task and close the ImageBitmap. Older async results cannot overwrite newer colors or an unmounted view. Keep the last complete frame while loading; on failure release the Canvas buffer and display the original master. Readiness tracks both HEX and source.

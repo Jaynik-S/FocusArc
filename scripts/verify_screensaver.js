@@ -183,10 +183,10 @@ async page => {
       await fallback.getByRole('button', { name: 'Play', exact: true }).click();
       await dialog(fallback).waitFor();
       await fallback.locator('.screensaver-wallpaper[data-render-state="fallback"]').waitFor();
-      assert(await fallback.locator('.screensaver-wallpaper').evaluate(el => getComputedStyle(el).backgroundImage.includes('master-screensaver.png')), 'Clean master fallback missing');
+      assert(await fallback.locator('.screensaver-wallpaper').evaluate(el => /master-screensaver(?:-[2-5])?\.png/.test(getComputedStyle(el).backgroundImage)), 'Selected clean artwork fallback missing');
       await fallback.getByRole('button', { name: 'Pause timer', exact: true }).click();
       await normal(fallback);
-      report.checks.push('Unavailable worker uses clean master fallback and timer controls remain functional');
+      report.checks.push('Unavailable worker uses selected clean artwork fallback and timer controls remain functional');
     } finally { await fallbackContext.close(); }
     assert(errors.length === 0, 'Browser errors: ' + errors.join('; '));
     report.browserErrors = errors;

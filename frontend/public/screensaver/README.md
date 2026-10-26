@@ -1,10 +1,12 @@
 # Space wallpapers
 
-`master-screensaver.png` is an unmodified copy of the user's supplied clean master. It is the sole source for production Canvas recoloring. All timer text and controls are rendered separately. No additional clean assets are required.
+`master-screensaver.png` and `master-screensaver-2.png` through `master-screensaver-5.png` are unmodified copies of the five supplied clean masters. They are the production Canvas sources, registered centrally in `src/utils/screensaverWallpapers.ts`. All timer text and controls are rendered separately. No additional clean assets are required.
 
 The pixel engine is `src/utils/screensaverRecolor.ts`; its worker and eight-entry Blob cache are separate from timer logic. It derives a palette from exact HEX hue, chroma and lightness, preserving painted texture and warm highlights. See `docs/screensaver-recoloring.md` for the algorithm, comparison preview and limitations. Preset selection and CSS hue filters have been removed.
 
 The artwork is a separate static layer. UI text, planet ornament, controls, and transitions are HTML/CSS/SVG rendered by `Screensaver.tsx`; none are baked into the PNGs. No celestial animation is implemented.
+
+All five images passed the shared pixel mapper without custom processing profiles. Sky garden alone uses dark overlay ink for its bright composition. See `docs/screensaver-wallpapers.md` for stable random selection, the twenty-image comparison, asset expansion and validation.
 
 ## Legacy reference artwork
 
