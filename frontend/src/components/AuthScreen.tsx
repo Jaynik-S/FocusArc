@@ -76,9 +76,6 @@ export const AuthScreen = () => {
               aria-label="Password"
               autoComplete="current-password"
               disabled={pending || confirmRegistration}
-              minLength={8}
-              maxLength={128}
-              required
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}

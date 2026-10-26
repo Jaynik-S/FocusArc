@@ -56,7 +56,7 @@ Environment secrets:
 
 - `MIGRATION_DATABASE_URL`: Neon direct owner TLS URL for Alembic and the one-time account initializer.
 - `RENDER_API_KEY`: Render API key with access to both services.
-- `PRODUCTION_AUTH_PASSWORD`: the chosen `jayy` password, 8–128 characters. Keep this stable for later releases; the initializer verifies it and refuses to overwrite a different hash.
+- `PRODUCTION_AUTH_PASSWORD`: the chosen `jayy` password. Keep this stable for later releases; the initializer verifies it and refuses to overwrite a different hash.
 
 Environment variables:
 

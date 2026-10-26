@@ -49,6 +49,17 @@ afterEach(() => {
 });
 
 describe("account authentication", () => {
+  it("does not impose password length or required constraints", async () => {
+    fetchMock.mockResolvedValue(json({}, 401));
+
+    renderGate();
+
+    const input = await screen.findByLabelText("Password");
+    expect(input.hasAttribute("minlength")).toBe(false);
+    expect(input.hasAttribute("maxlength")).toBe(false);
+    expect(input.hasAttribute("required")).toBe(false);
+  });
+
   it("uses a username pattern that modern browsers can compile", async () => {
     fetchMock.mockResolvedValue(json({}, 401));
 

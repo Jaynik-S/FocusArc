@@ -30,13 +30,17 @@ def test_unknown_login_requires_explicit_registration_confirmation(client):
 
 
 def test_registration_signs_in_and_normalizes_username(client):
-    response = _register(client, " New-User ")
+    response = _register(client, " New-User ", "")
 
-    assert response.status_code == 201
+    assert response.status_code == 201, response.text
     assert response.json() == {"username": "new-user"}
     assert "focusarc_session=" in response.headers["set-cookie"]
     assert "httponly" in response.headers["set-cookie"].lower()
     assert client.get("/api/auth/session").json() == {"username": "new-user"}
+
+    client.post("/api/auth/logout", json={})
+    login = client.post("/api/auth/login", json=_credentials("new-user", ""))
+    assert login.status_code == 200
 
 
 def test_logout_clears_authenticated_session(client):

@@ -150,7 +150,7 @@ def main() -> None:
         with Session(engine) as db, db.begin():
             today = datetime.now(timezone.utc).astimezone(ZoneInfo("America/Toronto")).date()
             if args.create_account:
-                password = os.getenv("FOCUSARC_DEMO_PASSWORD") or getpass.getpass("New demo password (8-128 characters): ")
+                password = os.getenv("FOCUSARC_DEMO_PASSWORD") or getpass.getpass("New demo password: ")
                 timer_count, session_count = create_and_seed_demo_account(db, args.username, password, today)
             else:
                 timer_count, session_count = seed_demo_account(db, args.username, today)

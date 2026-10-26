@@ -30,11 +30,6 @@ def test_demo_guard_also_accepts_the_requested_demo_username():
     validate_demo_target(settings, "demo")
 
 
-def test_account_bootstrap_rejects_short_passwords_before_database_access():
-    with pytest.raises(ValueError):
-        demo_analytics.create_and_seed_demo_account(GuardDB([]), "demo", "123", date(2026, 10, 17))
-
-
 def test_account_bootstrap_creates_hashed_credentials_and_history_atomically(db_session):
     from sqlalchemy import func, select
     from app.models.session import Session as StudySession

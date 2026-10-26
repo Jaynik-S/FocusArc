@@ -1,13 +1,13 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 from app.security import normalize_username
 
 
 class LoginRequest(BaseModel):
     username: str
-    password: str = Field(min_length=8, max_length=128)
+    password: str
 
     @field_validator("username")
     @classmethod
