@@ -9,6 +9,25 @@ export type Timer = {
   updated_at: string;
 };
 
+export type StudyStateResponse = {
+  username: string;
+  changed: boolean;
+  revision: number;
+  server_now: string;
+  study_timezone: string;
+  day_date: string;
+  day_start_at: string;
+  day_end_at: string;
+  lease_expires_at: string | null;
+  active_session?: Session | null;
+  timers?: Array<Timer & { completed_today_seconds: number }>;
+};
+
+export type StudySnapshot = StudyStateResponse & {
+  active_session: Session | null;
+  timers: Array<Timer & { completed_today_seconds: number }>;
+};
+
 export type Session = {
   id: string;
   timer_id: string;

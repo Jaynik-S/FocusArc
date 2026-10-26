@@ -1,3 +1,7 @@
+import asyncio
+import logging
+from contextlib import asynccontextmanager, suppress
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -5,12 +9,43 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.router import router
 from app.settings import Settings, get_settings
+from app.db import SessionLocal
+from app.services.study_state import expire_stale_accounts
+
+logger = logging.getLogger(__name__)
+
+
+def _expire_study_leases() -> None:
+    with SessionLocal() as db:
+        expire_stale_accounts(db)
+        db.commit()
+
+
+async def _sweep_study_leases() -> None:
+    while True:
+        await asyncio.sleep(15)
+        try:
+            await asyncio.to_thread(_expire_study_leases)
+        except Exception as exc:
+            logger.warning('Study lease sweep failed (%s)', type(exc).__name__)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    sweeper = asyncio.create_task(_sweep_study_leases())
+    try:
+        yield
+    finally:
+        sweeper.cancel()
+        with suppress(asyncio.CancelledError):
+            await sweeper
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     configured = settings or get_settings()
     application = FastAPI(
         title="FocusArc API",
+        lifespan=lifespan,
         debug=configured.app_env != "prod",
         docs_url=None if configured.app_env == "prod" else "/docs",
         redoc_url=None if configured.app_env == "prod" else "/redoc",

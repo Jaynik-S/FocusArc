@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { storageForAccount } from "../storage/accountStorage";
+import * as TimerRuntime from "./TimerRuntimeContext";
 
 type TimerSelectionContextValue = {
   selectedTimerId: string | null;
@@ -29,10 +30,20 @@ export const TimerSelectionProvider = ({
   children: React.ReactNode;
   username: string;
 }) => {
+  const runtime = "useOptionalTimerRuntime" in TimerRuntime ? TimerRuntime.useOptionalTimerRuntime() : undefined;
+  const activeTimerId = runtime?.activeSession?.timer_id ?? null;
+  const previousActiveTimerId = useRef<string | null>(null);
   const [selectedTimerId, setSelectedTimerId] = useState<string | null>(() => {
     const stored = readStoredSelectedTimer(username);
     return stored || null;
   });
+
+  useEffect(() => {
+    if (activeTimerId && activeTimerId !== previousActiveTimerId.current) {
+      setSelectedTimerId(activeTimerId);
+    }
+    previousActiveTimerId.current = activeTimerId;
+  }, [activeTimerId]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

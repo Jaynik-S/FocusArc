@@ -1,3 +1,4 @@
+from study_helpers import study_post
 from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
@@ -111,7 +112,7 @@ def test_active_adjustment_survives_recovery_switch_and_stop(client, db_session,
     second = _create_timer(client, "Physics")
     start = datetime(2026, 1, 2, 10, tzinfo=timezone.utc)
     _freeze_time(monkeypatch, start)
-    current = client.post(f"/api/timers/{timer['id']}/start", json={"client_tz": "UTC"}).json()["active_session"]
+    current = study_post(client, f"/api/timers/{timer['id']}/start", json={"client_tz": "UTC"}).json()["active_session"]
     _freeze_time(monkeypatch, start + timedelta(minutes=2))
     response = adjust(client, current, -300)
     assert response.status_code == 200
@@ -119,28 +120,32 @@ def test_active_adjustment_survives_recovery_switch_and_stop(client, db_session,
     assert datetime.fromisoformat(current["start_at"]) == start + timedelta(minutes=2)
     assert current["end_at"] is None
     current = adjust(client, current, 600).json()
+    assert client.post('/api/study-heartbeat', json={'active_session_id': current['id']}).status_code == 204
     recovered = client.get("/api/active-session").json()["active_session"]
     assert recovered["id"] == current["id"]
     assert datetime.fromisoformat(recovered["start_at"]) == datetime.fromisoformat(current["start_at"])
     _freeze_time(monkeypatch, start + timedelta(minutes=5))
-    switched = client.post(f"/api/timers/{second['id']}/start", json={"client_tz": "UTC"}).json()
+    switched = study_post(client, f"/api/timers/{second['id']}/start", json={"client_tz": "UTC"}).json()
     assert switched["stopped_session"]["duration_seconds"] == 780
     assert datetime.fromisoformat(switched["stopped_session"]["end_at"]) == start + timedelta(minutes=5)
     _freeze_time(monkeypatch, start + timedelta(minutes=7))
-    stopped = client.post("/api/stop").json()["stopped_session"]
+    stopped = study_post(client, "/api/stop").json()["stopped_session"]
     assert stopped["duration_seconds"] == 120
 
 
 @pytest.mark.parametrize("delta,seconds", [(600, 2400), (-300, 1500), (-3000, 0)])
-def test_legacy_stop_adjustment_moves_start_not_end(client, db_session, monkeypatch, delta, seconds):
+def test_versioned_stop_adjustment_moves_start_not_end(client, db_session, monkeypatch, delta, seconds):
     _register(client)
     timer = _create_timer(client, "Algorithms")
     start = datetime(2026, 1, 2, 10, tzinfo=timezone.utc)
     _freeze_time(monkeypatch, start)
-    client.post(f"/api/timers/{timer['id']}/start", json={"client_tz": "UTC"})
-    _freeze_time(monkeypatch, start + timedelta(hours=1))
+    active = study_post(client, f"/api/timers/{timer['id']}/start", json={"client_tz": "UTC"}).json()['active_session']
+    for minute in range(4, 30, 4):
+        _freeze_time(monkeypatch, start + timedelta(minutes=minute))
+        assert client.post('/api/study-heartbeat', json={'active_session_id': active['id']}).status_code == 204
     end = start + timedelta(minutes=30)
-    stopped = client.post("/api/stop", json={"adjustment_seconds": delta, "stopped_at_client": end.isoformat()}).json()["stopped_session"]
+    _freeze_time(monkeypatch, end)
+    stopped = study_post(client, "/api/stop", json={"adjustment_seconds": delta, "stopped_at_client": start.isoformat()}).json()["stopped_session"]
     assert datetime.fromisoformat(stopped["end_at"]) == end
     assert datetime.fromisoformat(stopped["start_at"]) == end - timedelta(seconds=seconds)
     assert stopped["duration_seconds"] == seconds
@@ -149,7 +154,7 @@ def test_legacy_stop_adjustment_moves_start_not_end(client, db_session, monkeypa
 def test_adjusting_before_reset_does_not_repopulate_cycle_total(client, db_session):
     seed(client, db_session)
     previous = saved(client)
-    assert client.post("/api/totals/reset").status_code == 200
+    assert study_post(client, "/api/totals/reset").status_code == 200
     assert adjust(client, previous, 600).status_code == 200
     assert client.get("/api/timers").json()["timers"][0]["cycle_total_seconds"] == 0
     assert saved(client)["duration_seconds"] == 2400

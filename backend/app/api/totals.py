@@ -11,6 +11,7 @@ from app.schemas.session import StopTimerRequest
 from app.schemas.stats import TimerTotal
 from app.schemas.totals import ResetTotalsResponse
 from app.services import sessions as sessions_service
+from app.services.study_state import prepare_command
 
 router = APIRouter(prefix="/totals", tags=["totals"])
 
@@ -22,9 +23,11 @@ def reset_totals(
     payload: StopTimerRequest | None = None,
 ) -> ResetTotalsResponse:
     username = request.state.username
-    sessions_service.lock_study_data(db, username)
+    prepare_command(db, username, payload)
     adjustment_seconds = payload.adjustment_seconds if payload else None
-    sessions_service.stop_active_session(db, username, adjustment_seconds)
+    stopped = sessions_service.stop_active_session(db, username, adjustment_seconds, increment_revision=False)
+    changed = stopped is not None or db.scalar(select(Timer.id).where(
+        Timer.username == username, Timer.cycle_total_seconds != 0).limit(1)) is not None
 
     with db.begin_nested():
         db.execute(
@@ -36,6 +39,8 @@ def reset_totals(
     timers = db.execute(
         select(Timer.id).where(Timer.username == username)
     ).all()
+    if changed:
+        sessions_service.increment_study_revision(db, username)
 
     return ResetTotalsResponse(
         totals=[

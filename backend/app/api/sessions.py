@@ -21,6 +21,7 @@ from app.schemas.session import (
     WeekScheduleDay,
 )
 from app.services import sessions as sessions_service
+from app.services.study_state import prepare_command
 
 router = APIRouter(tags=["sessions"])
 
@@ -67,6 +68,7 @@ def start_timer(
     db: Session = Depends(get_db),
 ) -> StartTimerResponse:
     username = request.state.username
+    prepare_command(db, username, payload)
     try:
         stopped_session, active_session = sessions_service.start_timer(
             db,
@@ -99,10 +101,10 @@ def stop_timer(
     payload: StopTimerRequest | None = None,
 ) -> StopTimerResponse:
     username = request.state.username
+    prepare_command(db, username, payload)
     adjustment_seconds = payload.adjustment_seconds if payload else None
-    stopped_at_client = payload.stopped_at_client if payload else None
     stopped_session = sessions_service.stop_active_session(
-        db, username, adjustment_seconds, stopped_at_client
+        db, username, adjustment_seconds
     )
     return StopTimerResponse(
         stopped_session=SessionOut.model_validate(stopped_session)

@@ -23,11 +23,13 @@ type DayTimelineProps = {
   timers: Timer[];
   timeZone?: string;
   dayDate?: string;
+  nowMs?: number;
+  commandsDisabled?: boolean;
 };
 
-const DayTimeline = ({ sessions, timers, timeZone, dayDate }: DayTimelineProps) => {
+const DayTimeline = ({ sessions, timers, timeZone, dayDate, nowMs = Date.now(), commandsDisabled = false }: DayTimelineProps) => {
   const zone = timeZone ?? getClientTimezone();
-  const day = dayDate ?? getLocalDateString(new Date(), zone);
+  const day = dayDate ?? getLocalDateString(new Date(nowMs), zone);
   const bounds = useMemo(() => dayBounds(day, zone), [day, zone]);
   const [selected, setSelected] = useState<Session | null>(null);
   const adjustment = useSessionAdjustment();
@@ -46,7 +48,7 @@ const DayTimeline = ({ sessions, timers, timeZone, dayDate }: DayTimelineProps) 
   const blocks = sortedSessions.map((session) => {
     const timer = timerMap.get(session.timer_id);
     const start = new Date(session.start_at);
-    const end = session.end_at ? new Date(session.end_at) : new Date();
+    const end = session.end_at ? new Date(session.end_at) : new Date(nowMs);
     const clampedStart = Math.max(bounds.start, start.getTime());
     const clampedEnd = Math.min(bounds.end, end.getTime());
     const duration = Math.max(0, (clampedEnd - clampedStart) / 60000);
@@ -90,8 +92,8 @@ const DayTimeline = ({ sessions, timers, timeZone, dayDate }: DayTimelineProps) 
   return (
     <>
     {selected ? <div className="schedule-session-editor">
-      <div><strong>{selectedTimer?.name ?? "Timer"}</strong><div className="muted">{formatRange(new Date(selected.start_at), selected.end_at ? new Date(selected.end_at) : new Date(), zone)} · {formatDuration(selected.duration_seconds ?? 0)}</div></div>
-      {selected.end_at ? <SessionAdjustmentControls busy={adjustment.busy} onAdjust={(delta) => {
+      <div><strong>{selectedTimer?.name ?? "Timer"}</strong><div className="muted">{formatRange(new Date(selected.start_at), selected.end_at ? new Date(selected.end_at) : new Date(nowMs), zone)} · {formatDuration(selected.duration_seconds ?? Math.max(0, Math.floor((nowMs - Date.parse(selected.start_at)) / 1000)))}</div></div>
+      {selected.end_at ? <SessionAdjustmentControls busy={adjustment.busy || commandsDisabled} onAdjust={(delta) => {
         void adjustment.adjust(selected, delta).then((updated) => { if (updated) setSelected(updated); });
       }} /> : <span className="muted">Adjust the running timer on the Timers page.</span>}
     </div> : null}

@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AnalyticsFiltersValue } from "../components/stats/AnalyticsFilters";
 import StatsOverview from "../components/stats/StatsOverview";
 import StatsReports from "../components/stats/StatsReports";
-import { getClientTimezone, getLocalDateString, shiftCivilDate } from "../utils/date";
+import { getLocalDateString, shiftCivilDate } from "../utils/date";
+import * as TimerRuntime from "../context/TimerRuntimeContext";
 
 export default function StatsPage() {
   const [params, setParams] = useSearchParams();
-  const [clientTz, setClientTz] = useState(getClientTimezone);
-  const [today, setToday] = useState(() => getLocalDateString(new Date(), clientTz));
+  const runtime = "useOptionalTimerRuntime" in TimerRuntime ? TimerRuntime.useOptionalTimerRuntime() : undefined;
+  const clientTz = runtime?.timeZone ?? "America/Toronto";
+  const today = runtime?.today ?? getLocalDateString(new Date(runtime?.nowMs ?? Date.now()), clientTz);
   const previousToday = useRef(today);
   const reports = params.get("view") === "reports";
   const preset = params.get("range") ?? (params.has("from") || params.has("to") ? "custom" : "90d");
@@ -22,17 +24,6 @@ export default function StatsPage() {
     });
   }, [setParams]);
 
-  useEffect(() => {
-    const checkDate = () => {
-      const zone = getClientTimezone();
-      setClientTz(zone);
-      setToday(getLocalDateString(new Date(), zone));
-    };
-    const interval = window.setInterval(checkDate, 60000);
-    window.addEventListener("focus", checkDate);
-    document.addEventListener("visibilitychange", checkDate);
-    return () => { window.clearInterval(interval); window.removeEventListener("focus", checkDate); document.removeEventListener("visibilitychange", checkDate); };
-  }, []);
   useEffect(() => {
     if (previousToday.current === today) return;
     previousToday.current = today;
@@ -49,6 +40,6 @@ export default function StatsPage() {
           onClick={() => setParams((current) => { const next = new URLSearchParams(current); if (isReports) next.set("view", "reports"); else next.delete("view"); return next; })}>{isReports ? "Reports" : "Overview"}</button>)}
       </div>
     </div>
-    {reports ? <StatsReports /> : <StatsOverview filters={filters} onChange={updateFilters} today={today} clientTz={clientTz} />}
+    {reports ? <StatsReports today={today} clientTz={clientTz} /> : <StatsOverview filters={filters} onChange={updateFilters} today={today} clientTz={clientTz} />}
   </div>;
 }

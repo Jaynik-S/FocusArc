@@ -7,7 +7,6 @@ import { useStatsWeek } from "../../hooks/useStatsWeek";
 import { useReportingTimers } from "../../hooks/useReportingTimers";
 import {
   formatWeekday,
-  getClientTimezone,
   getLocalDateString,
   getWeekStartDateString,
 } from "../../utils/date";
@@ -19,14 +18,11 @@ const sumTotals = (totals: TimerTotal[]) =>
 const getMax = (values: number[]) =>
   values.length ? Math.max(...values) : 0;
 
-const StatsReports = () => {
-  const clientTz = useMemo(() => getClientTimezone(), []);
-  const [dayDate, setDayDate] = useState(() =>
-    getLocalDateString(new Date(), clientTz)
-  );
-  const [weekStart, setWeekStart] = useState(() =>
-    getWeekStartDateString(new Date(), clientTz)
-  );
+const StatsReports = ({ clientTz = "America/Toronto", today = getLocalDateString(new Date(), clientTz) }: { clientTz?: string; today?: string }) => {
+  const [selectedDay, setDayDate] = useState<string | null>(null);
+  const [selectedWeek, setWeekStart] = useState<string | null>(null);
+  const dayDate = selectedDay ?? today;
+  const weekStart = selectedWeek ?? getWeekStartDateString(new Date(`${today}T00:00:00Z`), "UTC");
   const [avgDays, setAvgDays] = useState(14);
 
   const timersState = useReportingTimers();
@@ -179,13 +175,13 @@ const StatsReports = () => {
             <div className="week-stats-list">
               {weekRows.map((row) => {
                 const percent = weekMax ? (row.totalSeconds / weekMax) * 100 : 0;
-                const dateObj = new Date(`${row.dayDate}T00:00:00`);
+                const dateObj = new Date(`${row.dayDate}T00:00:00Z`);
                 return (
                   <div className="week-stats-day" key={row.dayDate}>
                     <div className="week-stats-header">
                       <div>
                         <div className="week-stats-title">
-                          {formatWeekday(dateObj, clientTz)} {row.dayDate}
+                          {formatWeekday(dateObj, "UTC")} {row.dayDate}
                         </div>
                         <div className="week-stats-total">
                           {formatDurationShort(row.totalSeconds)} total

@@ -14,6 +14,7 @@ const TimersPage = () => {
   const [editingTimer, setEditingTimer] = useState<Timer | null>(null);
   const [actionError, setActionError] = useState("");
   const [adjustmentStatus, setAdjustmentStatus] = useState("");
+  const [applyingSaved, setApplyingSaved] = useState(false);
   const {
     activeSession,
     elapsedSeconds,
@@ -23,7 +24,14 @@ const TimersPage = () => {
     offsets,
     adjustOffset,
     elapsedByTimer,
+    synced = true,
+    legacyPendingAdjustments = {},
+    legacyPendingOffsets = {},
+    applyLegacyAdjustment,
   } = useTimerRuntime();
+  const controlsBusy = busy || applyingSaved;
+  const hasSavedDrafts = Object.keys(legacyPendingAdjustments).length > 0 || Object.keys(legacyPendingOffsets).length > 0;
+  const savedActiveAdjustment = activeSession ? legacyPendingAdjustments[activeSession.id] ?? 0 : 0;
 
   const selectedTimer = useMemo(() => {
     if (!selectedTimerId) {
@@ -52,7 +60,7 @@ const TimersPage = () => {
   const accentContrast = getContrastColor(accentColor);
 
   const handlePlayPause = async () => {
-    if (!selectedTimerId) {
+    if (!selectedTimerId || controlsBusy || !synced) {
       return;
     }
     setActionError("");
@@ -70,7 +78,7 @@ const TimersPage = () => {
   };
 
   const handleAdjust = async (delta: number) => {
-    if (!selectedTimerId || busy) return;
+    if (!selectedTimerId || controlsBusy || !synced) return;
     setActionError("");
     setAdjustmentStatus("");
     try {
@@ -81,7 +89,26 @@ const TimersPage = () => {
     }
   };
 
+  const handleApplySaved = async () => {
+    if (!activeSession || !savedActiveAdjustment || controlsBusy || !synced) return;
+    setActionError("");
+    setAdjustmentStatus("");
+    setApplyingSaved(true);
+    try {
+      await applyLegacyAdjustment(activeSession, savedActiveAdjustment);
+      setAdjustmentStatus("Saved adjustment applied.");
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : "Could not apply saved adjustment.");
+    } finally {
+      setApplyingSaved(false);
+    }
+  };
+
   const handleUpdate = async (values: TimerFormValues) => {
+    if (!synced || controlsBusy) {
+      setActionError("Reconnect and sync before editing a timer.");
+      return;
+    }
     if (!editingTimer) {
       return;
     }
@@ -95,7 +122,7 @@ const TimersPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!selectedTimer) {
+    if (!selectedTimer || !synced || controlsBusy) {
       return;
     }
     setActionError("");
@@ -126,6 +153,8 @@ const TimersPage = () => {
           <h1 className="timer-name" id="timer-heading">
             {selectedTimer ? selectedTimer.name : "Select a timer"}
           </h1>
+          <span className="muted">Today</span>
+          {!synced ? <span className="muted" role="status">Synchronizing study data… Timer controls are unavailable until connected.</span> : null}
         </div>
         <div
           className="timer-dial"
@@ -151,7 +180,7 @@ const TimersPage = () => {
             className="ghost accent timer-control-secondary"
             type="button"
             onClick={() => void handleAdjust(-300)}
-            disabled={!selectedTimerId || busy}
+            disabled={!selectedTimerId || controlsBusy || !synced}
           >
             −5 min
           </button>
@@ -159,7 +188,7 @@ const TimersPage = () => {
             className="primary timer-control-main"
             type="button"
             onClick={handlePlayPause}
-            disabled={!selectedTimerId || busy}
+            disabled={!selectedTimerId || controlsBusy || !synced}
           >
             {isActive ? "Pause" : "Play"}
           </button>
@@ -167,7 +196,7 @@ const TimersPage = () => {
             className="ghost accent timer-control-secondary"
             type="button"
             onClick={() => void handleAdjust(600)}
-            disabled={!selectedTimerId || busy}
+            disabled={!selectedTimerId || controlsBusy || !synced}
           >
             +10 min
           </button>
@@ -178,16 +207,21 @@ const TimersPage = () => {
               className="link-button"
               type="button"
               onClick={() => setEditingTimer(selectedTimer)}
+              disabled={controlsBusy || !synced}
             >
               Edit timer
             </button>
-            <button className="link-button" type="button" onClick={handleDelete}>
+            <button className="link-button" type="button" onClick={handleDelete} disabled={controlsBusy || !synced}>
               Delete timer
             </button>
           </div>
         ) : null}
         {actionError ? <div className="error" role="alert">{actionError}</div> : null}
         {adjustmentStatus ? <div className="muted" role="status">{adjustmentStatus}</div> : null}
+        {hasSavedDrafts ? <div className="muted">
+          <p>Saved browser adjustments are retained for review and excluded from shared totals.</p>
+          {savedActiveAdjustment ? <button className="link-button" type="button" onClick={() => void handleApplySaved()} disabled={controlsBusy || !synced}>Apply saved adjustment</button> : null}
+        </div> : null}
       </div>
       <TimerFormModal
         title="Edit timer"

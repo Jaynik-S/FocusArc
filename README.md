@@ -37,6 +37,7 @@ The hosted services are deployed independently so the frontend remains lightweig
 - **Progress reports:** track daily totals, weekly totals, averages, and course-level progress.
 - **Advanced analytics:** explore a 90/365-day activity calendar, hourly timer activity, weekly trends, and study consistency. Filter by course (including archived courses) or a custom range, then open a calendar day in History.
 - **State recovery:** preserve timer display state across refreshes and separate it by account.
+- **Cross-device sync:** share Toronto daily totals, running timers, History and Schedule edits across signed-in devices. Server-owned inactivity stops the timer after all devices stop sending heartbeats for five minutes.
 - **User accounts:** register and sign in with a username and password, then log out without exposing another account's local state.
 
 Typical uses include tracking study hours across several courses, reviewing how time was distributed during a week, and comparing planned work with recorded sessions.
@@ -49,7 +50,7 @@ Typical uses include tracking study hours across several courses, reviewing how 
 
 - [React 18](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite 6](https://vite.dev/), and [React Router](https://reactrouter.com/).
 - A **responsive single-page interface** with routes for timers, schedules, history, and statistics.
-- **Account-scoped browser storage** for timer counters, offsets, selections, and preferences.
+- **Server-calibrated timers and versioned account snapshots**; browser storage retains selections, preferences, and legacy drafts rather than authoritative counters.
 - [Vitest](https://vitest.dev/) and [Testing Library](https://testing-library.com/) coverage for authentication, storage isolation, timer recovery, and UI behavior.
 
 ### ⚙️ Backend
@@ -64,9 +65,9 @@ Typical uses include tracking study hours across several courses, reviewing how 
 
 ### 🗄️ Database model
 
-PostgreSQL stores users, timers, sessions, and day summaries. Timers hold course metadata and accumulated totals; sessions hold timestamps, durations, time zones, and reporting dates. Aggregate SQL queries produce daily and weekly statistics without rebuilding reports entirely in the browser.
+PostgreSQL stores users, timers, sessions, and day summaries. Accounts hold the shared revision, reporting time zone, and inactivity lease; timers hold course metadata and cycle totals. Sessions hold timestamps and durations. The backend allocates their intervals into daily and weekly reports.
 
-The Stats **Overview** allocates completed sessions across local dates in the displayed time zone. Recorded totals include manual duration adjustments; the hourly chart shows elapsed timer activity. The **Reports** tab preserves the original saved-date reports. See [analytics calculations, API, tests, and demo setup](docs/analytics.md).
+The Stats **Overview** and **Reports** allocate completed sessions into their displayed calendar intervals. The live dial and sidebar show **Today** in America/Toronto, including the running session. See [cross-device synchronization, verification, and migration notes](docs/cross-device-sync.md) and [analytics calculations](docs/analytics.md).
 
 For a populated local account (`demo` / `demo12345`) and step-by-step local testing, Neon checks, and Render deployment, see the [analytics demo and release guide](docs/analytics-demo-release.md).
 

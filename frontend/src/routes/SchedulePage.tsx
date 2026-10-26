@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import * as TimerRuntime from "../context/TimerRuntimeContext";
 
 import DayTimeline from "../components/DayTimeline";
 import { useScheduleDay } from "../hooks/useScheduleDay";
@@ -6,28 +7,27 @@ import { useReportingTimers } from "../hooks/useReportingTimers";
 import {
   formatDateShort,
   formatWeekday,
-  getClientTimezone,
   getLocalDateString,
+  shiftCivilDate,
 } from "../utils/date";
 
 const SchedulePage = () => {
-  const clientTz = useMemo(() => getClientTimezone(), []);
-  const [dayDate, setDayDate] = useState(() =>
-    getLocalDateString(new Date(), clientTz)
-  );
+  const runtime = "useOptionalTimerRuntime" in TimerRuntime ? TimerRuntime.useOptionalTimerRuntime() : undefined;
+  const clientTz = runtime?.timeZone ?? "America/Toronto";
+  const today = runtime?.today ?? getLocalDateString(new Date(runtime?.nowMs ?? Date.now()), clientTz);
+  const [selectedDate, setDayDate] = useState<string | null>(null);
+  const dayDate = selectedDate ?? today;
   const timersState = useReportingTimers();
   const daySchedule = useScheduleDay(dayDate);
 
-  const dateObj = useMemo(() => new Date(`${dayDate}T00:00:00`), [dayDate]);
-  const dateLabel = `${formatWeekday(dateObj, clientTz)} ${formatDateShort(
+  const dateObj = useMemo(() => new Date(`${dayDate}T00:00:00Z`), [dayDate]);
+  const dateLabel = `${formatWeekday(dateObj, "UTC")} ${formatDateShort(
     dateObj,
-    clientTz
+    "UTC"
   )}`;
 
   const shiftDay = (offset: number) => {
-    const nextDate = new Date(`${dayDate}T00:00:00`);
-    nextDate.setDate(nextDate.getDate() + offset);
-    setDayDate(getLocalDateString(nextDate, clientTz));
+    setDayDate(shiftCivilDate(dayDate, offset));
   };
 
   return (
@@ -57,6 +57,8 @@ const SchedulePage = () => {
           sessions={daySchedule.sessions}
           timers={timersState.timers}
           timeZone={clientTz}
+          nowMs={runtime?.nowMs}
+          commandsDisabled={runtime?.synced === false || Boolean(runtime?.busy)}
         />
       </div>
     </div>

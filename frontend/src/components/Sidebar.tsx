@@ -36,7 +36,7 @@ const Sidebar = ({ username }: SidebarProps) => {
   const isReady = Boolean(username);
   const timersState = useTimers();
   const { selectedTimerId, setSelectedTimerId } = useSelectedTimer();
-  const { activeSession, elapsedSeconds, offsets, elapsedByTimer, error: syncError } = useTimerRuntime();
+  const { activeSession, elapsedSeconds, offsets, elapsedByTimer, error: syncError, synced = true, busy: timerBusy = false } = useTimerRuntime();
   const { logout } = useAuth();
   const [theme, setTheme] = useState<"light" | "dark">(() => getInitialTheme(username));
   const [createOpen, setCreateOpen] = useState(false);
@@ -47,10 +47,10 @@ const Sidebar = ({ username }: SidebarProps) => {
     if (!timersState.loading && timersState.timers.length > 0) {
       const exists = timersState.timers.some((timer) => timer.id === selectedTimerId);
       if (!selectedTimerId || !exists) {
-        setSelectedTimerId(timersState.timers[0].id);
+        setSelectedTimerId(activeSession?.timer_id ?? timersState.timers[0].id);
       }
     }
-  }, [timersState.loading, timersState.timers, selectedTimerId, setSelectedTimerId]);
+  }, [timersState.loading, timersState.timers, selectedTimerId, setSelectedTimerId, activeSession?.timer_id]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -78,6 +78,10 @@ const Sidebar = ({ username }: SidebarProps) => {
   }, [selectedTimer]);
 
   const handleCreate = async (values: TimerFormValues) => {
+    if (!synced || timerBusy) {
+      setActionError("Reconnect and sync before creating a timer.");
+      return;
+    }
     setActionError("");
     try {
       await timersState.createTimer(values);
@@ -113,14 +117,15 @@ const Sidebar = ({ username }: SidebarProps) => {
       </div>
       <PrimaryNav />
       {syncError && <p className="error" role="status">{syncError}</p>}
+      {!synced && !syncError ? <p className="muted" role="status">Synchronizing study data…</p> : null}
       <section className="sidebar-section" aria-labelledby="timer-list-heading">
         <div className="sidebar-section-header">
-          <span id="timer-list-heading">Timers</span>
+          <span id="timer-list-heading">Timers · Today</span>
           <button
             className="link-button"
             type="button"
             onClick={() => setCreateOpen(true)}
-            disabled={!isReady}
+            disabled={!isReady || !synced || timerBusy}
           >
             New
           </button>

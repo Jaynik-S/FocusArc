@@ -7,6 +7,7 @@ from app.db import get_db
 from app.schemas.stats import EndDayRequest, EndDayResponse, TimerTotal
 from app.services import sessions as sessions_service
 from app.services import stats as stats_service
+from app.services.study_state import prepare_command
 
 router = APIRouter(tags=["stats"])
 
@@ -16,6 +17,7 @@ def end_day(
     payload: EndDayRequest, request: Request, db: Session = Depends(get_db)
 ) -> EndDayResponse:
     username = request.state.username
+    prepare_command(db, username, payload)
 
     try:
         sessions_service.stop_active_session_for_day(

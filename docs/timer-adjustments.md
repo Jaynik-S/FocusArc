@@ -1,5 +1,8 @@
 # Timer duration adjustments
 
+The interval adjustment rules below still apply. Shared daily counters, clock
+recovery, and legacy browser-draft handling now follow [cross-device synchronization](cross-device-sync.md).
+
 ## Behavior and data flow
 
 The Timers page, History, and Schedule use the same backend adjustment operation.

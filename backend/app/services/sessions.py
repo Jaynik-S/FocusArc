@@ -23,9 +23,16 @@ def _increment_cycle_total(db: Session, timer_id: UUID, delta_seconds: int) -> N
     timer.cycle_total_seconds = max(0, timer.cycle_total_seconds + delta_seconds)
 
 
-def lock_study_data(db: Session, username: str) -> None:
+def lock_study_data(db: Session, username: str) -> User:
     # Serialize session edits, stops, switches and resets in the same lock order.
-    db.execute(select(User.username).where(User.username == username).with_for_update())
+    return db.scalar(select(User).where(User.username == username).with_for_update()
+                     .execution_options(populate_existing=True))
+
+
+def increment_study_revision(db: Session, username: str) -> None:
+    user = db.get(User, username)
+    user.study_revision += 1
+    db.flush()
 
 
 def _move_start(session: SessionModel, delta_seconds: int, end_at: datetime) -> None:
@@ -60,6 +67,9 @@ def _refresh_summaries(db: Session, username: str) -> None:
 
 def adjust_session(db: Session, username: str, session_id: UUID, data: AdjustSessionRequest) -> SessionModel | None:
     lock_study_data(db, username)
+    if data.expected_revision is not None:
+        from app.services.study_state import check_revision
+        check_revision(db.get(User, username), data.expected_revision)
     session = db.scalar(select(SessionModel).where(
         SessionModel.id == session_id, SessionModel.username == username,
     ).with_for_update().execution_options(populate_existing=True))
@@ -70,6 +80,7 @@ def adjust_session(db: Session, username: str, session_id: UUID, data: AdjustSes
     if session.start_at.astimezone(timezone.utc) != data.expected_start_at.astimezone(timezone.utc) or actual_end != expected_end:
         raise ValueError("session_changed")
     previous_duration = session.duration_seconds or 0
+    previous_start = session.start_at
     _move_start(session, data.delta_seconds, session.end_at or datetime.now(timezone.utc))
     if session.end_at is not None:
         timer = db.get(Timer, session.timer_id)
@@ -77,6 +88,8 @@ def adjust_session(db: Session, username: str, session_id: UUID, data: AdjustSes
             _increment_cycle_total(db, session.timer_id, session.duration_seconds - previous_duration)
     db.flush()
     _refresh_summaries(db, username)
+    if session.start_at != previous_start:
+        increment_study_revision(db, username)
     return session
 
 
@@ -173,6 +186,8 @@ def start_timer(
                 day_of_week=day_of_week,
             )
             db.add(new_session)
+            db.get(User, username).study_last_seen_at = now
+            increment_study_revision(db, username)
 
         db.refresh(new_session)
         if stopped_session is not None:
@@ -191,6 +206,7 @@ def stop_active_session(
     username: str,
     adjustment_seconds: int | None = None,
     stopped_at_client: datetime | None = None,
+    *, increment_revision: bool = True,
 ) -> SessionModel | None:
     lock_study_data(db, username)
     now = datetime.now(timezone.utc)
@@ -220,6 +236,8 @@ def stop_active_session(
             return None
 
         _finish_session(db, active, end_at, adjustment_seconds or 0)
+        if increment_revision:
+            increment_study_revision(db, username)
 
     db.refresh(active)
     return active
@@ -276,6 +294,7 @@ def stop_active_session_for_day(
                 end_at = active.start_at
 
         _finish_session(db, active, end_at)
+        increment_study_revision(db, username)
 
     db.refresh(active)
     return active
