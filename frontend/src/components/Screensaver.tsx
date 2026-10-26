@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Timer } from "../api/types";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
@@ -31,22 +31,29 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds }: ScreensaverProps
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     (pause.current?.disabled ? exit.current : pause.current)?.focus({ preventScroll: true });
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); onExit(); }
+      if (event.key !== "Tab") return;
+      const buttons = Array.from(layer.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (!layer.current?.contains(document.activeElement) ||
+          (event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last)) {
+        event.preventDefault(); (event.shiftKey ? last : first)?.focus();
+      }
+    };
+    // Disabled buttons can lose focus to BODY in Chromium, so listen outside the layer too.
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
+      document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = overflow;
       if (previous?.isConnected) previous.focus({ preventScroll: true });
     };
-  }, [isOpen]);
+  }, [isOpen, onExit]);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Escape") { event.preventDefault(); onExit(); }
-    if (event.key !== "Tab") return;
-    const buttons = Array.from(layer.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
-    const first = buttons[0];
-    const last = buttons[buttons.length - 1];
-    if ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last)) {
-      event.preventDefault(); (event.shiftKey ? last : first)?.focus();
-    }
-  };
+  useEffect(() => {
+    if (isOpen && disabled) exit.current?.focus({ preventScroll: true });
+  }, [isOpen, disabled]);
 
   const act = async (delta?: number) => {
     if (disabled || !timer || activeSession?.timer_id !== timer.id) return;
@@ -61,7 +68,7 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds }: ScreensaverProps
 
   return (
     <section ref={layer} className="screensaver" data-open={isOpen} role="dialog" aria-modal={isOpen || undefined}
-      aria-label="Timer screensaver" aria-hidden={!isOpen} onKeyDown={handleKeyDown}>
+      aria-label="Timer screensaver" aria-hidden={!isOpen}>
       <div className="screensaver-wallpaper" data-testid="screensaver-wallpaper" data-palette={theme.name}
         style={{ backgroundImage: `url("${theme.src}")`, filter: theme.filter }} aria-hidden="true" />
       <button className="screensaver-exit" type="button" ref={exit} onClick={onExit} aria-label="Exit screensaver">

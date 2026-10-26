@@ -24,13 +24,13 @@ const MainLayout = () => {
 
   return (
     <>
-    <div className="app-layout" ref={normalView} aria-hidden={isOpen || undefined}>
-      <Sidebar username={user?.username ?? ""} />
-      <main className="main-content" id="main-content">
-        <Outlet />
-      </main>
-    </div>
-    <Screensaver isOpen={isOpen} onExit={exit} timer={timer} elapsedSeconds={displaySeconds} />
+      <div className="app-layout" ref={normalView} aria-hidden={isOpen || undefined}>
+        <Sidebar username={user?.username ?? ""} />
+        <main className="main-content" id="main-content">
+          <Outlet />
+        </main>
+      </div>
+      <Screensaver isOpen={isOpen} onExit={exit} timer={timer} elapsedSeconds={displaySeconds} />
     </>
   );
 };

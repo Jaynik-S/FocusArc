@@ -45,6 +45,10 @@ async page => {
       }, skew);
     }
     const a = await contextA.newPage(); const b = await contextB.newPage();
+    const leaveScreensavers = async () => Promise.all([a, b].map(async view => {
+      await view.getByRole('dialog', { name: 'Timer screensaver' }).waitFor();
+      await view.getByRole('button', { name: 'Exit screensaver', exact: true }).click();
+    }));
     for (const view of [a, b]) view.on('pageerror', error => errors.push(error.message));
     const login = async (view) => {
       await view.goto(origin);
@@ -58,6 +62,7 @@ async page => {
     assert(await seconds(a) === 0 && await seconds(b) === 0, 'Fresh account did not show shared zero daily totals');
     const startedAt = Date.now();
     await a.getByRole('button', { name: 'Play', exact: true }).click();
+    await leaveScreensavers();
     await b.getByRole('button', { name: 'Pause', exact: true }).waitFor();
     report.startPropagationMs = Date.now() - startedAt;
     await a.getByRole('button', { name: '+10 min', exact: true }).click();
@@ -99,6 +104,7 @@ async page => {
     await a.getByRole('link', { name: 'Timers', exact: true }).click();
     await a.getByRole('button', { name: /^Physics / }).click();
     await a.getByRole('button', { name: 'Play', exact: true }).click();
+    await leaveScreensavers();
     await b.getByRole('heading', { name: 'Physics', exact: true }).waitFor();
     await b.getByRole('button', { name: 'Pause', exact: true }).waitFor();
     const rejected = await seed.post(api + '/stop', { data: { expected_revision: stale.revision, expected_active_session_id: null } });
@@ -115,6 +121,7 @@ async page => {
     await eventually(async () => await seconds(a) === completedToday && await seconds(b) === completedToday, 'Cycle reset erased or desynchronized today totals');
     report.resetPreservesToday = true;
     await a.getByRole('button', { name: 'Play', exact: true }).click();
+    await leaveScreensavers();
     await b.getByRole('button', { name: 'Pause', exact: true }).waitFor();
     await a.getByRole('button', { name: '+10 min', exact: true }).click();
     await eventually(async () => await seconds(b) >= completedToday + 600, 'Second active adjustment missing');

@@ -76,3 +76,15 @@ it("retains the running view and shows failed actions instead of claiming succes
   expect(screen.getByRole("dialog")).toBeTruthy();
   expect(exit).not.toHaveBeenCalled();
 });
+
+it("keeps keyboard exit available when busy or offline controls lose focus to the document", () => {
+  const view = render(content());
+  state.runtime.synced = false;
+  view.rerender(content());
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: "Exit screensaver" }));
+  (document.activeElement as HTMLElement).blur();
+  fireEvent.keyDown(document.body, { key: "Tab" });
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: "Exit screensaver" }));
+  fireEvent.keyDown(document.body, { key: "Escape" });
+  expect(exit).toHaveBeenCalledTimes(1);
+});
