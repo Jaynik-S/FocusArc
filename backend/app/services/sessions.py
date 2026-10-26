@@ -46,13 +46,16 @@ def _finish_session(db: Session, session: SessionModel, end_at: datetime, adjust
 
 def _refresh_summaries(db: Session, username: str) -> None:
     from app.models.day_summary import DaySummary
-    from app.services.stats import compute_day_totals
+    from app.services.stats import compute_day_totals, upsert_day_summaries
 
     # Existing finalized summaries are caches; replace their values rather than add.
     summaries = db.scalars(select(DaySummary).where(DaySummary.username == username)).all()
     totals = {day: dict(compute_day_totals(db, username, day)) for day in {s.day_date for s in summaries}}
     for summary in summaries:
         summary.total_seconds = totals[summary.day_date].get(summary.timer_id, 0)
+    db.flush()
+    for day, values in totals.items():
+        upsert_day_summaries(db, username, day, values.items())
 
 
 def adjust_session(db: Session, username: str, session_id: UUID, data: AdjustSessionRequest) -> SessionModel | None:

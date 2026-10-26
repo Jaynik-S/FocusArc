@@ -13,6 +13,8 @@ with engine.connect() as connection:
     password_hash = next(c for c in inspector.get_columns('users') if c['name'] == 'password_hash')
     assert password_hash['nullable'] is True
     assert 'cycle_total_seconds' in {c['name'] for c in inspector.get_columns('timers')}
+    reset_at = next(c for c in inspector.get_columns('timers') if c['name'] == 'cycle_reset_at')
+    assert reset_at['nullable'] is True
     active = next(i for i in inspector.get_indexes('sessions') if i['name'] == 'ux_sessions_one_active_per_user')
     assert active['unique'] and 'end_at IS NULL' in str(active['dialect_options']['postgresql_where'])
     assert inspector.get_foreign_keys('sessions') and inspector.get_foreign_keys('timers')

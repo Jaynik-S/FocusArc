@@ -80,7 +80,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
                   className="primary"
                   type="button"
                   onClick={handleConfirm}
-                  disabled={busy}
+                  disabled={busy || timerBusy}
                 >
                   {busy ? "Resetting..." : "Confirm"}
                 </button>

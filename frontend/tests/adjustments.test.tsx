@@ -6,6 +6,8 @@ import { TimerRuntimeProvider, useTimerRuntime } from "../src/context/TimerRunti
 import HistoryPage from "../src/routes/HistoryPage";
 import SchedulePage from "../src/routes/SchedulePage";
 import DayTimeline from "../src/components/DayTimeline";
+import { notifyStudyDataChanged } from "../src/api/dataEvents";
+import { accountStorageKey } from "../src/storage/accountStorage";
 
 vi.mock("../src/contexts/AuthContext", () => ({ useAuth: () => ({ user: { username: "adjustments" } }) }));
 vi.mock("../src/utils/date", async (original) => ({ ...await original<object>(), getClientTimezone: () => "UTC" }));
@@ -121,5 +123,41 @@ describe("session adjustment integration", () => {
     const blocks = screen.getAllByRole("button", { name: /Algorithms.*00:35/i });
     expect(blocks).toHaveLength(2);
     expect(blocks[0].style.left).not.toBe(blocks[1].style.left);
+  });
+
+  it("keeps the visual end fixed when a short session is clamped to zero", () => {
+    const short = { ...initial, start_at: "2026-01-02T00:30:00Z", duration_seconds: 300 };
+    const view = render(<DayTimeline sessions={[short]} timers={[timer]} timeZone="UTC" dayDate="2026-01-02" />);
+    const original = screen.getByRole("button", { name: /Algorithms.*00:35/i });
+    const bottom = parseFloat(original.style.top) + parseFloat(original.style.height);
+    view.rerender(<DayTimeline sessions={[{ ...short, start_at: short.end_at!, duration_seconds: 0 }]} timers={[timer]} timeZone="UTC" dayDate="2026-01-02" />);
+    const zero = screen.getByRole("button", { name: /Algorithms.*00:35/i });
+    expect(parseFloat(zero.style.top) + parseFloat(zero.style.height)).toBe(bottom);
+  });
+
+  it("refreshes immediately after an old in-flight poll when another view changes data", async () => {
+    active = session = { ...initial, end_at: null, duration_seconds: null };
+    const wrapper = ({ children }: { children: React.ReactNode }) => <TimerRuntimeProvider username="adjustments">{children}</TimerRuntimeProvider>;
+    const hook = renderHook(() => useTimerRuntime(), { wrapper });
+    await waitFor(() => expect(hook.result.current.loading).toBe(false));
+    let finish!: (response: Response) => void;
+    const oldSession = { ...session };
+    vi.mocked(fetch).mockImplementationOnce(() => new Promise((done) => { finish = done; }));
+    let pending!: Promise<void>;
+    act(() => { pending = hook.result.current.refresh(); });
+    session = active = { ...session, start_at: "2026-01-01T23:55:00Z" };
+    act(() => notifyStudyDataChanged());
+    await act(async () => { finish(json({ active_session: oldSession })); await pending; });
+    await waitFor(() => expect(hook.result.current.elapsedSeconds).toBe(2400));
+  });
+
+  it("does not reapply legacy browser offsets to an already completed session", async () => {
+    localStorage.setItem(accountStorageKey("adjustments", "sessionAdjustments"), '{"session":600}');
+    const wrapper = ({ children }: { children: React.ReactNode }) => <TimerRuntimeProvider username="adjustments">{children}</TimerRuntimeProvider>;
+    const hook = renderHook(() => useTimerRuntime(), { wrapper });
+    await waitFor(() => expect(hook.result.current.loading).toBe(false));
+    await act(async () => { await hook.result.current.adjustOffset("course", 600); });
+    await waitFor(() => expect(hook.result.current.elapsedByTimer.course).toBe(2400));
+    expect(session.duration_seconds).toBe(2400);
   });
 });

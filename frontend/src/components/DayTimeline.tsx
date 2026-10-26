@@ -50,12 +50,14 @@ const DayTimeline = ({ sessions, timers, timeZone, dayDate }: DayTimelineProps) 
     const clampedStart = Math.max(bounds.start, start.getTime());
     const clampedEnd = Math.min(bounds.end, end.getTime());
     const duration = Math.max(0, (clampedEnd - clampedStart) / 60000);
+    const height = Math.max(MIN_BLOCK_HEIGHT, duration * PX_PER_MINUTE);
+    const bottom = (clampedEnd - bounds.start) / 60000 * PX_PER_MINUTE;
 
     return {
       session,
       timer,
-      top: (clampedStart - bounds.start) / 60000 * PX_PER_MINUTE,
-      height: Math.max(MIN_BLOCK_HEIGHT, duration * PX_PER_MINUTE),
+      top: Math.max(0, bottom - height),
+      height,
       timeRange: formatRange(start, end, zone),
       lane: 0,
       lanes: 1,

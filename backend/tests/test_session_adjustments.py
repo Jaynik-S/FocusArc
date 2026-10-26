@@ -165,6 +165,82 @@ def test_paused_timer_recovers_latest_session_after_refresh(client, db_session):
     assert client.get(f"/api/timers/{timer['id']}/latest-session").status_code == 404
 
 
+def test_adjustment_adds_course_to_already_finalized_previous_day(client, db_session):
+    _, model = seed(client, db_session)
+    other = _create_timer(client, "Physics")
+    db_session.add(DaySummary(username="jay", timer_id=UUID(other["id"]), day_date=date(2026, 1, 1), total_seconds=0))
+    db_session.commit()
+    assert adjust(client, saved(client), 600).status_code == 200
+    db_session.expire_all()
+    summary = db_session.scalar(select(DaySummary).where(DaySummary.timer_id == model.timer_id, DaySummary.day_date == date(2026, 1, 1)))
+    assert summary is not None
+    assert summary.total_seconds == 300
+
+
+def test_simultaneous_edits_apply_once_and_reject_stale_version(client, db_session, engine):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    from sqlalchemy.orm import Session
+    from app.schemas.session import AdjustSessionRequest
+
+    _, model = seed(client, db_session)
+    original = saved(client)
+    data = AdjustSessionRequest(delta_seconds=600, expected_start_at=original["start_at"], expected_end_at=original["end_at"])
+    session_id = model.id
+    gate = Barrier(2)
+    def edit():
+        with Session(engine) as db:
+            gate.wait(timeout=5)
+            try:
+                session = service.adjust_session(db, "jay", session_id, data)
+                seconds = session.duration_seconds
+                db.commit()
+                return seconds
+            except ValueError as exc:
+                db.rollback()
+                return str(exc)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: edit(), range(2)))
+    assert sorted(results, key=str) == [2400, "session_changed"]
+    assert saved(client)["duration_seconds"] == 2400
+    assert client.get("/api/timers").json()["timers"][0]["cycle_total_seconds"] == 2400
+
+
+def test_reports_use_display_timezone_for_adjusted_intervals(client, db_session):
+    timer, _ = seed(client, db_session)
+    assert adjust(client, saved(client), 600).status_code == 200
+    expected = [{"timer_id": timer["id"], "total_seconds": 2400}]
+    assert client.get("/api/stats/day?day_date=2026-01-01&client_tz=America/Toronto").json()["totals"] == expected
+    week = client.get("/api/stats/week?week_start=2025-12-29&client_tz=America/Toronto").json()["daily"]
+    assert [d["totals"] for d in week if d["totals"]] == [expected]
+    assert client.get("/api/stats/day?day_date=2026-01-01&client_tz=Nope").status_code == 400
+
+
+def test_legacy_zero_session_can_expand_after_data_migration(client, db_session, engine):
+    import importlib.util
+    from pathlib import Path
+    from alembic.migration import MigrationContext
+    from alembic.operations import Operations
+    from sqlalchemy import text
+
+    seed(client, db_session, seconds=0)
+    before = saved(client)
+    # Rehearse the old schema only in the fixture's disposable focusarc_test DB.
+    db_session.execute(text("ALTER TABLE timers DROP COLUMN cycle_reset_at"))
+    db_session.commit()
+    path = Path(__file__).parents[1] / "alembic/versions/0004_session_adjustments.py"
+    spec = importlib.util.spec_from_file_location("adjustment_migration", path)
+    migration = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(migration)
+    with engine.begin() as connection:
+        with Operations.context(MigrationContext.configure(connection)):
+            migration.upgrade()
+    response = adjust(client, before, 600)
+    assert response.status_code == 200
+    assert response.json()["duration_seconds"] == 600
+    assert client.get("/api/timers").json()["timers"][0]["cycle_total_seconds"] == 600
+
+
 @pytest.mark.parametrize("start,zone,want_hours", [
     ("2026-03-08T07:05:00+00:00", "America/Toronto", {1: 300, 3: 2100}),
     ("2026-11-01T06:05:00+00:00", "America/Toronto", {1: 2400}),

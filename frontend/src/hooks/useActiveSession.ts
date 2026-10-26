@@ -148,7 +148,10 @@ export const useActiveSession = (username = "") => {
         setActiveSession(session.end_at ? null : session);
         setElapsedSeconds(session.end_at ? 0 : Math.max(0, Math.floor((Date.now() - Date.parse(session.start_at)) / 1000)));
       } else {
-        void refresh().catch(() => { /* Polling reports sync errors. */ });
+        // Finish any older read before fetching the revision that triggered this event.
+        void (refreshRef.current ?? Promise.resolve()).catch(() => {}).then(() => refresh()).catch(() => {
+          // Polling reports sync errors.
+        });
       }
     };
     window.addEventListener(STUDY_DATA_CHANGED_EVENT, changed);
