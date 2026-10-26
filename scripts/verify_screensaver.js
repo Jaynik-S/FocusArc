@@ -30,6 +30,13 @@ async page => {
   const browser = page.context().browser();
   const contextA = await browser.newContext({ viewport: { width: 900, height: 700 }, timezoneId: 'Asia/Tokyo' });
   const contextB = await browser.newContext({ viewport: { width: 900, height: 700 }, timezoneId: 'America/Los_Angeles' });
+  for (const context of [contextA, contextB]) await context.addInitScript(() => {
+    const NativeWorker = window.Worker;
+    window.screensaverWorkerJobs = 0;
+    window.Worker = class extends NativeWorker {
+      postMessage(...args) { window.screensaverWorkerJobs++; super.postMessage(...args); }
+    };
+  });
   const a = await contextA.newPage();
   const b = await contextB.newPage();
   const errors = [];
@@ -59,6 +66,7 @@ async page => {
   };
   const screenshot = async (view, name) => {
     await view.waitForFunction(() => getComputedStyle(document.querySelector('.screensaver')).opacity === '1');
+    await view.locator('.screensaver-wallpaper[data-render-state="ready"]').waitFor();
     const path = '.deployment-private/screensaver-' + name + '.png';
     await view.screenshot({ path }); report.screenshots.push(path);
   };
@@ -79,6 +87,10 @@ async page => {
     assert((await state()).active_session.id === first.id, 'Adjustment duplicated session');
     report.checks.push('Shared +10/−5 persist without new session');
     await screenshot(a, 'purple-900');
+    const steadyJobs = await a.evaluate(() => window.screensaverWorkerJobs);
+    await a.waitForTimeout(2500);
+    assert(await a.evaluate(() => window.screensaverWorkerJobs) === steadyJobs, 'Timer ticks reprocessed wallpaper');
+    report.checks.push('Timer ticks and shared adjustments do not reprocess artwork');
 
     await a.getByRole('button', { name: 'Exit screensaver', exact: true }).click();
     await normal(a);
@@ -115,12 +127,12 @@ async page => {
     await choose(a, 'Evening Flow');
     await a.getByRole('button', { name: 'Play', exact: true }).click();
     await Promise.all([dialog(a).waitFor(), dialog(b).waitFor()]);
-    await eventually(async () => await b.locator('.screensaver-wallpaper').getAttribute('data-palette') === 'orange', 'Active color not synchronized');
+    await eventually(async () => await b.locator('.screensaver-wallpaper').getAttribute('data-color') === '#FF8855', 'Active color not synchronized');
     await screenshot(a, 'orange-900');
     const orangeSession = (await state()).active_session.id;
     const patch = await seed.patch(api + '/timers/' + orange.id, { data: { color: '#2299dd' } });
     assert(patch.ok(), 'Color update failed');
-    await eventually(async () => await b.locator('.screensaver-wallpaper').getAttribute('data-palette') === 'blue', 'HEX color edit not reflected');
+    await eventually(async () => await b.locator('.screensaver-wallpaper').getAttribute('data-color') === '#2299DD', 'HEX color edit not reflected');
     assert((await state()).active_session.id === orangeSession, 'Theme change reset session');
     await screenshot(b, 'blue-900');
     report.checks.push('New timer selects correct wallpaper; remote HEX edit updates artwork without reset');
@@ -128,6 +140,7 @@ async page => {
     const rename = await seed.patch(api + '/timers/' + orange.id, { data: { name: 'Advanced Algorithms Study ' + Date.now().toString(36).slice(-6) } });
     assert(rename.ok(), 'Long name update failed: ' + await rename.text());
     await eventually(async () => (await b.getByRole('heading').textContent()).startsWith('Advanced Algorithms'), 'Long timer name did not sync');
+    const resizeJobs = await b.evaluate(() => window.screensaverWorkerJobs);
     for (const viewport of [{ width: 320, height: 568 }, { width: 900, height: 400 }]) {
       await b.setViewportSize(viewport);
       await b.waitForTimeout(100);
@@ -138,6 +151,7 @@ async page => {
       assert(bounds.every(rect => rect.left >= 0 && rect.top >= 0 && rect.right <= viewport.width && rect.bottom <= viewport.height), 'Controls or long name outside viewport ' + JSON.stringify(viewport));
       await screenshot(b, viewport.width + 'x' + viewport.height);
     }
+    assert(await b.evaluate(() => window.screensaverWorkerJobs) === resizeJobs, 'Viewport resize reprocessed artwork');
     await b.emulateMedia({ reducedMotion: 'reduce' });
     // The app-wide reduced-motion rule uses an effectively instant 0.01ms duration.
     assert(await b.locator('.screensaver').evaluate(el => getComputedStyle(el).transitionDuration.split(',').every(value => parseFloat(value) <= 0.001)), 'Reduced motion not respected');
@@ -159,6 +173,21 @@ async page => {
     }
     report.checks.push('Long name and controls fit 320×568 and900×400; reduced motion; offline exit and reconnect');
     report.checks.push('History, Schedule and Stats accessible while timer continues after Exit');
+    const fallbackContext = await browser.newContext({ storageState: await contextB.storageState(), viewport: { width: 900, height: 700 } });
+    try {
+      await fallbackContext.addInitScript(() => { window.Worker = undefined; });
+      const fallback = await fallbackContext.newPage();
+      fallback.on('pageerror', error => errors.push(error.message));
+      await fallback.goto(origin);
+      await fallback.getByRole('button', { name: 'Pause', exact: true }).click();
+      await fallback.getByRole('button', { name: 'Play', exact: true }).click();
+      await dialog(fallback).waitFor();
+      await fallback.locator('.screensaver-wallpaper[data-render-state="fallback"]').waitFor();
+      assert(await fallback.locator('.screensaver-wallpaper').evaluate(el => getComputedStyle(el).backgroundImage.includes('master-screensaver.png')), 'Clean master fallback missing');
+      await fallback.getByRole('button', { name: 'Pause timer', exact: true }).click();
+      await normal(fallback);
+      report.checks.push('Unavailable worker uses clean master fallback and timer controls remain functional');
+    } finally { await fallbackContext.close(); }
     assert(errors.length === 0, 'Browser errors: ' + errors.join('; '));
     report.browserErrors = errors;
     return report;

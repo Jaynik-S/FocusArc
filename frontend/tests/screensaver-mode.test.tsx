@@ -37,4 +37,3 @@ it("refresh with an active session starts normal even in StrictMode and writes n
   expect(renderHook(() => useScreensaverMode("restored")).result.current.isOpen).toBe(false);
   expect(localStorage.length).toBe(before);
 });
-
