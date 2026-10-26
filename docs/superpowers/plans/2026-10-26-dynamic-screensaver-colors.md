@@ -1,0 +1,13 @@
+# Dynamic screensaver recoloring
+
+Use `master-screensaver.png` as the sole production artwork. Preserve timer ownership, activation/dismissal, shared HEX metadata and UI controls. No dependencies, backend changes, animation or manual segmentation.
+
+1. **Color engine**: replace preset selection with pure, testable perceptual color mapping. Prepare source lightness/chroma once; derive a bounded palette from exact HEX hue/chroma/lightness; rotate cool atmospheric colors, preserve their lightness detail, and protect warm/neutral highlights automatically. Reconstruct out-of-gamut colors by reducing chroma. Inspect eight real-image results and refine before committing.
+2. **Canvas integration**: process in a module worker using OffscreenCanvas; cache a bounded number of rendered Blobs by source and normalized HEX, share pending jobs, and terminate idle workers. A separate wallpaper component decodes completed frames and draws them atomically to a visible Canvas, retaining the previous frame while loading and the master image as failure fallback. Effects depend on source/color, never timer ticks. Verify lifecycle/race/failure cases and commit.
+3. **Visual/browser validation**: generate the eight-color comparison PNG, verify same-family and neutral differences, highlight/character preservation, performance, rapid HEX changes, failure fallback, 900×700/narrow scaling and shared timer behavior. Update stale preset-based tests/scripts/docs; run frontend tests/build and real browser checks, then commit the verified stage.
+
+## Evidence and progress
+
+- Inspected current `screensaverTheme.ts`, `Screensaver.tsx`, `MainLayout.tsx`, CSS, assets, tests, timer form/hooks and backend HEX validation. Timer color remains a shared six-digit HEX string; MainLayout already supplies the active timer from the authoritative snapshot.
+- Inspected the clean 1672×941 master illustration. Cool blue atmospheric pixels are separable from cream stars/highlights by pixel color; the character's cream body can stay protected while some cool shadow detail naturally adapts.
+- Stage 1 visual validation: inspected the complete eight-color comparison using the real master at full resolution. Sage/purple/pink/blue/gold/charcoal/white/red retain painted grain, shading and cream highlights, with a relatively unchanged character. Prototype mapping cost was 102–280ms per 1.57MP image on this machine; production will move that work to a worker. Oklab transforms checked against the author's public-domain reference.
