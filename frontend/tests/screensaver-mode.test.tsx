@@ -3,7 +3,6 @@ import { StrictMode } from "react";
 import { afterEach, expect, it } from "vitest";
 
 import { useScreensaverMode } from "../src/hooks/useScreensaverMode";
-import { getScreensaverTheme } from "../src/utils/screensaverTheme";
 
 afterEach(cleanup);
 
@@ -39,16 +38,3 @@ it("refresh with an active session starts normal even in StrictMode and writes n
   expect(localStorage.length).toBe(before);
 });
 
-it("selects authored palettes across the hue wrap and limits recoloring to preserve the illustration", () => {
-  expect(getScreensaverTheme("#2299dd").name).toBe("blue");
-  expect(getScreensaverTheme("#a56de2").name).toBe("purple");
-  expect(getScreensaverTheme("#ff8855").name).toBe("orange");
-  expect(getScreensaverTheme("#ff0033").name).toBe("orange");
-  expect(getScreensaverTheme("#00ff00").filter).toBe("none");
-  expect(getScreensaverTheme("invalid")).toEqual(getScreensaverTheme("#5e6ad2"));
-});
-
-it("uses a desaturated palette for neutral HEX colors without extreme brightness changes", () => {
-  expect(getScreensaverTheme("#808080").filter).toBe("saturate(0.45)");
-  expect(getScreensaverTheme("#000000").src).toBe(getScreensaverTheme("#ffffff").src);
-});

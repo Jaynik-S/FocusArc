@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Timer } from "../api/types";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
-import { getScreensaverTheme } from "../utils/screensaverTheme";
 import { formatDuration } from "../utils/time";
+import ScreensaverWallpaper from "./ScreensaverWallpaper";
 import "./screensaver.css";
 
 type ScreensaverProps = {
@@ -20,7 +20,6 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds }: ScreensaverProps
   const layer = useRef<HTMLElement>(null);
   const pause = useRef<HTMLButtonElement>(null);
   const exit = useRef<HTMLButtonElement>(null);
-  const theme = getScreensaverTheme(timer?.color ?? "#5e6ad2");
   const disabled = busy || working || !synced || !activeSession;
 
   useEffect(() => { setActionError(""); }, [activeSession?.id]);
@@ -69,8 +68,7 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds }: ScreensaverProps
   return (
     <section ref={layer} className="screensaver" data-open={isOpen} role="dialog" aria-modal={isOpen || undefined}
       aria-label="Timer screensaver" aria-hidden={!isOpen}>
-      <div className="screensaver-wallpaper" data-testid="screensaver-wallpaper" data-palette={theme.name}
-        style={{ backgroundImage: `url("${theme.src}")`, filter: theme.filter }} aria-hidden="true" />
+      <ScreensaverWallpaper color={timer?.color ?? "#5e6ad2"} />
       <button className="screensaver-exit" type="button" ref={exit} onClick={onExit} aria-label="Exit screensaver">
         <span aria-hidden="true">↙</span> Exit screensaver <kbd>Esc</kbd>
       </button>

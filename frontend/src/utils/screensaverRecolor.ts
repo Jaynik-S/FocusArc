@@ -65,7 +65,8 @@ export const recolorArtwork = (art: PreparedArtwork, hex: string): Uint8ClampedA
   const targetChroma = Math.hypot(target[1], target[2]);
   const angle = targetChroma < 0.006 ? 0 : Math.atan2(target[2], target[1]) - art.hue;
   const cosine = Math.cos(angle); const sine = Math.sin(angle);
-  const scale = 0.12 + Math.min(0.15, targetChroma) / 0.16;
+  // Soft compression keeps vivid colors painterly while retaining differences above the knee.
+  const scale = 0.12 + (0.19 * targetChroma / (targetChroma + 0.08)) / 0.16;
   const lift = (target[0] - 0.64) * 0.18;
   const result = art.pixels.slice();
   const rgb = new Float64Array(3);

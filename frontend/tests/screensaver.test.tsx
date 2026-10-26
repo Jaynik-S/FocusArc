@@ -6,6 +6,7 @@ import type { Timer } from "../src/api/types";
 
 const state = vi.hoisted(() => ({ runtime: {} as Record<string, any> }));
 vi.mock("../src/context/TimerRuntimeContext", () => ({ useTimerRuntime: () => state.runtime }));
+vi.mock("../src/components/ScreensaverWallpaper", () => ({ default: ({ color }: { color: string }) => <div data-testid="screensaver-wallpaper" data-color={color} /> }));
 const timer = { id: "course", name: "Creative Focus", color: "#a56de2" } as Timer;
 const exit = vi.fn();
 const content = (isOpen = true, selected = timer, elapsedSeconds = 2530) => <Screensaver isOpen={isOpen} onExit={exit} timer={selected} elapsedSeconds={elapsedSeconds} />;
@@ -20,11 +21,11 @@ it("renders live timer information and active controls with the matching wallpap
   expect(screen.getByRole("dialog", { name: "Timer screensaver" })).toBeTruthy();
   expect(screen.getByRole("heading", { name: "Creative Focus" })).toBeTruthy();
   expect(screen.getByRole("timer").textContent).toBe("00:42:10");
-  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-palette")).toBe("purple");
+  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#a56de2");
   view.rerender(content(true, { ...timer, name: "Evening Flow", color: "#ff8855" }, 2531));
   expect(screen.getByRole("heading", { name: "Evening Flow" })).toBeTruthy();
   expect(screen.getByRole("timer").textContent).toBe("00:42:11");
-  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-palette")).toBe("orange");
+  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#ff8855");
 });
 
 it("calls the shared adjustment and pause commands without creating another timer", async () => {
