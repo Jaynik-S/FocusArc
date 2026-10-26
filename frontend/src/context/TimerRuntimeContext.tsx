@@ -1,264 +1,85 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 
 import { apiFetch } from "../api/apiClient";
 import { adjustStudySession } from "../api/sessionAdjustments";
-import { STUDY_DATA_CHANGED_EVENT } from "../api/dataEvents";
-import type { Session, Timer } from "../api/types";
-import { useActiveSession } from "../hooks/useActiveSession";
+import type { Session } from "../api/types";
+import { useStudySync } from "../hooks/useStudySync";
 import { storageForAccount } from "../storage/accountStorage";
 
-type TimerRuntimeContextValue = {
-  activeSession: ReturnType<typeof useActiveSession>["activeSession"];
-  elapsedSeconds: number;
-  loading: boolean;
-  busy: boolean;
-  error: string | null;
-  refresh: ReturnType<typeof useActiveSession>["refresh"];
-  startTimer: (timerId: string) => Promise<void>;
-  stopTimer: () => Promise<void>;
-  elapsedByTimer: Record<string, number>;
+type TimerRuntimeContextValue = ReturnType<typeof useStudySync> & {
   offsets: Record<string, number>;
   activeAdjustmentSeconds: number;
+  legacyPendingAdjustments: Record<string, number>;
+  legacyPendingOffsets: Record<string, number>;
   resetRuntimeState: () => void;
   adjustOffset: (timerId: string, deltaSeconds: number) => Promise<void>;
+  applyLegacyAdjustment: (session: Session, deltaSeconds: number) => Promise<void>;
 };
 
-const readStoredElapsed = (username: string) => {
-  if (typeof window === "undefined") {
-    return {};
-  }
+const readLegacyDraft = (username: string, key: "sessionAdjustments" | "timerOffsets") => {
   try {
-    const raw = storageForAccount(username).getItem("timerElapsed");
-    if (!raw) {
-      return {};
-    }
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    return Object.fromEntries(
-      Object.entries(parsed).map(([key, value]) => [key, Number(value) || 0])
-    );
-  } catch {
-    return {};
-  }
+    const parsed = JSON.parse(storageForAccount(username).getItem(key) ?? "{}") as Record<string, unknown>;
+    return Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === "number" && Number.isFinite(entry[1]) && entry[1] !== 0));
+  } catch { return {}; }
 };
 
-const readStoredOffsets = (username: string) => {
-  if (typeof window === "undefined") {
-    return {};
-  }
-  try {
-    const raw = storageForAccount(username).getItem("timerOffsets");
-    if (!raw) {
-      return {};
-    }
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    return Object.fromEntries(
-      Object.entries(parsed).map(([key, value]) => [key, Number(value) || 0])
-    );
-  } catch {
-    return {};
-  }
-};
+const TimerRuntimeContext = createContext<TimerRuntimeContextValue | undefined>(undefined);
 
-const readStoredSessionAdjustments = (username: string) => {
-  if (typeof window === "undefined") {
-    return {};
-  }
-  try {
-    const raw = storageForAccount(username).getItem("sessionAdjustments");
-    if (!raw) {
-      return {};
-    }
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    return Object.fromEntries(
-      Object.entries(parsed).map(([key, value]) => [key, Number(value) || 0])
-    );
-  } catch {
-    return {};
-  }
-};
-
-const TimerRuntimeContext = createContext<TimerRuntimeContextValue | undefined>(
-  undefined
-);
-
-export const TimerRuntimeProvider = ({
-  children,
-  username,
-}: {
-  children: React.ReactNode;
-  username: string;
-}) => {
-  const { activeSession, elapsedSeconds, loading, busy: sessionBusy, error, refresh, startTimer, stopTimer } =
-    useActiveSession(username);
+export const TimerRuntimeProvider = ({ children, username }: { children: React.ReactNode; username: string }) => {
+  const sync = useStudySync(username);
   const [adjusting, setAdjusting] = useState(false);
   const adjustingRef = useRef(false);
-  const totalsRevision = useRef(0);
-  const busy = sessionBusy || adjusting;
-  const [elapsedByTimer, setElapsedByTimer] = useState<Record<string, number>>(
-    () => readStoredElapsed(username)
-  );
-  const [offsets, setOffsets] = useState<Record<string, number>>(() => readStoredOffsets(username));
-  const [sessionAdjustments, setSessionAdjustments] = useState<Record<string, number>>(
-    () => readStoredSessionAdjustments(username)
-  );
-  const sessionAdjustmentSeconds = activeSession ? sessionAdjustments[activeSession.id] ?? 0 : 0;
-
-  const refreshTotals = useCallback(async () => {
-    const revision = ++totalsRevision.current;
-    const response = await apiFetch<{ timers: Timer[] }>("/timers?include_archived=false");
-    if (revision !== totalsRevision.current) return;
-    setElapsedByTimer(Object.fromEntries(response.timers.map((timer) => [timer.id, timer.cycle_total_seconds])));
-    setOffsets({});
-  }, []);
-
-  useEffect(() => {
-    const reload = (event?: Event) => {
-      const session = (event as CustomEvent<Session> | undefined)?.detail;
-      if (session?.end_at) setSessionAdjustments((values) => ({ ...values, [session.id]: 0 }));
-      void refreshTotals().catch(() => { /* Retain offline counters. */ });
-    };
-    reload();
-    window.addEventListener(STUDY_DATA_CHANGED_EVENT, reload);
-    return () => { totalsRevision.current++; window.removeEventListener(STUDY_DATA_CHANGED_EVENT, reload); };
-  }, [refreshTotals]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+  const [draftRevision, setDraftRevision] = useState(0);
+  const legacyPendingAdjustments = useMemo(() => readLegacyDraft(username, "sessionAdjustments"), [username, draftRevision]);
+  const legacyPendingOffsets = useMemo(() => readLegacyDraft(username, "timerOffsets"), [username, draftRevision]);
+  const adjustOffset = useCallback(async (timerId: string, deltaSeconds: number) => {
+    if (adjustingRef.current || sync.busy) return;
+    if (!sync.synced) throw new Error("Reconnect and sync before adjusting a session.");
+    adjustingRef.current = true;
+    setAdjusting(true);
     try {
-      storageForAccount(username).setItem("timerElapsed", JSON.stringify(elapsedByTimer));
-    } catch {
-      // Ignore storage errors.
-    }
-  }, [elapsedByTimer, username]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+      const session = sync.activeSession?.timer_id === timerId ? sync.activeSession : await apiFetch<Session | null>(`/timers/${timerId}/latest-session`);
+      if (!session) throw new Error("Start this timer before adjusting its duration.");
+      await adjustStudySession(session, deltaSeconds);
+    } finally { adjustingRef.current = false; setAdjusting(false); }
+  }, [sync.activeSession, sync.busy, sync.synced]);
+  const applyLegacyAdjustment = useCallback(async (session: Session, deltaSeconds: number) => {
+    if (adjustingRef.current || sync.busy) throw new Error("Wait for the current study action to finish.");
+    if (!sync.synced) throw new Error("Reconnect and sync before recovering an adjustment.");
+    adjustingRef.current = true;
+    setAdjusting(true);
     try {
-      storageForAccount(username).setItem("timerOffsets", JSON.stringify(offsets));
-    } catch {
-      // Ignore storage errors.
-    }
-  }, [offsets, username]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    try {
-      storageForAccount(username).setItem(
-        "sessionAdjustments", JSON.stringify(sessionAdjustments)
-      );
-    } catch {
-      // Ignore storage errors.
-    }
-  }, [sessionAdjustments, username]);
-
-  const adjustOffset = useCallback(
-    async (timerId: string, deltaSeconds: number) => {
-      if (adjustingRef.current || sessionBusy) return;
-      adjustingRef.current = true;
-      setAdjusting(true);
-      try {
-        const session = activeSession?.timer_id === timerId ? activeSession :
-          await apiFetch<Session | null>(`/timers/${timerId}/latest-session`);
-        if (!session) throw new Error("Start this timer before adjusting its duration.");
-        // Legacy browser offsets are sent once on stop; new edits persist immediately.
-        await adjustStudySession(session, deltaSeconds);
-      } finally {
-        adjustingRef.current = false;
-        setAdjusting(false);
-      }
-    },
-    [activeSession, sessionBusy]
-  );
-
-  const activeAdjustmentSeconds = sessionAdjustmentSeconds;
-  const resetRuntimeState = useCallback(() => {
-    setElapsedByTimer({});
-    setOffsets({});
-    setSessionAdjustments({});
-    if (typeof window === "undefined") {
-      return;
-    }
-    try {
-      const storage = storageForAccount(username);
-      storage.removeItem("timerElapsed");
-      storage.removeItem("timerOffsets");
-      storage.removeItem("sessionAdjustments");
-    } catch {
-      // Ignore storage errors.
-    }
-  }, [username]);
-
-  const startTimerWithAdjustments = useCallback(
-    async (timerId: string) => {
-      if (adjustingRef.current) return;
-      const adjustmentSeconds =
-        activeSession && activeSession.timer_id !== timerId
-          ? sessionAdjustmentSeconds
-          : 0;
-      await startTimer(timerId, adjustmentSeconds);
-      if (activeSession && activeSession.timer_id !== timerId) {
-        setSessionAdjustments((values) => ({ ...values, [activeSession.id]: 0 }));
-      }
-    },
-    [activeSession, sessionAdjustmentSeconds, startTimer]
-  );
-
-  const stopTimerWithAdjustments = useCallback(async () => {
-    if (adjustingRef.current) return;
-    await stopTimer(sessionAdjustmentSeconds);
-  }, [sessionAdjustmentSeconds, stopTimer]);
-
-  const value = useMemo(
-    () => ({
-      activeSession,
-      elapsedSeconds: Math.max(0, elapsedSeconds + sessionAdjustmentSeconds),
-      loading,
-      busy,
-      error,
-      refresh,
-      startTimer: startTimerWithAdjustments,
-      stopTimer: stopTimerWithAdjustments,
-      elapsedByTimer,
-      offsets,
-      activeAdjustmentSeconds,
-      resetRuntimeState,
-      adjustOffset,
-    }),
-    [
-      activeSession,
-      elapsedSeconds,
-      sessionAdjustmentSeconds,
-      loading,
-      busy,
-      error,
-      refresh,
-      startTimerWithAdjustments,
-      stopTimerWithAdjustments,
-      elapsedByTimer,
-      offsets,
-      activeAdjustmentSeconds,
-      resetRuntimeState,
-      adjustOffset,
-    ]
-  );
-
-  return (
-    <TimerRuntimeContext.Provider value={value}>
-      {children}
-    </TimerRuntimeContext.Provider>
-  );
+      await adjustStudySession(session, deltaSeconds);
+      const remaining = readLegacyDraft(username, "sessionAdjustments");
+      delete remaining[session.id];
+      try { storageForAccount(username).setItem("sessionAdjustments", JSON.stringify(remaining)); } catch { /* Draft storage is optional. */ }
+      setDraftRevision((revision) => revision + 1);
+    } finally { adjustingRef.current = false; setAdjusting(false); }
+  }, [username, sync.busy, sync.synced]);
+  const startTimer = useCallback(async (timerId: string) => {
+    if (adjustingRef.current) throw new Error("Wait for the current adjustment to finish.");
+    await sync.startTimer(timerId);
+  }, [sync.startTimer]);
+  const stopTimer = useCallback(async () => {
+    if (adjustingRef.current) throw new Error("Wait for the current adjustment to finish.");
+    await sync.stopTimer();
+  }, [sync.stopTimer]);
+  const resetTotals = useCallback(async () => {
+    if (adjustingRef.current) throw new Error("Wait for the current adjustment to finish.");
+    return sync.resetTotals();
+  }, [sync.resetTotals]);
+  // Runtime counters are always authoritative. Reset only asks for a fresh snapshot.
+  const resetRuntimeState = useCallback(() => { void sync.refresh().catch(() => {}); }, [sync.refresh]);
+  const value = useMemo(() => ({
+    ...sync, busy: sync.busy || adjusting, offsets: {}, activeAdjustmentSeconds: 0,
+    legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals,
+  }), [sync, adjusting, legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals]);
+  return <TimerRuntimeContext.Provider value={value}>{children}</TimerRuntimeContext.Provider>;
 };
 
+export const useOptionalTimerRuntime = () => useContext(TimerRuntimeContext);
 export const useTimerRuntime = () => {
-  const context = useContext(TimerRuntimeContext);
-  if (!context) {
-    throw new Error("useTimerRuntime must be used within TimerRuntimeProvider");
-  }
+  const context = useOptionalTimerRuntime();
+  if (!context) throw new Error("useTimerRuntime must be used within TimerRuntimeProvider");
   return context;
 };

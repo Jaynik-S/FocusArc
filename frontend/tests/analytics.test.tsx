@@ -9,7 +9,10 @@ import { useDayStats } from "../src/hooks/useDayStats";
 import { notifyStudyDataChanged } from "../src/api/dataEvents";
 
 vi.mock("../src/contexts/AuthContext", () => ({ useAuth: () => ({ user: { username: "analytics-test" } }) }));
-vi.mock("../src/context/TimerRuntimeContext", () => ({ useTimerRuntime: () => ({ activeSession: null }) }));
+vi.mock("../src/context/TimerRuntimeContext", () => ({
+  useTimerRuntime: () => ({ activeSession: null, timeZone: "UTC", today: "2026-10-16", nowMs: Date.now() }),
+  useOptionalTimerRuntime: () => ({ activeSession: null, timeZone: "UTC", today: "2026-10-16", nowMs: Date.now() }),
+}));
 vi.mock("../src/utils/date", async (original) => ({ ...await original<object>(), getClientTimezone: () => "UTC" }));
 
 const courseId = "11111111-1111-4111-8111-111111111111";

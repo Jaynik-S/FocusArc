@@ -15,6 +15,13 @@ const json = (body: unknown, status = 200) =>
 const fetchMock = vi.fn<typeof fetch>();
 const key = (suffix: Parameters<typeof accountStorageKey>[1]) =>
   accountStorageKey("jayy", suffix);
+const study = (active_session: unknown = null) => ({
+  username: "jayy",
+  changed: true, revision: 1, server_now: new Date().toISOString(),
+  study_timezone: "America/Toronto", day_date: "2026-10-25",
+  day_start_at: "2026-10-25T04:00:00Z", day_end_at: "2026-10-26T04:00:00Z",
+  lease_expires_at: null, active_session, timers: [],
+});
 
 beforeEach(() => {
   localStorage.clear();
@@ -60,13 +67,15 @@ describe("account-scoped active session polling", () => {
     const session = { id: "session", timer_id: "timer", start_at: new Date().toISOString() };
     localStorage.setItem(key("activeSession"), JSON.stringify({ activeSession: session, elapsedSeconds: 0 }));
     localStorage.setItem(key("sessionAdjustments"), '{"session":120}');
-    fetchMock.mockImplementation(async () => json({ active_session: session }));
+    fetchMock.mockImplementation(async (url) => json(String(url).includes("study-heartbeat") ? {} : study(session)));
     const { result } = renderHook(() => useTimerRuntime(), {
       wrapper: ({ children }) => (
         <StrictMode><TimerRuntimeProvider username="jayy">{children}</TimerRuntimeProvider></StrictMode>
       ),
     });
-    await waitFor(() => expect(result.current.activeAdjustmentSeconds).toBe(120));
+    await waitFor(() => expect(result.current.revision).toBe(1));
+    expect(result.current.activeAdjustmentSeconds).toBe(0);
+    expect(result.current.legacyPendingAdjustments.session).toBe(120);
     expect(localStorage.getItem(key("sessionAdjustments"))).toBe('{"session":120}');
   });
 
@@ -74,12 +83,12 @@ describe("account-scoped active session polling", () => {
     vi.useFakeTimers();
     let resolve!: (response: Response) => void;
     fetchMock.mockImplementationOnce(() => new Promise((done) => { resolve = done; }))
-      .mockImplementation(async () => json({ active_session: null }));
+      .mockImplementation(async () => json(study()));
     renderHook(() => useActiveSession("jayy"));
     await act(async () => { await vi.advanceTimersByTimeAsync(45_000); });
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    await act(async () => resolve(json({ active_session: null })));
-    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    await act(async () => resolve(json(study())));
+    await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
     expect(fetchMock).toHaveBeenCalledTimes(2);
     Object.defineProperty(document, "hidden", { configurable: true, value: true });
     act(() => document.dispatchEvent(new Event("visibilitychange")));
@@ -90,37 +99,34 @@ describe("account-scoped active session polling", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it("backs off transient failures while retaining the account cache", async () => {
+  it("backs off transient failures while retaining the last authoritative snapshot", async () => {
     vi.useFakeTimers();
     const session = { id: "session", timer_id: "timer", start_at: new Date().toISOString() };
-    localStorage.setItem(key("activeSession"), JSON.stringify({ activeSession: session, elapsedSeconds: 0 }));
-    fetchMock.mockRejectedValue(new Error("Offline"));
+    fetchMock.mockResolvedValueOnce(json(study(session))).mockResolvedValueOnce(json({})).mockRejectedValue(new Error("Offline"));
     const { result } = renderHook(() => useActiveSession("jayy"));
-    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(result.current.activeSession?.id).toBe("session");
-    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.current.synced).toBe(false);
+    await act(async () => { await vi.advanceTimersByTimeAsync(4_000); });
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    await act(async () => { await vi.advanceTimersByTimeAsync(7_000); });
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
-  it("stops at the saved timestamp after a five-minute suspension and does not replay a failed stop", async () => {
+  it("never lets a saved browser inactivity timestamp stop the account timer", async () => {
     vi.useFakeTimers();
     const now = Date.now();
     const session = { id: "session", timer_id: "timer", start_at: new Date(now - 600_000).toISOString() };
     localStorage.setItem(key("activeSession"), JSON.stringify({ activeSession: session, elapsedSeconds: 0 }));
     localStorage.setItem(key("lastActiveAt"), JSON.stringify({ sessionId: "session", lastActiveAt: now - 360_000 }));
     fetchMock.mockImplementation(async (url) => {
-      if (String(url).endsWith("/stop")) throw new Error("Response lost");
-      return json({ active_session: session });
+      if (new URL(String(url)).pathname.endsWith("/stop")) throw new Error("Response lost");
+      return json(String(url).includes("study-heartbeat") ? {} : study(session));
     });
     renderHook(() => useActiveSession("jayy"));
     await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
-    const stops = fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/stop"));
-    expect(stops).toHaveLength(1);
-    expect(JSON.parse(stops[0][1]?.body as string).stopped_at_client).toBe(
-      new Date(now - 360_000).toISOString()
-    );
+    const stops = fetchMock.mock.calls.filter(([url]) => new URL(String(url)).pathname.endsWith("/stop"));
+    expect(stops).toHaveLength(0);
   });
 });

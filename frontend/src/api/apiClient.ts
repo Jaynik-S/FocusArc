@@ -1,3 +1,5 @@
+import { getStudyAccount } from "./studySyncState";
+
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api").replace(/\/$/, "");
 
@@ -60,6 +62,15 @@ export const apiFetch = async <T>(
   options: ApiFetchOptions = {}
 ): Promise<T> => {
   const { suppressAuthenticationEvent = false, ...requestOptions } = options;
+  const account = getStudyAccount();
+  const [pathname, query = ""] = path.split("?");
+  const studyRequest = !/^\/auth(?:\/|$)/.test(pathname) && !/^\/health(?:\/|$)/.test(pathname);
+  let requestPath = path;
+  if (studyRequest && account !== null) {
+    const params = new URLSearchParams(query);
+    params.set("expected_username", account);
+    requestPath = `${pathname}?${params}`;
+  }
   const headers = new Headers(requestOptions.headers);
   if (requestOptions.body !== undefined && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -75,7 +86,7 @@ export const apiFetch = async <T>(
   );
 
   try {
-    const response = await fetch(API_BASE_URL + path, {
+    const response = await fetch(API_BASE_URL + requestPath, {
       ...requestOptions,
       credentials: "include",
       headers,
@@ -92,6 +103,9 @@ export const apiFetch = async <T>(
           window.dispatchEvent(new Event(AUTHENTICATION_REQUIRED_EVENT));
         }
         throw new AuthenticationError(message, code, retryAfter);
+      }
+      if (response.status === 409 && code === "account_changed") {
+        window.dispatchEvent(new Event(AUTHENTICATION_REQUIRED_EVENT));
       }
       throw new ApiError(message, response.status, code, retryAfter);
     }

@@ -1,7 +1,5 @@
 import { useId, useState } from "react";
 
-import { apiFetch } from "../api/apiClient";
-import { notifyStudyDataChanged } from "../api/dataEvents";
 import { ResetTotalsResponse } from "../api/types";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
 
@@ -15,20 +13,14 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const titleId = useId();
-  const { activeAdjustmentSeconds, refresh, resetRuntimeState, busy: timerBusy } = useTimerRuntime();
+  const { resetTotals, busy: timerBusy, synced = true } = useTimerRuntime();
 
   const handleConfirm = async () => {
-    if (timerBusy || busy) return;
+    if (timerBusy || busy || !synced) return;
     setBusy(true);
     setError("");
     try {
-      const response = await apiFetch<ResetTotalsResponse>("/totals/reset", {
-        method: "POST",
-        body: { adjustment_seconds: activeAdjustmentSeconds },
-      });
-      resetRuntimeState();
-      notifyStudyDataChanged();
-      void refresh(true).catch(() => { /* Runtime displays the sync error. */ });
+      const response = await resetTotals();
       onEnded(response);
       setOpen(false);
     } catch (err) {
@@ -43,16 +35,16 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
       <button
         className="end-day-button"
         type="button"
-        disabled={disabled || timerBusy}
+        disabled={disabled || timerBusy || !synced}
         onClick={() => setOpen(true)}
       >
-        Reset Totals
+        Reset cycle counters
       </button>
       {open ? (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
           <div className="modal">
             <div className="modal-header">
-              <h2 id={titleId}>Reset totals?</h2>
+              <h2 id={titleId}>Reset cycle counters?</h2>
               <button
                 className="ghost"
                 type="button"
@@ -64,7 +56,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
             </div>
             <div className="modal-body">
               <p className="modal-text">
-                This will stop any running timer and reset all total counters to zero.
+                This will stop any running timer and reset cycle counters to zero. Today's recorded study time remains intact.
               </p>
               {error ? <div className="error">{error}</div> : null}
               <div className="modal-actions">
@@ -72,7 +64,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
                   className="secondary"
                   type="button"
                   onClick={() => setOpen(false)}
-                  disabled={busy || timerBusy}
+                  disabled={busy}
                 >
                   Cancel
                 </button>
@@ -80,7 +72,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
                   className="primary"
                   type="button"
                   onClick={handleConfirm}
-                  disabled={busy || timerBusy}
+                  disabled={busy || timerBusy || !synced}
                 >
                   {busy ? "Resetting..." : "Confirm"}
                 </button>

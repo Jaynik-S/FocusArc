@@ -1,33 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { apiFetch } from "../api/apiClient";
 import { notifyStudyDataChanged } from "../api/dataEvents";
 import { Timer } from "../api/types";
 import { useAuth } from "../contexts/AuthContext";
-import { storageForAccount } from "../storage/accountStorage";
-import { useStudyDataRefresh } from "./useStudyDataRefresh";
+import { getStudySnapshot, requestStudySync } from "../api/studySyncState";
+import { useApiResource } from "./useApiResource";
 
 const sortTimers = (timers: Timer[]) =>
   [...timers].sort((a, b) => a.created_at.localeCompare(b.created_at));
 
-const readStoredTimers = (username: string) => {
-  if (typeof window === "undefined") {
-    return [];
-  }
-  try {
-    const raw = storageForAccount(username).getItem("timers");
-    if (!raw) {
-      return [];
-    }
-    const parsed = JSON.parse(raw) as Timer[];
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed.filter((item) => item && typeof item.id === "string");
-  } catch {
-    return [];
-  }
-};
+const EMPTY_TIMERS: Timer[] = [];
 
 export type TimerFormValues = {
   name: string;
@@ -37,70 +20,22 @@ export type TimerFormValues = {
 export const useTimers = () => {
   const { user } = useAuth();
   const username = user?.username ?? "";
-  const enabled = Boolean(username);
-  const [timers, setTimers] = useState<Timer[]>(() =>
-    enabled ? readStoredTimers(username) : []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  const snapshot = getStudySnapshot(username);
+  const resource = useApiResource<{ timers: Timer[] }>(snapshot ? null : "/timers?include_archived=false");
+  const source = snapshot?.timers ?? resource.data?.timers ?? EMPTY_TIMERS;
+  const timers = useMemo(() => sortTimers(source.filter((timer) => !timer.is_archived)), [source]);
   const loadTimers = useCallback(async () => {
-    if (!enabled) {
-      setTimers([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await apiFetch<{ timers: Timer[] }>(
-        "/timers?include_archived=false"
-      );
-      setTimers(sortTimers(response.timers));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load timers");
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled]);
-
-  useStudyDataRefresh(loadTimers);
-
-  useEffect(() => {
-    loadTimers();
-  }, [loadTimers]);
-
-  useEffect(() => {
-    if (!enabled || !loading) {
-      return;
-    }
-    if (timers.length > 0) {
-      return;
-    }
-    const stored = readStoredTimers(username);
-    if (stored.length > 0) {
-      setTimers(stored);
-    }
-  }, [enabled, loading, timers.length, username]);
-
-  useEffect(() => {
-    if (!enabled || loading) {
-      return;
-    }
-    try {
-      storageForAccount(username).setItem("timers", JSON.stringify(timers));
-    } catch {
-      // Ignore storage errors.
-    }
-  }, [timers, enabled, loading, username]);
+    if (getStudySnapshot(username)) await requestStudySync();
+    else resource.reload();
+  }, [username, resource.reload]);
 
   const createTimer = useCallback(async (payload: TimerFormValues) => {
     const timer = await apiFetch<Timer>("/timers", {
       method: "POST",
       body: payload,
     });
-    setTimers((prev) => sortTimers([...prev, timer]));
     notifyStudyDataChanged();
+    await requestStudySync();
     return timer;
   }, []);
 
@@ -110,10 +45,8 @@ export const useTimers = () => {
         method: "PATCH",
         body: payload,
       });
-      setTimers((prev) =>
-        sortTimers(prev.map((item) => (item.id === id ? timer : item)))
-      );
       notifyStudyDataChanged();
+      await requestStudySync();
       return timer;
     },
     []
@@ -121,20 +54,20 @@ export const useTimers = () => {
 
   const archiveTimer = useCallback(async (id: string) => {
     await apiFetch<void>(`/timers/${id}`, { method: "DELETE" });
-    setTimers((prev) => prev.filter((item) => item.id !== id));
     notifyStudyDataChanged();
+    await requestStudySync();
   }, []);
 
   return useMemo(
     () => ({
       timers,
-      loading,
-      error,
+      loading: snapshot ? false : resource.loading,
+      error: snapshot ? null : resource.error,
       reload: loadTimers,
       createTimer,
       updateTimer,
       archiveTimer,
     }),
-    [timers, loading, error, loadTimers, createTimer, updateTimer, archiveTimer]
+    [timers, snapshot, resource.loading, resource.error, loadTimers, createTimer, updateTimer, archiveTimer]
   );
 };

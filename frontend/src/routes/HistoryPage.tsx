@@ -1,5 +1,6 @@
 import { CSSProperties, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import * as TimerRuntime from "../context/TimerRuntimeContext";
 
 import { useSessions } from "../hooks/useSessions";
 import { useReportingTimers } from "../hooks/useReportingTimers";
@@ -9,30 +10,29 @@ import { getContrastColor, getMutedTextColor } from "../utils/color";
 import {
   formatCivilDate,
   formatTime,
-  getClientTimezone,
   getLocalDateString,
   isCivilDate,
+  shiftCivilDate,
   validateAnalyticsRange,
 } from "../utils/date";
 import { formatDuration } from "../utils/time";
 
-const getDateOffset = (days: number) => {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date;
-};
-
 const HistoryPage = () => {
+  const runtime = "useOptionalTimerRuntime" in TimerRuntime ? TimerRuntime.useOptionalTimerRuntime() : undefined;
+  const accountZone = runtime?.timeZone ?? "America/Toronto";
+  const nowMs = runtime?.nowMs ?? Date.now();
+  const today = runtime?.today ?? getLocalDateString(new Date(nowMs), accountZone);
+  const commandsDisabled = runtime?.synced === false || Boolean(runtime?.busy);
   const adjustment = useSessionAdjustment();
   const [params, setParams] = useSearchParams();
   const activityMode = params.get("date_basis") === "activity";
-  const requestedZone = activityMode ? params.get("client_tz") ?? getClientTimezone() : getClientTimezone();
+  const requestedZone = activityMode ? params.get("client_tz") ?? accountZone : accountZone;
   const zoneValid = useMemo(() => {
     try { new Intl.DateTimeFormat("en", { timeZone: requestedZone }); return true; } catch { return false; }
   }, [requestedZone]);
-  const clientTz = zoneValid ? requestedZone : getClientTimezone();
-  const fromDate = params.get("from") ?? getLocalDateString(getDateOffset(-1), clientTz);
-  const toDate = params.get("to") ?? getLocalDateString(getDateOffset(0), clientTz);
+  const clientTz = zoneValid ? requestedZone : accountZone;
+  const fromDate = params.get("from") ?? shiftCivilDate(today, -1);
+  const toDate = params.get("to") ?? today;
   const selectedTimerId = params.get("timer_id");
   const updateFilter = (key: string, value: string | null) => setParams((current) => {
     const next = new URLSearchParams(current);
@@ -40,7 +40,7 @@ const HistoryPage = () => {
     return next;
   });
   const rangeError = !zoneValid ? "The linked time zone is invalid. Switch to saved-date history to continue." : activityMode
-    ? validateAnalyticsRange(fromDate, toDate, getLocalDateString(new Date(), clientTz))
+    ? validateAnalyticsRange(fromDate, toDate, getLocalDateString(new Date(nowMs), clientTz))
     : !isCivilDate(fromDate) || !isCivilDate(toDate) || fromDate > toDate ? "Choose a valid date range." : null;
   const timersState = useReportingTimers();
   const sessionsState = useSessions(fromDate, toDate, selectedTimerId, { dateBasis: activityMode ? "activity" : "saved", clientTz, enabled: !rangeError });
@@ -55,7 +55,7 @@ const HistoryPage = () => {
       .map((session) => {
         const timer = timerMap.get(session.timer_id);
         const start = new Date(session.start_at);
-        const end = session.end_at ? new Date(session.end_at) : new Date();
+        const end = session.end_at ? new Date(session.end_at) : new Date(nowMs);
         const durationSeconds = activityMode ? session.range_recorded_seconds ?? 0 :
           session.duration_seconds ??
           Math.max(0, Math.floor((end.getTime() - start.getTime()) / 1000));
@@ -75,13 +75,13 @@ const HistoryPage = () => {
           fullSessionLabel: activityMode ? `${formatDuration(session.duration_seconds ?? 0)} full session` : null,
         };
       });
-  }, [sessionsState.sessions, timerMap, clientTz, activityMode]);
+  }, [sessionsState.sessions, timerMap, clientTz, activityMode, nowMs]);
 
   const totalsByTimer = useMemo(() => {
     const totals = new Map<string, number>();
     sessionsState.sessions.forEach((session) => {
       const start = new Date(session.start_at);
-      const end = session.end_at ? new Date(session.end_at) : new Date();
+      const end = session.end_at ? new Date(session.end_at) : new Date(nowMs);
       const durationSeconds = activityMode ? session.range_recorded_seconds ?? 0 :
         session.duration_seconds ??
         Math.max(0, Math.floor((end.getTime() - start.getTime()) / 1000));
@@ -91,7 +91,7 @@ const HistoryPage = () => {
       );
     });
     return totals;
-  }, [sessionsState.sessions, activityMode]);
+  }, [sessionsState.sessions, activityMode, nowMs]);
 
   const summaryRows = useMemo(() => {
     if (selectedTimerId) {
@@ -234,7 +234,7 @@ const HistoryPage = () => {
                   {row.dateLabel} · {row.timeLabel}
                 </div>
                 <div className="session-time">{row.durationLabel}{row.fullSessionLabel ? <div className="analytics-help">{row.fullSessionLabel}</div> : null}
-                  {row.session.end_at ? <SessionAdjustmentControls busy={adjustment.busy} onAdjust={(delta) => void adjustment.adjust(row.session, delta)} /> : null}
+                  {row.session.end_at ? <SessionAdjustmentControls busy={adjustment.busy || commandsDisabled} onAdjust={(delta) => void adjustment.adjust(row.session, delta)} /> : null}
                 </div>
               </div>
             ))}
