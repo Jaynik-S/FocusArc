@@ -1,12 +1,14 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import Screensaver from "../src/components/Screensaver";
 import type { Timer } from "../src/api/types";
+import { SCREENSAVER_WALLPAPERS } from "../src/utils/screensaverWallpapers";
 
-const state = vi.hoisted(() => ({ runtime: {} as Record<string, any> }));
+const state = vi.hoisted(() => ({ runtime: {} as Record<string, any>, frame: undefined as undefined | ((frame: { source: string; color: string }) => void) }));
 vi.mock("../src/context/TimerRuntimeContext", () => ({ useTimerRuntime: () => state.runtime }));
-vi.mock("../src/components/ScreensaverWallpaper", () => ({ default: ({ color }: { color: string }) => <div data-testid="screensaver-wallpaper" data-color={color} /> }));
+vi.mock("../src/components/ScreensaverWallpaper", () => ({ ORIGINAL_ARTWORK_COLOR: "#377DC2", default: ({ color, onVisibleFrame }: any) => { state.frame = onVisibleFrame; return <div data-testid="screensaver-wallpaper" data-color={color} />; } }));
+vi.mock("../src/components/ScreensaverEnvironment", () => ({ default: ({ scene, color }: any) => <canvas data-testid="environment" data-scene={scene} data-color={color} aria-hidden="true" /> }));
 const timer = { id: "course", name: "Creative Focus", color: "#a56de2" } as Timer;
 const exit = vi.fn();
 const content = (isOpen = true, selected = timer, elapsedSeconds = 2530) => <Screensaver isOpen={isOpen} onExit={exit} timer={selected} elapsedSeconds={elapsedSeconds} />;
@@ -88,4 +90,20 @@ it("keeps keyboard exit available when busy or offline controls lose focus to th
   expect(document.activeElement).toBe(screen.getByRole("button", { name: "Exit screensaver" }));
   fireEvent.keyDown(document.body, { key: "Escape" });
   expect(exit).toHaveBeenCalledTimes(1);
+});
+
+it("changes animation identity on displayed scenes, retaining its instance across color commits", () => {
+  const [space, forest] = SCREENSAVER_WALLPAPERS;
+  const view = render(<Screensaver isOpen onExit={exit} timer={timer} elapsedSeconds={1} wallpaper={space} />);
+  const first = screen.getByTestId("environment");
+  view.rerender(<Screensaver isOpen onExit={exit} timer={timer} elapsedSeconds={2} wallpaper={forest} />);
+  expect(screen.getByTestId("environment")).toBe(first);
+  expect(first.getAttribute("data-scene")).toBe("space");
+  act(() => state.frame?.({ source: forest.source, color: "#A8D5BA" }));
+  const second = screen.getByTestId("environment");
+  expect(second).not.toBe(first);
+  expect(second.getAttribute("data-scene")).toBe("forest");
+  act(() => state.frame?.({ source: forest.source, color: "#FF0000" }));
+  expect(screen.getByTestId("environment")).toBe(second);
+  expect(second.getAttribute("data-color")).toBe("#FF0000");
 });

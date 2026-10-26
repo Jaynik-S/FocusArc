@@ -3,44 +3,35 @@ import { useEffect, useRef, useState } from "react";
 import { storageForAccount } from "../storage/accountStorage";
 import { chooseScreensaverWallpaper, findScreensaverWallpaper, SCREENSAVER_WALLPAPERS } from "../utils/screensaverWallpapers";
 
-type Selection = { day: string; timerId: string | null; wallpaperId: string | null };
-const readSelection = (username: string, day: string): Selection => {
+const readSelection = (username: string) => {
   try {
     const saved = JSON.parse(storageForAccount(username).getItem("screensaverWallpaper") ?? "null");
-    if (saved && typeof saved.day === "string" && (saved.timerId === null || typeof saved.timerId === "string") &&
-        (saved.wallpaperId === null || findScreensaverWallpaper(saved.wallpaperId))) return saved;
+    return findScreensaverWallpaper(saved?.wallpaperId)?.id ?? null;
   } catch { /* Wallpaper storage is optional presentation state. */ }
-  return { day, timerId: null, wallpaperId: null };
+  return null;
 };
 
-/** Account containers remount on account changes. Pause keeps this logical study's image. */
+/** Account containers remount on account changes. Only new running activations choose. */
 export const useScreensaverWallpaper = (
   username: string,
-  session: { id: string; timer_id: string } | null,
-  day: string,
-  resetRevision = 0,
+  session: { id: string } | null,
 ) => {
-  const [selection, setSelection] = useState(() => readSelection(username, day));
-  const current = useRef(selection);
-  const previousReset = useRef(resetRevision);
+  const [wallpaperId, setWallpaperId] = useState(() => readSelection(username));
+  const current = useRef(wallpaperId);
   const activeId = session?.id ?? null;
-  const timerId = session?.timer_id ?? null;
+  // A session present at mount is a restored running timer, not a start/resume.
+  const previousActiveId = useRef(activeId);
 
   useEffect(() => {
-    const explicitReset = resetRevision !== previousReset.current;
-    previousReset.current = resetRevision;
-    let next = current.current;
-    if (explicitReset || next.day !== day) next = { ...next, day, timerId: null };
-    // A reset can finish before its stopped snapshot arrives; choose on the next activation.
-    if (!explicitReset && timerId && (next.timerId !== timerId || !next.wallpaperId)) {
-      next = { day, timerId, wallpaperId: chooseScreensaverWallpaper(next.wallpaperId).id };
-    }
-    if (next === current.current) return;
+    if (activeId === previousActiveId.current) return;
+    previousActiveId.current = activeId;
+    if (!activeId) return;
+    const next = chooseScreensaverWallpaper(current.current).id;
     // Update the ref before React state so StrictMode's effect replay cannot draw twice.
     current.current = next;
-    setSelection(next);
-    try { storageForAccount(username).setItem("screensaverWallpaper", JSON.stringify(next)); } catch { /* Keep the in-memory choice. */ }
-  }, [activeId, timerId, day, resetRevision, username]);
+    setWallpaperId(next);
+    try { storageForAccount(username).setItem("screensaverWallpaper", JSON.stringify({ wallpaperId: next })); } catch { /* Keep the in-memory choice. */ }
+  }, [activeId, username]);
 
-  return findScreensaverWallpaper(selection.wallpaperId) ?? SCREENSAVER_WALLPAPERS[0];
+  return findScreensaverWallpaper(wallpaperId) ?? SCREENSAVER_WALLPAPERS[0];
 };

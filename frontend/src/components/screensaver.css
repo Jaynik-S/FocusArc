@@ -1,4 +1,4 @@
-/* A separate static artwork layer leaves room for future illustrated motion. */
+/* Static artwork, decorative motion and interactive controls have separate layers. */
 .screensaver {
   --screensaver-ink: #fff3dc;
   --screensaver-shadow: 0 2px 15px #071322, 0 1px 3px #071322;
@@ -33,6 +33,8 @@
 .screensaver[data-open="true"] { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
 .screensaver-wallpaper { position: absolute; inset: 0; z-index: -1; background-size: cover; background-position: center; background-repeat: no-repeat; }
 .screensaver-wallpaper canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.screensaver-environment { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+.screensaver-body, .screensaver-exit, .screensaver-messages { z-index: 1; }
 .screensaver-body { position: absolute; top: 33%; left: 50%; width: min(30rem, calc(100% - 2rem)); transform: translateX(-50%); text-align: center; text-shadow: var(--screensaver-shadow); }
 .screensaver-ornament { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.8rem; opacity: 0.85; }
 .screensaver-ornament svg { width: 2rem; height: 1.5rem; }
@@ -68,4 +70,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .screensaver { transition: none; }
+  .screensaver-environment { display: none; }
 }

@@ -76,3 +76,27 @@ it("reports the raw fallback immediately and retains the old canvas source until
   expect(drawImage).toHaveBeenCalledTimes(2);
   expect(ready).toHaveBeenLastCalledWith("/forest.png");
 });
+
+it("reports the displayed HEX with its source, retaining both until recoloring finishes", async () => {
+  const visible = vi.fn();
+  const view = render(<ScreensaverWallpaper color="#A8D5BA" onVisibleFrame={visible} />);
+  expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#377DC2" }));
+  await waitFor(() => expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#A8D5BA" })));
+  const artwork = screen.getByTestId("screensaver-wallpaper").querySelector("canvas");
+  expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ artwork }));
+  let finish!: (blob: Blob) => void;
+  state.render.mockReturnValueOnce(new Promise<Blob>(resolve => { finish = resolve; }));
+  view.rerender(<ScreensaverWallpaper color="#42216F" onVisibleFrame={visible} />);
+  expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#A8D5BA" }));
+  await act(async () => finish(pixels));
+  expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#42216F" }));
+});
+
+it("switches scene and palette together to the original-art fallback after a painted-frame failure", async () => {
+  const visible = vi.fn();
+  const view = render(<ScreensaverWallpaper color="#A8D5BA" onVisibleFrame={visible} />);
+  await waitFor(() => expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#A8D5BA" })));
+  state.render.mockRejectedValueOnce(new Error("Rendering failed"));
+  view.rerender(<ScreensaverWallpaper color="#FF0000" source="/forest.png" onVisibleFrame={visible} />);
+  await waitFor(() => expect(visible).toHaveBeenLastCalledWith({ source: "/forest.png", color: "#377DC2", artwork: null }));
+});
