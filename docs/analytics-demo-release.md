@@ -23,7 +23,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/local-demo.ps1 -
 Open **[http://localhost:5173/stats](http://localhost:5173/stats)** and sign in:
 
 - Username: **`demo`**
-- Password: **`demo12345`** (your approved replacement for `123`; existing password rules are unchanged).
+- Password: **`demo12345`** (the documented local demo credential; application passwords no longer have length constraints).
 
 If signed in locally as another user, sign out first. API health: [localhost:8000/api/health](http://localhost:8000/api/health). API docs: [localhost:8000/docs](http://localhost:8000/docs).
 

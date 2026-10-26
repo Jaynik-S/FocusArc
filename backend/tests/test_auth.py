@@ -195,14 +195,14 @@ def test_admin_never_overwrites_an_existing_password(
 
 
 def test_admin_does_not_echo_an_invalid_password(engine, monkeypatch, capsys):
-    invalid_password = "secret7"
+    private_password = "secret7"
     monkeypatch.setenv(
         "DATABASE_URL", engine.url.render_as_string(hide_password=False)
     )
-    monkeypatch.setenv("FOCUSARC_INITIAL_PASSWORD", invalid_password)
+    monkeypatch.setenv("FOCUSARC_INITIAL_PASSWORD", private_password)
 
-    assert admin_main(["set-initial-password", "--username", "jayy"]) == 2
+    assert admin_main(["set-initial-password", "--username", "bad/name"]) == 2
 
     captured = capsys.readouterr()
-    assert invalid_password not in captured.out + captured.err
+    assert private_password not in captured.out + captured.err
     assert "Invalid account setup input" in captured.err
