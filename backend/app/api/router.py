@@ -12,12 +12,14 @@ from app.api.stats import router as stats_router
 from app.api.sessions import router as sessions_router
 from app.api.timers import router as timers_router
 from app.api.totals import router as totals_router
+from app.api.study_state import router as study_state_router
+from app.services.study_state import guard_read_revision
 from app.db import get_db
 from app.models.session import Session as SessionModel
 
 router = APIRouter()
 public_router = APIRouter()
-api_router = APIRouter(dependencies=[Depends(get_current_username)])
+api_router = APIRouter(dependencies=[Depends(get_current_username), Depends(guard_read_revision)])
 logger = logging.getLogger(__name__)
 
 
@@ -73,6 +75,7 @@ api_router.include_router(sessions_router)
 api_router.include_router(end_day_router)
 api_router.include_router(stats_router)
 api_router.include_router(totals_router)
+api_router.include_router(study_state_router)
 router.include_router(public_router)
 router.include_router(auth_router)
 router.include_router(api_router)

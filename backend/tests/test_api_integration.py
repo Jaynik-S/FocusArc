@@ -1,3 +1,4 @@
+from study_helpers import study_post
 from app.models.timer import Timer
 
 
@@ -29,14 +30,14 @@ def test_timer_flow_and_single_active_enforced(client):
     timer_a = _create_timer(client, "BIO130")
     timer_b = _create_timer(client, "CHEM200")
 
-    response = client.post(
+    response = study_post(client,
         f"/api/timers/{timer_a['id']}/start",
         json={"client_tz": "UTC"},
     )
     assert response.status_code == 200
     assert response.json()["active_session"]["timer_id"] == timer_a["id"]
 
-    response = client.post(
+    response = study_post(client,
         f"/api/timers/{timer_b['id']}/start",
         json={"client_tz": "UTC"},
     )
@@ -47,7 +48,7 @@ def test_timer_flow_and_single_active_enforced(client):
     response = client.get("/api/active-session")
     assert response.json()["active_session"]["timer_id"] == timer_b["id"]
 
-    response = client.post("/api/stop")
+    response = study_post(client, "/api/stop")
     assert response.json()["stopped_session"]["end_at"] is not None
 
 
@@ -66,15 +67,15 @@ def test_end_day_finalizes_totals(client):
     _register(client)
     timer = _create_timer(client, "BIO130")
 
-    start_response = client.post(
+    start_response = study_post(client,
         f"/api/timers/{timer['id']}/start",
         json={"client_tz": "UTC"},
     )
     assert start_response.status_code == 200
     day_date = start_response.json()["active_session"]["day_date"]
-    client.post("/api/stop")
+    study_post(client, "/api/stop")
 
-    response = client.post(
+    response = study_post(client,
         "/api/end-day",
         json={"client_tz": "UTC", "day_date": day_date},
     )
@@ -87,14 +88,14 @@ def test_end_day_stops_active_session(client):
     _register(client)
     timer = _create_timer(client, "BIO130")
 
-    start_response = client.post(
+    start_response = study_post(client,
         f"/api/timers/{timer['id']}/start",
         json={"client_tz": "UTC"},
     )
     assert start_response.status_code == 200
     day_date = start_response.json()["active_session"]["day_date"]
 
-    response = client.post(
+    response = study_post(client,
         "/api/end-day",
         json={"client_tz": "UTC", "day_date": day_date},
     )
@@ -107,13 +108,13 @@ def test_end_day_stops_active_session(client):
 def test_accounts_cannot_access_each_others_data(client, db_session):
     _register(client, "alice")
     alice_timer = _create_timer(client, "Alice private timer")
-    started = client.post(
+    started = study_post(client,
         f"/api/timers/{alice_timer['id']}/start",
         json={"client_tz": "UTC"},
     )
     assert started.status_code == 200
     alice_day = started.json()["active_session"]["day_date"]
-    assert client.post("/api/stop").status_code == 200
+    assert study_post(client, "/api/stop").status_code == 200
     assert client.post("/api/auth/logout", json={}).status_code == 204
 
     _register(client, "bob")
@@ -131,7 +132,7 @@ def test_accounts_cannot_access_each_others_data(client, db_session):
         f"/api/timers/{alice_timer['id']}", json={"name": "Stolen"}
     ).status_code == 404
     assert client.delete(f"/api/timers/{alice_timer['id']}").status_code == 404
-    assert client.post(
+    assert study_post(client,
         f"/api/timers/{alice_timer['id']}/start", json={"client_tz": "UTC"}
     ).status_code == 404
 

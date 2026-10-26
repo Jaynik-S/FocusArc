@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.timer import Timer
 from app.schemas.timer import TimerCreate, TimerUpdate
+from app.services.sessions import lock_study_data, increment_study_revision
 
 
 def list_timers(db: Session, username: str, include_archived: bool) -> list[Timer]:
@@ -19,6 +20,7 @@ def list_timers(db: Session, username: str, include_archived: bool) -> list[Time
 
 
 def create_timer(db: Session, username: str, data: TimerCreate) -> Timer:
+    lock_study_data(db, username)
     timer = Timer(
         username=username,
         name=data.name,
@@ -27,6 +29,7 @@ def create_timer(db: Session, username: str, data: TimerCreate) -> Timer:
     )
     db.add(timer)
     try:
+        increment_study_revision(db, username)
         db.commit()
     except IntegrityError as exc:
         db.rollback()
@@ -38,10 +41,13 @@ def create_timer(db: Session, username: str, data: TimerCreate) -> Timer:
 def update_timer(
     db: Session, username: str, timer_id: UUID, data: TimerUpdate
 ) -> Timer | None:
+    lock_study_data(db, username)
     timer = db.get(Timer, timer_id)
     if timer is None or timer.username != username:
         return None
 
+    changed = any(value is not None and getattr(timer, key) != value
+                  for key, value in data.model_dump().items())
     if data.name is not None:
         timer.name = data.name
     if data.color is not None:
@@ -52,6 +58,8 @@ def update_timer(
         timer.is_archived = data.is_archived
 
     try:
+        if changed:
+            increment_study_revision(db, username)
         db.commit()
     except IntegrityError as exc:
         db.rollback()
@@ -61,10 +69,12 @@ def update_timer(
 
 
 def archive_timer(db: Session, username: str, timer_id: UUID) -> bool:
+    lock_study_data(db, username)
     timer = db.get(Timer, timer_id)
     if timer is None or timer.username != username:
         return False
     if not timer.is_archived:
         timer.is_archived = True
+        increment_study_revision(db, username)
         db.commit()
     return True

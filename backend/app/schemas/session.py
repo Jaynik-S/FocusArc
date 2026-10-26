@@ -23,7 +23,12 @@ class ActiveSessionResponse(BaseModel):
     active_session: SessionOut | None
 
 
-class StartTimerRequest(BaseModel):
+class StudyCommand(BaseModel):
+    expected_revision: int | None = Field(default=None, ge=0)
+    expected_active_session_id: UUID | None = None
+
+
+class StartTimerRequest(StudyCommand):
     client_tz: str
     started_at_client: datetime | None = None
     stopped_adjustment_seconds: int | None = None
@@ -34,7 +39,7 @@ class StartTimerResponse(BaseModel):
     active_session: SessionOut
 
 
-class StopTimerRequest(BaseModel):
+class StopTimerRequest(StudyCommand):
     stopped_at_client: datetime | None = None
     adjustment_seconds: int | None = None
 
@@ -48,6 +53,7 @@ class SessionList(BaseModel):
 
 
 class AdjustSessionRequest(BaseModel):
+    expected_revision: int | None = Field(default=None, ge=0)
     delta_seconds: int = Field(strict=True, ge=-86400, le=86400)
     expected_start_at: AwareDatetime
     expected_end_at: AwareDatetime | None

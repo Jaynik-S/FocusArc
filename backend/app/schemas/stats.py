@@ -4,6 +4,7 @@ from datetime import date
 from uuid import UUID
 
 from pydantic import BaseModel
+from app.schemas.session import StudyCommand
 
 
 class TimerTotal(BaseModel):
@@ -11,7 +12,7 @@ class TimerTotal(BaseModel):
     total_seconds: int
 
 
-class EndDayRequest(BaseModel):
+class EndDayRequest(StudyCommand):
     client_tz: str
     day_date: date
 

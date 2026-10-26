@@ -12,6 +12,10 @@ with engine.connect() as connection:
     assert {'users', 'timers', 'sessions', 'day_summaries', 'alembic_version'} <= set(inspector.get_table_names())
     password_hash = next(c for c in inspector.get_columns('users') if c['name'] == 'password_hash')
     assert password_hash['nullable'] is True
+    user_columns = {c['name']: c for c in inspector.get_columns('users')}
+    assert user_columns['study_revision']['nullable'] is False
+    assert user_columns['study_timezone']['nullable'] is False
+    assert user_columns['study_last_seen_at']['nullable'] is True
     assert 'cycle_total_seconds' in {c['name'] for c in inspector.get_columns('timers')}
     reset_at = next(c for c in inspector.get_columns('timers') if c['name'] == 'cycle_reset_at')
     assert reset_at['nullable'] is True
