@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { MASTER_SCREENSAVER, normalizeScreensaverColor } from "../utils/screensaverRecolor";
 import { renderScreensaver } from "../utils/screensaverRenderer";
 
-const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER }: { color: string; source?: string }) => {
+const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER, onVisibleSource }: { color: string; source?: string; onVisibleSource?: (source: string) => void }) => {
   const hex = normalizeScreensaverColor(color);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [painted, setPainted] = useState<{ hex: string; source: string } | null>(null);
   const [failed, setFailed] = useState(false);
+
+  // Ink follows the actual retained canvas or raw fallback before the browser paints.
+  useLayoutEffect(() => { onVisibleSource?.(painted?.source ?? source); }, [painted?.source, source, onVisibleSource]);
 
   useEffect(() => {
     let cancelled = false;

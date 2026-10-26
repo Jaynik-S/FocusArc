@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Timer } from "../api/types";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
 import { formatDuration } from "../utils/time";
+import { SCREENSAVER_WALLPAPERS, type ScreensaverWallpaperDefinition } from "../utils/screensaverWallpapers";
 import ScreensaverWallpaper from "./ScreensaverWallpaper";
 import "./screensaver.css";
 
@@ -11,12 +12,15 @@ type ScreensaverProps = {
   onExit: () => void;
   timer: Timer | null;
   elapsedSeconds: number;
+  wallpaper?: ScreensaverWallpaperDefinition;
 };
 
-const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds }: ScreensaverProps) => {
+const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREENSAVER_WALLPAPERS[0] }: ScreensaverProps) => {
   const { activeSession, busy, synced, error, stopTimer, adjustOffset } = useTimerRuntime();
   const [actionError, setActionError] = useState("");
   const [working, setWorking] = useState(false);
+  const [displayedSource, setDisplayedSource] = useState<string>(wallpaper.source);
+  const ink = SCREENSAVER_WALLPAPERS.find(item => item.source === displayedSource)?.ink ?? wallpaper.ink;
   const layer = useRef<HTMLElement>(null);
   const pause = useRef<HTMLButtonElement>(null);
   const exit = useRef<HTMLButtonElement>(null);
@@ -66,9 +70,9 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds }: ScreensaverProps
   };
 
   return (
-    <section ref={layer} className="screensaver" data-open={isOpen} role="dialog" aria-modal={isOpen || undefined}
+    <section ref={layer} className="screensaver" data-open={isOpen} data-wallpaper={wallpaper.id} data-ink={ink} role="dialog" aria-modal={isOpen || undefined}
       aria-label="Timer screensaver" aria-hidden={!isOpen}>
-      <ScreensaverWallpaper color={timer?.color ?? "#5e6ad2"} />
+      <ScreensaverWallpaper color={timer?.color ?? "#5e6ad2"} source={wallpaper.source} onVisibleSource={setDisplayedSource} />
       <button className="screensaver-exit" type="button" ref={exit} onClick={onExit} aria-label="Exit screensaver">
         <span aria-hidden="true">↙</span> Exit screensaver <kbd>Esc</kbd>
       </button>

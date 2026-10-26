@@ -9,6 +9,7 @@ import { storageForAccount } from "../storage/accountStorage";
 type TimerRuntimeContextValue = ReturnType<typeof useStudySync> & {
   offsets: Record<string, number>;
   activeAdjustmentSeconds: number;
+  wallpaperResetRevision: number;
   legacyPendingAdjustments: Record<string, number>;
   legacyPendingOffsets: Record<string, number>;
   resetRuntimeState: () => void;
@@ -30,6 +31,7 @@ export const TimerRuntimeProvider = ({ children, username }: { children: React.R
   const [adjusting, setAdjusting] = useState(false);
   const adjustingRef = useRef(false);
   const [draftRevision, setDraftRevision] = useState(0);
+  const [wallpaperResetRevision, setWallpaperResetRevision] = useState(0);
   const legacyPendingAdjustments = useMemo(() => readLegacyDraft(username, "sessionAdjustments"), [username, draftRevision]);
   const legacyPendingOffsets = useMemo(() => readLegacyDraft(username, "timerOffsets"), [username, draftRevision]);
   const adjustOffset = useCallback(async (timerId: string, deltaSeconds: number) => {
@@ -66,14 +68,16 @@ export const TimerRuntimeProvider = ({ children, username }: { children: React.R
   }, [sync.stopTimer]);
   const resetTotals = useCallback(async () => {
     if (adjustingRef.current) throw new Error("Wait for the current adjustment to finish.");
-    return sync.resetTotals();
+    const result = await sync.resetTotals();
+    setWallpaperResetRevision((revision) => revision + 1);
+    return result;
   }, [sync.resetTotals]);
   // Runtime counters are always authoritative. Reset only asks for a fresh snapshot.
   const resetRuntimeState = useCallback(() => { void sync.refresh().catch(() => {}); }, [sync.refresh]);
   const value = useMemo(() => ({
-    ...sync, busy: sync.busy || adjusting, offsets: {}, activeAdjustmentSeconds: 0,
+    ...sync, busy: sync.busy || adjusting, offsets: {}, activeAdjustmentSeconds: 0, wallpaperResetRevision,
     legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals,
-  }), [sync, adjusting, legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals]);
+  }), [sync, adjusting, wallpaperResetRevision, legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals]);
   return <TimerRuntimeContext.Provider value={value}>{children}</TimerRuntimeContext.Provider>;
 };
 

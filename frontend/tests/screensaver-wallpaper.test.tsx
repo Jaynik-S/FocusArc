@@ -61,3 +61,18 @@ it("keeps the previous frame visible and reports loading when only the source ch
   expect(screen.getByTestId("screensaver-wallpaper").querySelector("canvas")?.style.visibility).toBe("visible");
   expect(clearRect).not.toHaveBeenCalled();
 });
+
+it("reports the raw fallback immediately and retains the old canvas source until a new frame is committed", async () => {
+  const ready = vi.fn();
+  let finish!: (blob: Blob) => void;
+  const view = render(<ScreensaverWallpaper color="#FFFFFF" source="/sky-garden.png" onVisibleSource={ready} />);
+  expect(ready).toHaveBeenCalledWith("/sky-garden.png");
+  await waitFor(() => expect(drawImage).toHaveBeenCalledTimes(1));
+  ready.mockClear();
+  state.render.mockReturnValueOnce(new Promise<Blob>(resolve => { finish = resolve; }));
+  view.rerender(<ScreensaverWallpaper color="#FFFFFF" source="/forest.png" onVisibleSource={ready} />);
+  expect(ready).toHaveBeenLastCalledWith("/sky-garden.png");
+  await act(async () => finish(pixels));
+  expect(drawImage).toHaveBeenCalledTimes(2);
+  expect(ready).toHaveBeenLastCalledWith("/forest.png");
+});

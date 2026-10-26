@@ -1,41 +1,58 @@
 /* A separate static artwork layer leaves room for future illustrated motion. */
 .screensaver {
+  --screensaver-ink: #fff3dc;
+  --screensaver-shadow: 0 2px 15px #071322, 0 1px 3px #071322;
+  --screensaver-button-bg: rgb(7 19 34 / 24%);
+  --screensaver-strong-bg: rgb(7 19 34 / 35%);
+  --screensaver-border: #fff3dc55;
+  --screensaver-hover-bg: rgb(255 243 220 / 15%);
+  --screensaver-hover-ink: #fff;
   position: fixed;
   inset: 0;
   z-index: 100;
   overflow: hidden;
   isolation: isolate;
   color-scheme: dark;
-  color: #fff3dc;
+  color: var(--screensaver-ink);
   background: #112b43;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 360ms ease, visibility 0s 360ms;
 }
+.screensaver[data-ink="dark"] {
+  background: #c8d8da;
+  --screensaver-ink: #183137;
+  --screensaver-shadow: 0 1px 8px #fff8e099, 0 1px 2px #fff8e0aa;
+  --screensaver-button-bg: rgb(255 248 224 / 25%);
+  --screensaver-strong-bg: rgb(255 248 224 / 40%);
+  --screensaver-border: #18313766;
+  --screensaver-hover-bg: rgb(255 248 224 / 65%);
+  --screensaver-hover-ink: #06191e;
+}
 .screensaver[data-open="true"] { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
 .screensaver-wallpaper { position: absolute; inset: 0; z-index: -1; background-size: cover; background-position: center; background-repeat: no-repeat; }
 .screensaver-wallpaper canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.screensaver-body { position: absolute; top: 33%; left: 50%; width: min(30rem, calc(100% - 2rem)); transform: translateX(-50%); text-align: center; text-shadow: 0 2px 15px #071322, 0 1px 3px #071322; }
+.screensaver-body { position: absolute; top: 33%; left: 50%; width: min(30rem, calc(100% - 2rem)); transform: translateX(-50%); text-align: center; text-shadow: var(--screensaver-shadow); }
 .screensaver-ornament { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.8rem; opacity: 0.85; }
 .screensaver-ornament svg { width: 2rem; height: 1.5rem; }
-.screensaver-ornament span { width: 2.4rem; height: 1px; background: linear-gradient(90deg, transparent, #fff3dc99); }
+.screensaver-ornament span { width: 2.4rem; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, currentColor 60%, transparent)); }
 .screensaver-ornament span:last-child { transform: rotate(180deg); }
 .screensaver-name { max-width: 100%; margin: 0 0 0.6rem; overflow-wrap: anywhere; color: inherit; font-weight: 400; font-size: clamp(1rem, 2.5vw, 1.4rem); letter-spacing: 0.12em; line-height: 1.35; }
 .screensaver-time { display: block; color: inherit; font-size: clamp(2.5rem, 7vw, 4rem); font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: 0.035em; line-height: 1.2; white-space: nowrap; }
 .screensaver-controls { display: flex; justify-content: center; align-items: center; gap: 0.65rem; margin-top: 1rem; }
-.screensaver button { color: #fff3dc; text-shadow: 0 1px 5px #071322; font-weight: 400; }
-.screensaver-controls button { display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; min-height: 2.5rem; padding: 0.35rem 0.65rem; border-radius: 999px; font-size: 0.8rem; background: rgb(7 19 34 / 24%); }
+.screensaver button { color: var(--screensaver-ink); text-shadow: var(--screensaver-shadow); font-weight: 400; }
+.screensaver-controls button { display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; min-height: 2.5rem; padding: 0.35rem 0.65rem; border-radius: 999px; font-size: 0.8rem; background: var(--screensaver-button-bg); }
 .screensaver-controls button span { font-size: 0.7rem; opacity: 0.8; }
-.screensaver-controls .screensaver-pause { gap: 0.35rem; padding-inline: 0.9rem; border-color: #fff3dc55; background: rgb(7 19 34 / 35%); }
+.screensaver-controls .screensaver-pause { gap: 0.35rem; padding-inline: 0.9rem; border-color: var(--screensaver-border); background: var(--screensaver-strong-bg); }
 .screensaver-pause svg { width: 1rem; height: 1rem; }
-.screensaver button:hover:not(:disabled) { color: #fff; background: rgb(255 243 220 / 15%); border-color: #fff3dc88; }
-.screensaver button:focus-visible { outline: 2px solid #fff3dc; outline-offset: 4px; box-shadow: none; }
+.screensaver button:hover:not(:disabled) { color: var(--screensaver-hover-ink); background: var(--screensaver-hover-bg); border-color: currentColor; }
+.screensaver button:focus-visible { outline: 2px solid var(--screensaver-ink); outline-offset: 4px; box-shadow: none; }
 .screensaver button:disabled { opacity: 0.55; }
-.screensaver-exit { position: absolute; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right)); display: inline-flex; align-items: center; gap: 0.6rem; min-height: 2.5rem; padding: 0.4rem 0.7rem; font-size: 0.72rem; background: rgb(7 19 34 / 28%); border-radius: 999px; }
+.screensaver-exit { position: absolute; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right)); display: inline-flex; align-items: center; gap: 0.6rem; min-height: 2.5rem; padding: 0.4rem 0.7rem; font-size: 0.72rem; background: var(--screensaver-button-bg); border-radius: 999px; }
 .screensaver-exit > span { font-size: 1rem; }
 .screensaver-exit kbd { font: inherit; font-size: 0.6rem; opacity: 0.65; }
-.screensaver-messages { position: absolute; bottom: max(1.25rem, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(32rem, calc(100% - 3rem)); text-align: center; font-size: 0.8rem; text-shadow: 0 1px 4px #071322, 0 0 12px #071322; }
+.screensaver-messages { position: absolute; bottom: max(1.25rem, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(32rem, calc(100% - 3rem)); color: #fff3dc; text-align: center; font-size: 0.8rem; text-shadow: 0 1px 4px #071322, 0 0 12px #071322; }
 .screensaver-messages p { padding: 0.5rem; border-radius: 6px; background: rgb(7 19 34 / 70%); }
 @media (max-width: 480px) {
   .screensaver-body { top: 34%; }

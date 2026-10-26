@@ -7,6 +7,7 @@ export const ACCOUNT_STORAGE_SUFFIXES = [
   "lastActiveAt",
   "selectedTimerId",
   "theme",
+  "screensaverWallpaper",
 ] as const;
 
 export type AccountStorageSuffix = typeof ACCOUNT_STORAGE_SUFFIXES[number];
