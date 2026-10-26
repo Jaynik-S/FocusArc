@@ -1,6 +1,6 @@
 import { isValidHexColor } from "./color";
 
-export const MASTER_SCREENSAVER = "/screensaver/master-screensaver.png";
+export { MASTER_SCREENSAVER } from "./screensaverWallpapers";
 export const normalizeScreensaverColor = (hex: string) => isValidHexColor(hex) ? hex.trim().toUpperCase() : "#5E6AD2";
 
 const clamp = (value: number, low = 0, high = 1) => Math.max(low, Math.min(high, value));
