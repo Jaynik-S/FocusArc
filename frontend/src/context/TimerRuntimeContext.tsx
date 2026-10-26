@@ -1,5 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
+import { apiFetch } from "../api/apiClient";
+import { adjustStudySession } from "../api/sessionAdjustments";
+import { STUDY_DATA_CHANGED_EVENT } from "../api/dataEvents";
+import type { Session, Timer } from "../api/types";
 import { useActiveSession } from "../hooks/useActiveSession";
 import { storageForAccount } from "../storage/accountStorage";
 
@@ -16,7 +20,7 @@ type TimerRuntimeContextValue = {
   offsets: Record<string, number>;
   activeAdjustmentSeconds: number;
   resetRuntimeState: () => void;
-  adjustOffset: (timerId: string, deltaSeconds: number) => void;
+  adjustOffset: (timerId: string, deltaSeconds: number) => Promise<void>;
 };
 
 const readStoredElapsed = (username: string) => {
@@ -84,8 +88,12 @@ export const TimerRuntimeProvider = ({
   children: React.ReactNode;
   username: string;
 }) => {
-  const { activeSession, elapsedSeconds, loading, busy, error, refresh, startTimer, stopTimer } =
+  const { activeSession, elapsedSeconds, loading, busy: sessionBusy, error, refresh, startTimer, stopTimer } =
     useActiveSession(username);
+  const [adjusting, setAdjusting] = useState(false);
+  const adjustingRef = useRef(false);
+  const totalsRevision = useRef(0);
+  const busy = sessionBusy || adjusting;
   const [elapsedByTimer, setElapsedByTimer] = useState<Record<string, number>>(
     () => readStoredElapsed(username)
   );
@@ -94,6 +102,25 @@ export const TimerRuntimeProvider = ({
     () => readStoredSessionAdjustments(username)
   );
   const sessionAdjustmentSeconds = activeSession ? sessionAdjustments[activeSession.id] ?? 0 : 0;
+
+  const refreshTotals = useCallback(async () => {
+    const revision = ++totalsRevision.current;
+    const response = await apiFetch<{ timers: Timer[] }>("/timers?include_archived=false");
+    if (revision !== totalsRevision.current) return;
+    setElapsedByTimer(Object.fromEntries(response.timers.map((timer) => [timer.id, timer.cycle_total_seconds])));
+    setOffsets({});
+  }, []);
+
+  useEffect(() => {
+    const reload = (event?: Event) => {
+      const session = (event as CustomEvent<Session> | undefined)?.detail;
+      if (session?.end_at) setSessionAdjustments((values) => ({ ...values, [session.id]: 0 }));
+      void refreshTotals().catch(() => { /* Retain offline counters. */ });
+    };
+    reload();
+    window.addEventListener(STUDY_DATA_CHANGED_EVENT, reload);
+    return () => { totalsRevision.current++; window.removeEventListener(STUDY_DATA_CHANGED_EVENT, reload); };
+  }, [refreshTotals]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -131,31 +158,22 @@ export const TimerRuntimeProvider = ({
   }, [sessionAdjustments, username]);
 
   const adjustOffset = useCallback(
-    (timerId: string, deltaSeconds: number) => {
-      setOffsets((prev) => {
-        const current = prev[timerId] ?? 0;
-        const baseSeconds = elapsedByTimer[timerId] ?? 0;
-        let next = current + deltaSeconds;
-        if (activeSession?.timer_id === timerId) {
-          const minOffset = -(baseSeconds + elapsedSeconds);
-          if (next < minOffset) {
-            next = minOffset;
-          }
-        }
-        const appliedDelta = next - current;
-        if (appliedDelta !== 0 && activeSession?.timer_id === timerId) {
-          setSessionAdjustments((values) => ({
-            ...values,
-            [activeSession.id]: (values[activeSession.id] ?? 0) + appliedDelta,
-          }));
-        }
-        return {
-          ...prev,
-          [timerId]: next,
-        };
-      });
+    async (timerId: string, deltaSeconds: number) => {
+      if (adjustingRef.current || sessionBusy) return;
+      adjustingRef.current = true;
+      setAdjusting(true);
+      try {
+        const session = activeSession?.timer_id === timerId ? activeSession :
+          await apiFetch<Session | null>(`/timers/${timerId}/latest-session`);
+        if (!session) throw new Error("Start this timer before adjusting its duration.");
+        // Legacy browser offsets are sent once on stop; new edits persist immediately.
+        await adjustStudySession(session, deltaSeconds);
+      } finally {
+        adjustingRef.current = false;
+        setAdjusting(false);
+      }
     },
-    [activeSession?.id, activeSession?.timer_id, elapsedSeconds, elapsedByTimer]
+    [activeSession, sessionBusy]
   );
 
   const activeAdjustmentSeconds = sessionAdjustmentSeconds;
@@ -176,48 +194,30 @@ export const TimerRuntimeProvider = ({
     }
   }, [username]);
 
-  const applyElapsedToTimer = useCallback((timerId: string, deltaSeconds: number) => {
-    if (!timerId || deltaSeconds <= 0) {
-      return;
-    }
-    setElapsedByTimer((prev) => ({
-      ...prev,
-      [timerId]: (prev[timerId] ?? 0) + deltaSeconds,
-    }));
-  }, []);
-
   const startTimerWithAdjustments = useCallback(
     async (timerId: string) => {
-      const previousTimerId =
-        activeSession && activeSession.timer_id !== timerId
-          ? activeSession.timer_id
-          : null;
-      const elapsedSnapshot = elapsedSeconds;
+      if (adjustingRef.current) return;
       const adjustmentSeconds =
         activeSession && activeSession.timer_id !== timerId
           ? sessionAdjustmentSeconds
           : 0;
       await startTimer(timerId, adjustmentSeconds);
-      if (previousTimerId) {
-        applyElapsedToTimer(previousTimerId, elapsedSnapshot);
+      if (activeSession && activeSession.timer_id !== timerId) {
+        setSessionAdjustments((values) => ({ ...values, [activeSession.id]: 0 }));
       }
     },
-    [activeSession, applyElapsedToTimer, elapsedSeconds, sessionAdjustmentSeconds, startTimer]
+    [activeSession, sessionAdjustmentSeconds, startTimer]
   );
 
   const stopTimerWithAdjustments = useCallback(async () => {
-    const previousTimerId = activeSession?.timer_id ?? null;
-    const elapsedSnapshot = elapsedSeconds;
+    if (adjustingRef.current) return;
     await stopTimer(sessionAdjustmentSeconds);
-    if (previousTimerId) {
-      applyElapsedToTimer(previousTimerId, elapsedSnapshot);
-    }
-  }, [activeSession, applyElapsedToTimer, elapsedSeconds, sessionAdjustmentSeconds, stopTimer]);
+  }, [sessionAdjustmentSeconds, stopTimer]);
 
   const value = useMemo(
     () => ({
       activeSession,
-      elapsedSeconds,
+      elapsedSeconds: Math.max(0, elapsedSeconds + sessionAdjustmentSeconds),
       loading,
       busy,
       error,
@@ -233,6 +233,7 @@ export const TimerRuntimeProvider = ({
     [
       activeSession,
       elapsedSeconds,
+      sessionAdjustmentSeconds,
       loading,
       busy,
       error,

@@ -13,6 +13,7 @@ const TimersPage = () => {
   const timersState = useTimers();
   const [editingTimer, setEditingTimer] = useState<Timer | null>(null);
   const [actionError, setActionError] = useState("");
+  const [adjustmentStatus, setAdjustmentStatus] = useState("");
   const {
     activeSession,
     elapsedSeconds,
@@ -68,18 +69,16 @@ const TimersPage = () => {
     }
   };
 
-  const handleAddFive = () => {
-    if (!selectedTimerId || !isActive) {
-      return;
+  const handleAdjust = async (delta: number) => {
+    if (!selectedTimerId || busy) return;
+    setActionError("");
+    setAdjustmentStatus("");
+    try {
+      await adjustOffset(selectedTimerId, delta);
+      setAdjustmentStatus("Session updated.");
+    } catch (cause) {
+      setActionError(cause instanceof Error ? cause.message : "Could not save adjustment. Refresh and try again.");
     }
-    adjustOffset(selectedTimerId, 300);
-  };
-
-  const handleMinusOne = () => {
-    if (!selectedTimerId || !isActive) {
-      return;
-    }
-    adjustOffset(selectedTimerId, -600);
   };
 
   const handleUpdate = async (values: TimerFormValues) => {
@@ -151,10 +150,10 @@ const TimersPage = () => {
           <button
             className="ghost accent timer-control-secondary"
             type="button"
-            onClick={handleMinusOne}
-            disabled={!selectedTimerId || !isActive}
+            onClick={() => void handleAdjust(-300)}
+            disabled={!selectedTimerId || busy}
           >
-            -10 min
+            −5 min
           </button>
           <button
             className="primary timer-control-main"
@@ -167,10 +166,10 @@ const TimersPage = () => {
           <button
             className="ghost accent timer-control-secondary"
             type="button"
-            onClick={handleAddFive}
-            disabled={!selectedTimerId || !isActive}
+            onClick={() => void handleAdjust(600)}
+            disabled={!selectedTimerId || busy}
           >
-            +5 min
+            +10 min
           </button>
         </div>
         {selectedTimer ? (
@@ -187,7 +186,8 @@ const TimersPage = () => {
             </button>
           </div>
         ) : null}
-        {actionError ? <div className="error">{actionError}</div> : null}
+        {actionError ? <div className="error" role="alert">{actionError}</div> : null}
+        {adjustmentStatus ? <div className="muted" role="status">{adjustmentStatus}</div> : null}
       </div>
       <TimerFormModal
         title="Edit timer"

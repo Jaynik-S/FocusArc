@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -16,8 +16,18 @@ from app.schemas.stats import (
 )
 from app.services import stats as stats_service
 from app.services import analytics as analytics_service
+from app.services.sessions import _get_timezone
 
 router = APIRouter(prefix="/stats", tags=["stats"])
+
+
+def display_timezone(client_tz: str | None = None) -> str | None:
+    if client_tz is not None:
+        try:
+            _get_timezone(client_tz)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid client_tz")
+    return client_tz
 
 
 @router.get("/analytics")
@@ -54,10 +64,11 @@ def stats_analytics_sessions(
 def stats_day(
     request: Request,
     day_date: date = Query(...),
+    client_tz: str | None = Depends(display_timezone),
     db: Session = Depends(get_db),
 ) -> DayStatsResponse:
     username = request.state.username
-    totals = stats_service.compute_day_totals(db, username, day_date)
+    totals = stats_service.compute_day_totals(db, username, day_date, client_tz)
     return DayStatsResponse(
         day_date=day_date,
         totals=[
@@ -71,10 +82,11 @@ def stats_day(
 def stats_week(
     request: Request,
     week_start: date = Query(...),
+    client_tz: str | None = Depends(display_timezone),
     db: Session = Depends(get_db),
 ) -> WeekStatsResponse:
     username = request.state.username
-    days = stats_service.compute_week_totals(db, username, week_start)
+    days = stats_service.compute_week_totals(db, username, week_start, client_tz)
     return WeekStatsResponse(
         week_start=week_start,
         daily=[
@@ -94,10 +106,11 @@ def stats_week(
 def stats_averages(
     request: Request,
     days: int = Query(14, ge=1, le=365),
+    client_tz: str | None = Depends(display_timezone),
     db: Session = Depends(get_db),
 ) -> dict:
     username = request.state.username
-    averages = stats_service.compute_averages(db, username, days)
+    averages = stats_service.compute_averages(db, username, days, client_tz)
     return {
         "days": days,
         "averages": [

@@ -5,6 +5,7 @@ import { notifyStudyDataChanged } from "../api/dataEvents";
 import { Timer } from "../api/types";
 import { useAuth } from "../contexts/AuthContext";
 import { storageForAccount } from "../storage/accountStorage";
+import { useStudyDataRefresh } from "./useStudyDataRefresh";
 
 const sortTimers = (timers: Timer[]) =>
   [...timers].sort((a, b) => a.created_at.localeCompare(b.created_at));
@@ -62,6 +63,8 @@ export const useTimers = () => {
       setLoading(false);
     }
   }, [enabled]);
+
+  useStudyDataRefresh(loadTimers);
 
   useEffect(() => {
     loadTimers();

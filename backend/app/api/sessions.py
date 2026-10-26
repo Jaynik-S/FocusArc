@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.schemas.session import (
     ActiveSessionResponse,
+    AdjustSessionRequest,
     DaySchedule,
     SessionList,
     SessionOut,
@@ -22,6 +23,29 @@ from app.schemas.session import (
 from app.services import sessions as sessions_service
 
 router = APIRouter(tags=["sessions"])
+
+
+@router.get("/timers/{timer_id}/latest-session")
+def latest_timer_session(timer_id: UUID, request: Request, db: Session = Depends(get_db)) -> SessionOut | None:
+    try:
+        session = sessions_service.latest_timer_session(db, request.state.username, timer_id)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Timer not found")
+    return SessionOut.model_validate(session) if session else None
+
+
+@router.post("/sessions/{session_id}/adjust")
+def adjust_session(session_id: UUID, payload: AdjustSessionRequest, request: Request,
+                   db: Session = Depends(get_db)) -> SessionOut:
+    try:
+        session = sessions_service.adjust_session(db, request.state.username, session_id, payload)
+    except ValueError as exc:
+        if str(exc) == "session_changed":
+            raise HTTPException(status_code=409, detail="Session changed. Refresh before adjusting again.")
+        raise
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return SessionOut.model_validate(session)
 
 
 @router.get("/active-session")
@@ -110,10 +134,14 @@ def list_sessions(
 def schedule_day(
     request: Request,
     day_date: date = Query(...),
+    client_tz: str | None = None,
     db: Session = Depends(get_db),
 ) -> DaySchedule:
     username = request.state.username
-    sessions = sessions_service.list_sessions(db, username, day_date, day_date)
+    try:
+        sessions = sessions_service.schedule_sessions(db, username, day_date, day_date, client_tz)[day_date]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid client_tz")
     return DaySchedule(
         day_date=day_date,
         sessions=[SessionOut.model_validate(session) for session in sessions],
@@ -124,17 +152,17 @@ def schedule_day(
 def schedule_week(
     request: Request,
     week_start: date = Query(...),
+    client_tz: str | None = None,
     db: Session = Depends(get_db),
 ) -> WeekSchedule:
     username = request.state.username
     week_end = week_start + timedelta(days=6)
-    sessions = sessions_service.list_sessions(db, username, week_start, week_end)
-
-    days_map: dict[date, list[SessionOut]] = {
-        week_start + timedelta(days=offset): [] for offset in range(7)
-    }
-    for session in sessions:
-        days_map[session.day_date].append(SessionOut.model_validate(session))
+    try:
+        sessions_by_day = sessions_service.schedule_sessions(db, username, week_start, week_end, client_tz)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid client_tz")
+    days_map = {day: [SessionOut.model_validate(session) for session in sessions]
+                for day, sessions in sessions_by_day.items()}
 
     return WeekSchedule(
         week_start=week_start,

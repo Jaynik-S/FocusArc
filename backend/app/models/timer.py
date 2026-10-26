@@ -32,6 +32,7 @@ class Timer(Base):
     cycle_total_seconds: Mapped[int] = mapped_column(
         Integer, server_default=sa.text("0"), nullable=False
     )
+    cycle_reset_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     is_archived: Mapped[bool] = mapped_column(
         Boolean, server_default=sa.text("false"), nullable=False
     )

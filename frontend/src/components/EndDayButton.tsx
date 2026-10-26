@@ -15,9 +15,10 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const titleId = useId();
-  const { activeAdjustmentSeconds, refresh, resetRuntimeState } = useTimerRuntime();
+  const { activeAdjustmentSeconds, refresh, resetRuntimeState, busy: timerBusy } = useTimerRuntime();
 
   const handleConfirm = async () => {
+    if (timerBusy || busy) return;
     setBusy(true);
     setError("");
     try {
@@ -27,7 +28,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
       });
       resetRuntimeState();
       notifyStudyDataChanged();
-      refresh(true);
+      void refresh(true).catch(() => { /* Runtime displays the sync error. */ });
       onEnded(response);
       setOpen(false);
     } catch (err) {
@@ -42,7 +43,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
       <button
         className="end-day-button"
         type="button"
-        disabled={disabled}
+        disabled={disabled || timerBusy}
         onClick={() => setOpen(true)}
       >
         Reset Totals
@@ -71,7 +72,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
                   className="secondary"
                   type="button"
                   onClick={() => setOpen(false)}
-                  disabled={busy}
+                  disabled={busy || timerBusy}
                 >
                   Cancel
                 </button>
@@ -79,7 +80,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
                   className="primary"
                   type="button"
                   onClick={handleConfirm}
-                  disabled={busy}
+                  disabled={busy || timerBusy}
                 >
                   {busy ? "Resetting..." : "Confirm"}
                 </button>

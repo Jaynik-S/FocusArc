@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { apiFetch, AuthenticationError } from "../api/apiClient";
-import { notifyStudyDataChanged } from "../api/dataEvents";
+import { notifyStudyDataChanged, STUDY_DATA_CHANGED_EVENT } from "../api/dataEvents";
 import { Session } from "../api/types";
 import { storageForAccount } from "../storage/accountStorage";
 import { getClientTimezone } from "../utils/date";
@@ -98,6 +98,8 @@ export const useActiveSession = (username = "") => {
   const lastPersistedRef = useRef<number | null>(null);
   const autoStopRef = useRef(false);
   const refreshRef = useRef<Promise<void> | null>(null);
+  const revisionRef = useRef(0);
+  const mutationRef = useRef(false);
 
   const refresh = useCallback(
     async (initial = false, signal?: AbortSignal) => {
@@ -112,11 +114,12 @@ export const useActiveSession = (username = "") => {
       }
       if (refreshRef.current) return refreshRef.current;
       const request = (async () => {
+      const revision = revisionRef.current;
       try {
         const response = await apiFetch<{ active_session: Session | null }>(
           "/active-session", { signal }
         );
-        if (!signal?.aborted) {
+        if (!signal?.aborted && revision === revisionRef.current) {
           setActiveSession(response.active_session);
           setError(null);
         }
@@ -136,6 +139,24 @@ export const useActiveSession = (username = "") => {
     },
     [enabled]
   );
+
+  useEffect(() => {
+    const changed = (event: Event) => {
+      const session = (event as CustomEvent<Session | undefined>).detail;
+      revisionRef.current++;
+      if (session && activeSession?.id === session.id) {
+        setActiveSession(session.end_at ? null : session);
+        setElapsedSeconds(session.end_at ? 0 : Math.max(0, Math.floor((Date.now() - Date.parse(session.start_at)) / 1000)));
+      } else {
+        // Finish any older read before fetching the revision that triggered this event.
+        void (refreshRef.current ?? Promise.resolve()).catch(() => {}).then(() => refresh()).catch(() => {
+          // Polling reports sync errors.
+        });
+      }
+    };
+    window.addEventListener(STUDY_DATA_CHANGED_EVENT, changed);
+    return () => window.removeEventListener(STUDY_DATA_CHANGED_EVENT, changed);
+  }, [activeSession?.id, refresh]);
 
   useEffect(() => {
     if (!enabled) {
@@ -223,9 +244,11 @@ export const useActiveSession = (username = "") => {
 
   const startTimer = useCallback(
     async (timerId: string, stoppedAdjustmentSeconds: number = 0) => {
-      if (!enabled) {
+      if (!enabled || mutationRef.current) {
         return;
       }
+      mutationRef.current = true;
+      revisionRef.current++;
       setBusy(true);
       try {
         const response = await apiFetch<{
@@ -240,8 +263,10 @@ export const useActiveSession = (username = "") => {
           },
         });
         setActiveSession(response.active_session);
-        if (response.stopped_session) notifyStudyDataChanged();
+        setElapsedSeconds(Math.max(0, Math.floor((Date.now() - Date.parse(response.active_session.start_at)) / 1000)));
+        notifyStudyDataChanged();
       } finally {
+        mutationRef.current = false;
         setBusy(false);
       }
     },
@@ -250,9 +275,11 @@ export const useActiveSession = (username = "") => {
 
   const stopTimer = useCallback(
     async (adjustmentSeconds: number = 0, stoppedAtClient?: string) => {
-      if (!enabled) {
+      if (!enabled || mutationRef.current) {
         return;
       }
+      mutationRef.current = true;
+      revisionRef.current++;
       setBusy(true);
       try {
         const response = await apiFetch<{ stopped_session: Session | null }>("/stop", {
@@ -263,8 +290,10 @@ export const useActiveSession = (username = "") => {
           },
         });
         setActiveSession(null);
-        if (response.stopped_session) notifyStudyDataChanged();
+        setElapsedSeconds(0);
+        notifyStudyDataChanged(response.stopped_session ?? undefined);
       } finally {
+        mutationRef.current = false;
         setBusy(false);
       }
     },
@@ -290,7 +319,9 @@ export const useActiveSession = (username = "") => {
       const lastActiveAt = lastActiveRef.current ?? now;
       if (!autoStopRef.current && now - lastActiveAt > SUSPEND_GRACE_MS) {
         autoStopRef.current = true;
-        void stopTimer(0, new Date(lastActiveAt).toISOString()).catch(() => {
+        let pendingAdjustment = 0;
+        try { pendingAdjustment = JSON.parse(storageForAccount(username).getItem("sessionAdjustments") ?? "{}")[activeSession.id] ?? 0; } catch { /* Storage is optional. */ }
+        void stopTimer(pendingAdjustment, new Date(lastActiveAt).toISOString()).catch(() => {
           // The response may have been lost after commit. Never replay a mutation.
         });
         return;
