@@ -1,5 +1,7 @@
 # Timer screensaver
 
+Start/resume now waits for the selected, recolored frame and uses an independent random entrance. See [screensaver readiness, transitions and verification](screensaver-transitions.md) for the current lifecycle and failure behavior; this supersedes the original clean-master fallback and effectively instant reduced-motion transition described in the historical verification below.
+
 Starting or resuming a timer opens a full-viewport illustrated space scene. A newly synchronized session from another device opens it too. Pause returns to the normal interface. Exit or Escape returns without stopping the timer and stays dismissed for that session. Refresh always starts in the normal interface, including when an account timer is already running.
 
 ![Screensaver at 900×700](screenshots/screensaver-900.png)
