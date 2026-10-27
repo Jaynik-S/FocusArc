@@ -7,7 +7,9 @@ describe("getContrastColor", () => {
     ["#111827", "#ffffff"],
     ["#8f9250", "#111827"],
     ["#f5c451", "#111827"],
-  ])("selects the higher-contrast text color for %s", (background, expected) => {
+    ["#ff0000", "#000000"],
+    ["#777777", "#000000"],
+  ])("selects readable action text for %s", (background, expected) => {
     expect(getContrastColor(background)).toBe(expected);
   });
 });

@@ -1,508 +1,658 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-27T21:06:51Z",
+  "generatedAt": "2026-10-27T03:09:21.051514Z",
   "title": "Design System: FocusArc",
   "extensions": {
     "colorMeta": {
       "canvas": {
         "role": "neutral",
         "displayName": "Canvas",
+        "canonical": "#0b1424",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0177 261.3)",
+          "oklch(26% 0.0304 261.3)",
+          "oklch(37% 0.0354 261.3)",
+          "oklch(48% 0.0354 261.3)",
+          "oklch(59% 0.0354 261.3)",
+          "oklch(70% 0.0354 261.3)",
+          "oklch(82% 0.0318 261.3)",
+          "oklch(95% 0.0088 261.3)"
+        ]
+      },
+      "sidebar-surface": {
+        "role": "neutral",
+        "displayName": "Sidebar Surface",
+        "canonical": "#101f34",
+        "tonalRamp": [
+          "oklch(15% 0.0228 257.0)",
+          "oklch(26% 0.0392 257.0)",
+          "oklch(37% 0.0456 257.0)",
+          "oklch(48% 0.0456 257.0)",
+          "oklch(59% 0.0456 257.0)",
+          "oklch(70% 0.0456 257.0)",
+          "oklch(82% 0.0411 257.0)",
+          "oklch(95% 0.0114 257.0)"
         ]
       },
       "surface-1": {
         "role": "neutral",
         "displayName": "Surface 1",
+        "canonical": "#15263d",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0245 256.3)",
+          "oklch(26% 0.0421 256.3)",
+          "oklch(37% 0.0490 256.3)",
+          "oklch(48% 0.0490 256.3)",
+          "oklch(59% 0.0490 256.3)",
+          "oklch(70% 0.0490 256.3)",
+          "oklch(82% 0.0441 256.3)",
+          "oklch(95% 0.0122 256.3)"
         ]
       },
       "surface-2": {
         "role": "neutral",
         "displayName": "Surface 2",
+        "canonical": "#1d3250",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0303 257.4)",
+          "oklch(26% 0.0520 257.4)",
+          "oklch(37% 0.0605 257.4)",
+          "oklch(48% 0.0605 257.4)",
+          "oklch(59% 0.0605 257.4)",
+          "oklch(70% 0.0605 257.4)",
+          "oklch(82% 0.0545 257.4)",
+          "oklch(95% 0.0151 257.4)"
         ]
       },
       "surface-3": {
         "role": "neutral",
         "displayName": "Surface 3",
+        "canonical": "#2c4666",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0317 254.3)",
+          "oklch(26% 0.0546 254.3)",
+          "oklch(37% 0.0635 254.3)",
+          "oklch(48% 0.0635 254.3)",
+          "oklch(59% 0.0635 254.3)",
+          "oklch(70% 0.0635 254.3)",
+          "oklch(82% 0.0571 254.3)",
+          "oklch(95% 0.0159 254.3)"
         ]
       },
       "surface-hover": {
         "role": "neutral",
         "displayName": "Surface Hover",
+        "canonical": "#233c5c",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0321 255.2)",
+          "oklch(26% 0.0552 255.2)",
+          "oklch(37% 0.0642 255.2)",
+          "oklch(48% 0.0642 255.2)",
+          "oklch(59% 0.0642 255.2)",
+          "oklch(70% 0.0642 255.2)",
+          "oklch(82% 0.0578 255.2)",
+          "oklch(95% 0.0161 255.2)"
         ]
       },
-      "hairline": {
+      "border": {
         "role": "neutral",
-        "displayName": "Hairline",
+        "displayName": "Border",
+        "canonical": "#344f70",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0322 254.1)",
+          "oklch(26% 0.0554 254.1)",
+          "oklch(37% 0.0644 254.1)",
+          "oklch(48% 0.0644 254.1)",
+          "oklch(59% 0.0644 254.1)",
+          "oklch(70% 0.0644 254.1)",
+          "oklch(82% 0.0580 254.1)",
+          "oklch(95% 0.0161 254.1)"
         ]
       },
-      "hairline-strong": {
+      "border-strong": {
         "role": "neutral",
-        "displayName": "Hairline Strong",
+        "displayName": "Border Strong",
+        "canonical": "#6e94bb",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0361 249.6)",
+          "oklch(26% 0.0621 249.6)",
+          "oklch(37% 0.0722 249.6)",
+          "oklch(48% 0.0722 249.6)",
+          "oklch(59% 0.0722 249.6)",
+          "oklch(70% 0.0722 249.6)",
+          "oklch(82% 0.0650 249.6)",
+          "oklch(95% 0.0180 249.6)"
         ]
       },
-      "ink": {
+      "text-primary": {
         "role": "neutral",
-        "displayName": "Ink",
+        "displayName": "Text Primary",
+        "canonical": "#edf4ff",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0083 259.4)",
+          "oklch(26% 0.0142 259.4)",
+          "oklch(37% 0.0165 259.4)",
+          "oklch(48% 0.0165 259.4)",
+          "oklch(59% 0.0165 259.4)",
+          "oklch(70% 0.0165 259.4)",
+          "oklch(82% 0.0149 259.4)",
+          "oklch(95% 0.0041 259.4)"
         ]
       },
-      "ink-secondary": {
+      "text-secondary": {
         "role": "neutral",
-        "displayName": "Ink Secondary",
+        "displayName": "Text Secondary",
+        "canonical": "#d4e3f5",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0147 253.0)",
+          "oklch(26% 0.0253 253.0)",
+          "oklch(37% 0.0294 253.0)",
+          "oklch(48% 0.0294 253.0)",
+          "oklch(59% 0.0294 253.0)",
+          "oklch(70% 0.0294 253.0)",
+          "oklch(82% 0.0265 253.0)",
+          "oklch(95% 0.0074 253.0)"
         ]
       },
-      "ink-muted": {
+      "text-muted": {
         "role": "neutral",
-        "displayName": "Ink Muted",
+        "displayName": "Text Muted",
+        "canonical": "#afc6e1",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0228 252.5)",
+          "oklch(26% 0.0393 252.5)",
+          "oklch(37% 0.0457 252.5)",
+          "oklch(48% 0.0457 252.5)",
+          "oklch(59% 0.0457 252.5)",
+          "oklch(70% 0.0457 252.5)",
+          "oklch(82% 0.0411 252.5)",
+          "oklch(95% 0.0114 252.5)"
         ]
       },
-      "ink-subtle": {
+      "text-subtle": {
         "role": "neutral",
-        "displayName": "Ink Subtle",
+        "displayName": "Text Subtle",
+        "canonical": "#a2bbd8",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0249 252.3)",
+          "oklch(26% 0.0428 252.3)",
+          "oklch(37% 0.0497 252.3)",
+          "oklch(48% 0.0497 252.3)",
+          "oklch(59% 0.0497 252.3)",
+          "oklch(70% 0.0497 252.3)",
+          "oklch(82% 0.0448 252.3)",
+          "oklch(95% 0.0124 252.3)"
         ]
       },
-      "linear-lavender": {
-        "role": "primary",
-        "displayName": "Linear Lavender",
+      "primary-soft": {
+        "role": "neutral",
+        "displayName": "Primary Soft",
+        "canonical": "#edf4ff12",
         "tonalRamp": [
-          "oklch(15% 0.075 275)",
-          "oklch(26% 0.095 275)",
-          "oklch(37% 0.125 275)",
-          "oklch(48% 0.145 275)",
-          "oklch(59% 0.155 275)",
-          "oklch(70% 0.135 275)",
-          "oklch(82% 0.09 275)",
-          "oklch(95% 0.025 275)"
-        ]
-      },
-      "linear-lavender-hover": {
-        "role": "primary",
-        "displayName": "Linear Lavender Hover",
-        "tonalRamp": [
-          "oklch(15% 0.075 275)",
-          "oklch(26% 0.095 275)",
-          "oklch(37% 0.125 275)",
-          "oklch(48% 0.145 275)",
-          "oklch(59% 0.155 275)",
-          "oklch(70% 0.135 275)",
-          "oklch(82% 0.09 275)",
-          "oklch(95% 0.025 275)"
-        ]
-      },
-      "linear-lavender-soft": {
-        "role": "primary",
-        "displayName": "Linear Lavender Soft",
-        "tonalRamp": [
-          "oklch(15% 0.075 275)",
-          "oklch(26% 0.095 275)",
-          "oklch(37% 0.125 275)",
-          "oklch(48% 0.145 275)",
-          "oklch(59% 0.155 275)",
-          "oklch(70% 0.135 275)",
-          "oklch(82% 0.09 275)",
-          "oklch(95% 0.025 275)"
+          "oklch(15% 0.0083 259.4)",
+          "oklch(26% 0.0142 259.4)",
+          "oklch(37% 0.0165 259.4)",
+          "oklch(48% 0.0165 259.4)",
+          "oklch(59% 0.0165 259.4)",
+          "oklch(70% 0.0165 259.4)",
+          "oklch(82% 0.0149 259.4)",
+          "oklch(95% 0.0041 259.4)"
         ]
       },
       "danger": {
         "role": "semantic",
         "displayName": "Danger",
+        "canonical": "#f09d91",
         "tonalRamp": [
-          "oklch(15% 0.07 25)",
-          "oklch(26% 0.095 25)",
-          "oklch(37% 0.12 25)",
-          "oklch(48% 0.145 25)",
-          "oklch(59% 0.15 25)",
-          "oklch(70% 0.13 25)",
-          "oklch(82% 0.085 25)",
-          "oklch(95% 0.025 25)"
+          "oklch(15% 0.0508 28.6)",
+          "oklch(26% 0.0874 28.6)",
+          "oklch(37% 0.1016 28.6)",
+          "oklch(48% 0.1016 28.6)",
+          "oklch(59% 0.1016 28.6)",
+          "oklch(70% 0.1016 28.6)",
+          "oklch(82% 0.0915 28.6)",
+          "oklch(95% 0.0254 28.6)"
         ]
       },
       "danger-soft": {
         "role": "semantic",
         "displayName": "Danger Soft",
+        "canonical": "#f09d9114",
         "tonalRamp": [
-          "oklch(15% 0.07 25)",
-          "oklch(26% 0.095 25)",
-          "oklch(37% 0.12 25)",
-          "oklch(48% 0.145 25)",
-          "oklch(59% 0.15 25)",
-          "oklch(70% 0.13 25)",
-          "oklch(82% 0.085 25)",
-          "oklch(95% 0.025 25)"
+          "oklch(15% 0.0508 28.6)",
+          "oklch(26% 0.0874 28.6)",
+          "oklch(37% 0.1016 28.6)",
+          "oklch(48% 0.1016 28.6)",
+          "oklch(59% 0.1016 28.6)",
+          "oklch(70% 0.1016 28.6)",
+          "oklch(82% 0.0915 28.6)",
+          "oklch(95% 0.0254 28.6)"
+        ]
+      },
+      "overlay": {
+        "role": "neutral",
+        "displayName": "Overlay",
+        "canonical": "#030a17cc",
+        "tonalRamp": [
+          "oklch(15% 0.0159 256.8)",
+          "oklch(26% 0.0274 256.8)",
+          "oklch(37% 0.0319 256.8)",
+          "oklch(48% 0.0319 256.8)",
+          "oklch(59% 0.0319 256.8)",
+          "oklch(70% 0.0319 256.8)",
+          "oklch(82% 0.0287 256.8)",
+          "oklch(95% 0.0080 256.8)"
+        ]
+      },
+      "case-shadow": {
+        "role": "neutral",
+        "displayName": "Case Shadow",
+        "canonical": "#020b1a70",
+        "tonalRamp": [
+          "oklch(15% 0.0185 254.5)",
+          "oklch(26% 0.0319 254.5)",
+          "oklch(37% 0.0371 254.5)",
+          "oklch(48% 0.0371 254.5)",
+          "oklch(59% 0.0371 254.5)",
+          "oklch(70% 0.0371 254.5)",
+          "oklch(82% 0.0334 254.5)",
+          "oklch(95% 0.0093 254.5)"
         ]
       },
       "light-canvas": {
         "role": "neutral",
         "displayName": "Light Canvas",
+        "canonical": "#faf4e8",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0086 84.6)",
+          "oklch(26% 0.0147 84.6)",
+          "oklch(37% 0.0171 84.6)",
+          "oklch(48% 0.0171 84.6)",
+          "oklch(59% 0.0171 84.6)",
+          "oklch(70% 0.0171 84.6)",
+          "oklch(82% 0.0154 84.6)",
+          "oklch(95% 0.0043 84.6)"
+        ]
+      },
+      "light-sidebar-surface": {
+        "role": "neutral",
+        "displayName": "Light Sidebar Surface",
+        "canonical": "#eee3d2",
+        "tonalRamp": [
+          "oklch(15% 0.0128 78.9)",
+          "oklch(26% 0.0221 78.9)",
+          "oklch(37% 0.0257 78.9)",
+          "oklch(48% 0.0257 78.9)",
+          "oklch(59% 0.0257 78.9)",
+          "oklch(70% 0.0257 78.9)",
+          "oklch(82% 0.0231 78.9)",
+          "oklch(95% 0.0064 78.9)"
         ]
       },
       "light-surface-1": {
         "role": "neutral",
         "displayName": "Light Surface 1",
+        "canonical": "#fffaf1",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0065 82.4)",
+          "oklch(26% 0.0112 82.4)",
+          "oklch(37% 0.0130 82.4)",
+          "oklch(48% 0.0130 82.4)",
+          "oklch(59% 0.0130 82.4)",
+          "oklch(70% 0.0130 82.4)",
+          "oklch(82% 0.0117 82.4)",
+          "oklch(95% 0.0033 82.4)"
         ]
       },
       "light-surface-2": {
         "role": "neutral",
         "displayName": "Light Surface 2",
+        "canonical": "#efe2d0",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0140 76.2)",
+          "oklch(26% 0.0240 76.2)",
+          "oklch(37% 0.0279 76.2)",
+          "oklch(48% 0.0279 76.2)",
+          "oklch(59% 0.0279 76.2)",
+          "oklch(70% 0.0279 76.2)",
+          "oklch(82% 0.0251 76.2)",
+          "oklch(95% 0.0070 76.2)"
         ]
       },
       "light-surface-3": {
         "role": "neutral",
         "displayName": "Light Surface 3",
+        "canonical": "#dfccb4",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0194 73.7)",
+          "oklch(26% 0.0333 73.7)",
+          "oklch(37% 0.0387 73.7)",
+          "oklch(48% 0.0387 73.7)",
+          "oklch(59% 0.0387 73.7)",
+          "oklch(70% 0.0387 73.7)",
+          "oklch(82% 0.0349 73.7)",
+          "oklch(95% 0.0097 73.7)"
         ]
       },
       "light-surface-hover": {
         "role": "neutral",
         "displayName": "Light Surface Hover",
+        "canonical": "#e9d8c1",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0180 75.5)",
+          "oklch(26% 0.0310 75.5)",
+          "oklch(37% 0.0361 75.5)",
+          "oklch(48% 0.0361 75.5)",
+          "oklch(59% 0.0361 75.5)",
+          "oklch(70% 0.0361 75.5)",
+          "oklch(82% 0.0325 75.5)",
+          "oklch(95% 0.0090 75.5)"
         ]
       },
-      "light-hairline": {
+      "light-border": {
         "role": "neutral",
-        "displayName": "Light Hairline",
+        "displayName": "Light Border",
+        "canonical": "#cbb69b",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0220 74.0)",
+          "oklch(26% 0.0379 74.0)",
+          "oklch(37% 0.0441 74.0)",
+          "oklch(48% 0.0441 74.0)",
+          "oklch(59% 0.0441 74.0)",
+          "oklch(70% 0.0441 74.0)",
+          "oklch(82% 0.0397 74.0)",
+          "oklch(95% 0.0110 74.0)"
         ]
       },
-      "light-hairline-strong": {
+      "light-border-strong": {
         "role": "neutral",
-        "displayName": "Light Hairline Strong",
+        "displayName": "Light Border Strong",
+        "canonical": "#98785d",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0279 61.6)",
+          "oklch(26% 0.0480 61.6)",
+          "oklch(37% 0.0558 61.6)",
+          "oklch(48% 0.0558 61.6)",
+          "oklch(59% 0.0558 61.6)",
+          "oklch(70% 0.0558 61.6)",
+          "oklch(82% 0.0503 61.6)",
+          "oklch(95% 0.0140 61.6)"
         ]
       },
-      "light-ink": {
+      "light-text-primary": {
         "role": "neutral",
-        "displayName": "Light Ink",
+        "displayName": "Light Text Primary",
+        "canonical": "#20334d",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0265 256.5)",
+          "oklch(26% 0.0456 256.5)",
+          "oklch(37% 0.0530 256.5)",
+          "oklch(48% 0.0530 256.5)",
+          "oklch(59% 0.0530 256.5)",
+          "oklch(70% 0.0530 256.5)",
+          "oklch(82% 0.0477 256.5)",
+          "oklch(95% 0.0133 256.5)"
         ]
       },
-      "light-ink-secondary": {
+      "light-text-secondary": {
         "role": "neutral",
-        "displayName": "Light Ink Secondary",
+        "displayName": "Light Text Secondary",
+        "canonical": "#354b64",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0252 252.2)",
+          "oklch(26% 0.0434 252.2)",
+          "oklch(37% 0.0505 252.2)",
+          "oklch(48% 0.0505 252.2)",
+          "oklch(59% 0.0505 252.2)",
+          "oklch(70% 0.0505 252.2)",
+          "oklch(82% 0.0454 252.2)",
+          "oklch(95% 0.0126 252.2)"
         ]
       },
-      "light-ink-muted": {
+      "light-text-muted": {
         "role": "neutral",
-        "displayName": "Light Ink Muted",
+        "displayName": "Light Text Muted",
+        "canonical": "#40546d",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0242 254.3)",
+          "oklch(26% 0.0416 254.3)",
+          "oklch(37% 0.0484 254.3)",
+          "oklch(48% 0.0484 254.3)",
+          "oklch(59% 0.0484 254.3)",
+          "oklch(70% 0.0484 254.3)",
+          "oklch(82% 0.0435 254.3)",
+          "oklch(95% 0.0121 254.3)"
         ]
       },
-      "light-ink-subtle": {
+      "light-text-subtle": {
         "role": "neutral",
-        "displayName": "Light Ink Subtle",
+        "displayName": "Light Text Subtle",
+        "canonical": "#445770",
         "tonalRamp": [
-          "oklch(15% 0.005 270)",
-          "oklch(26% 0.005 270)",
-          "oklch(37% 0.005 270)",
-          "oklch(48% 0.005 270)",
-          "oklch(59% 0.005 270)",
-          "oklch(70% 0.005 270)",
-          "oklch(82% 0.005 270)",
-          "oklch(95% 0.005 270)"
+          "oklch(15% 0.0237 255.5)",
+          "oklch(26% 0.0408 255.5)",
+          "oklch(37% 0.0475 255.5)",
+          "oklch(48% 0.0475 255.5)",
+          "oklch(59% 0.0475 255.5)",
+          "oklch(70% 0.0475 255.5)",
+          "oklch(82% 0.0427 255.5)",
+          "oklch(95% 0.0119 255.5)"
         ]
       },
-      "light-lavender": {
-        "role": "primary",
-        "displayName": "Light Lavender",
+      "light-primary-soft": {
+        "role": "neutral",
+        "displayName": "Light Primary Soft",
+        "canonical": "#20334d0c",
         "tonalRamp": [
-          "oklch(15% 0.075 275)",
-          "oklch(26% 0.095 275)",
-          "oklch(37% 0.125 275)",
-          "oklch(48% 0.145 275)",
-          "oklch(59% 0.155 275)",
-          "oklch(70% 0.135 275)",
-          "oklch(82% 0.09 275)",
-          "oklch(95% 0.025 275)"
-        ]
-      },
-      "light-lavender-hover": {
-        "role": "primary",
-        "displayName": "Light Lavender Hover",
-        "tonalRamp": [
-          "oklch(15% 0.075 275)",
-          "oklch(26% 0.095 275)",
-          "oklch(37% 0.125 275)",
-          "oklch(48% 0.145 275)",
-          "oklch(59% 0.155 275)",
-          "oklch(70% 0.135 275)",
-          "oklch(82% 0.09 275)",
-          "oklch(95% 0.025 275)"
-        ]
-      },
-      "light-lavender-soft": {
-        "role": "primary",
-        "displayName": "Light Lavender Soft",
-        "tonalRamp": [
-          "oklch(15% 0.075 275)",
-          "oklch(26% 0.095 275)",
-          "oklch(37% 0.125 275)",
-          "oklch(48% 0.145 275)",
-          "oklch(59% 0.155 275)",
-          "oklch(70% 0.135 275)",
-          "oklch(82% 0.09 275)",
-          "oklch(95% 0.025 275)"
+          "oklch(15% 0.0265 256.5)",
+          "oklch(26% 0.0456 256.5)",
+          "oklch(37% 0.0530 256.5)",
+          "oklch(48% 0.0530 256.5)",
+          "oklch(59% 0.0530 256.5)",
+          "oklch(70% 0.0530 256.5)",
+          "oklch(82% 0.0477 256.5)",
+          "oklch(95% 0.0133 256.5)"
         ]
       },
       "light-danger": {
         "role": "semantic",
         "displayName": "Light Danger",
+        "canonical": "#a8433f",
         "tonalRamp": [
-          "oklch(15% 0.07 25)",
-          "oklch(26% 0.095 25)",
-          "oklch(37% 0.12 25)",
-          "oklch(48% 0.145 25)",
-          "oklch(59% 0.15 25)",
-          "oklch(70% 0.13 25)",
-          "oklch(82% 0.085 25)",
-          "oklch(95% 0.025 25)"
+          "oklch(15% 0.0671 25.2)",
+          "oklch(26% 0.1155 25.2)",
+          "oklch(37% 0.1343 25.2)",
+          "oklch(48% 0.1343 25.2)",
+          "oklch(59% 0.1343 25.2)",
+          "oklch(70% 0.1343 25.2)",
+          "oklch(82% 0.1208 25.2)",
+          "oklch(95% 0.0336 25.2)"
         ]
       },
       "light-danger-soft": {
         "role": "semantic",
         "displayName": "Light Danger Soft",
+        "canonical": "#a8433f0d",
         "tonalRamp": [
-          "oklch(15% 0.07 25)",
-          "oklch(26% 0.095 25)",
-          "oklch(37% 0.12 25)",
-          "oklch(48% 0.145 25)",
-          "oklch(59% 0.15 25)",
-          "oklch(70% 0.13 25)",
-          "oklch(82% 0.085 25)",
-          "oklch(95% 0.025 25)"
+          "oklch(15% 0.0671 25.2)",
+          "oklch(26% 0.1155 25.2)",
+          "oklch(37% 0.1343 25.2)",
+          "oklch(48% 0.1343 25.2)",
+          "oklch(59% 0.1343 25.2)",
+          "oklch(70% 0.1343 25.2)",
+          "oklch(82% 0.1208 25.2)",
+          "oklch(95% 0.0336 25.2)"
+        ]
+      },
+      "light-overlay": {
+        "role": "neutral",
+        "displayName": "Light Overlay",
+        "canonical": "#07172b70",
+        "tonalRamp": [
+          "oklch(15% 0.0229 254.8)",
+          "oklch(26% 0.0394 254.8)",
+          "oklch(37% 0.0459 254.8)",
+          "oklch(48% 0.0459 254.8)",
+          "oklch(59% 0.0459 254.8)",
+          "oklch(70% 0.0459 254.8)",
+          "oklch(82% 0.0413 254.8)",
+          "oklch(95% 0.0115 254.8)"
+        ]
+      },
+      "light-case-shadow": {
+        "role": "neutral",
+        "displayName": "Light Case Shadow",
+        "canonical": "#34445a25",
+        "tonalRamp": [
+          "oklch(15% 0.0215 256.5)",
+          "oklch(26% 0.0371 256.5)",
+          "oklch(37% 0.0431 256.5)",
+          "oklch(48% 0.0431 256.5)",
+          "oklch(59% 0.0431 256.5)",
+          "oklch(70% 0.0431 256.5)",
+          "oklch(82% 0.0388 256.5)",
+          "oklch(95% 0.0108 256.5)"
+        ]
+      },
+      "action-ink-dark": {
+        "role": "neutral",
+        "displayName": "Action Ink Dark",
+        "canonical": "#111827",
+        "tonalRamp": [
+          "oklch(15% 0.0159 264.7)",
+          "oklch(26% 0.0273 264.7)",
+          "oklch(37% 0.0318 264.7)",
+          "oklch(48% 0.0318 264.7)",
+          "oklch(59% 0.0318 264.7)",
+          "oklch(70% 0.0318 264.7)",
+          "oklch(82% 0.0286 264.7)",
+          "oklch(95% 0.0079 264.7)"
+        ]
+      },
+      "action-ink-light": {
+        "role": "neutral",
+        "displayName": "Action Ink Light",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.9)",
+          "oklch(26% 0.0000 89.9)",
+          "oklch(37% 0.0000 89.9)",
+          "oklch(48% 0.0000 89.9)",
+          "oklch(59% 0.0000 89.9)",
+          "oklch(70% 0.0000 89.9)",
+          "oklch(82% 0.0000 89.9)",
+          "oklch(95% 0.0000 89.9)"
+        ]
+      },
+      "action-ink-black": {
+        "role": "neutral",
+        "displayName": "Action Ink Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.0)",
+          "oklch(26% 0.0000 0.0)",
+          "oklch(37% 0.0000 0.0)",
+          "oklch(48% 0.0000 0.0)",
+          "oklch(59% 0.0000 0.0)",
+          "oklch(70% 0.0000 0.0)",
+          "oklch(82% 0.0000 0.0)",
+          "oklch(95% 0.0000 0.0)"
         ]
       }
     },
     "typographyMeta": {
       "headline": {
         "displayName": "Headline",
-        "purpose": "Compact page titles."
+        "purpose": "Compact serif page headings. Fraunces weight 500, optical sizing auto, SOFT 55 and WONK 1."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Serif panel headings. Fraunces weight 500, optical sizing auto, SOFT 55 and WONK 1."
+      },
+      "subtitle": {
+        "displayName": "Subtitle",
+        "purpose": "Small serif subheadings. Fraunces weight 500, optical sizing auto, SOFT 55 and WONK 1."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Operational text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form and state labels."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Compact buttons."
       },
       "timer": {
         "displayName": "Timer",
-        "purpose": "Large, tabular elapsed time inside the dial."
+        "purpose": "Nunito Sans weight 500 with lining tabular numerals; muted 0.7em colons retain text semantics. Responsive overrides live in the clock snippet."
       }
     },
     "shadows": [
       {
+        "name": "folio-lift",
+        "value": "0 8px 24px var(--case-shadow)",
+        "purpose": "Soft lift behind the inset sidebar."
+      },
+      {
+        "name": "clock-housing",
+        "value": "drop-shadow(0 10px 15px var(--case-shadow))",
+        "purpose": "Follows the arched case silhouette."
+      },
+      {
+        "name": "playback-plaque",
+        "value": "drop-shadow(0 4px 5px var(--case-shadow))",
+        "purpose": "Follows the contoured playback frame."
+      },
+      {
         "name": "modal-focus",
-        "value": "0 16px 48px rgba(0, 0, 0, 0.24)",
-        "purpose": "Separate a focused modal from the dimmed workspace."
+        "value": "0 16px 48px #00000030",
+        "purpose": "Separate dialogs over the blurred, dimmed backdrop."
       }
     ],
     "motion": [
       {
         "name": "state",
-        "value": "160ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "purpose": "Subtle control state transitions; reduced-motion preference shortens to 0.01ms."
-      },
-      {
-        "name": "page-in",
-        "value": "240ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "purpose": "Short route entrance."
+        "value": "160ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Control color, border, background, and press transitions."
       },
       {
         "name": "modal-in",
-        "value": "180ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "purpose": "Short dialog entrance."
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Dialog enters from translateY(4px) scale(0.99) and opacity 0 to its resting state."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Reduced-motion transition and animation duration, with one animation iteration."
       }
     ],
     "breakpoints": [
       {
         "name": "compact-desktop",
-        "value": "900px"
+        "value": "(max-width: 900px)"
+      },
+      {
+        "name": "short-desktop",
+        "value": "(max-height: 740px) and (min-width: 721px)"
       },
       {
         "name": "stacked-shell",
-        "value": "720px"
+        "value": "(max-width: 720px)"
+      },
+      {
+        "name": "very-short-desktop",
+        "value": "(max-height: 540px) and (min-width: 721px)"
       },
       {
         "name": "narrow",
-        "value": "480px"
+        "value": "(max-width: 480px)"
       },
       {
-        "name": "short-window",
-        "value": "740px height"
+        "name": "analytics-container",
+        "value": "(max-width: 520px) container query"
       }
     ]
   },
@@ -510,118 +660,121 @@
     {
       "name": "Primary Button",
       "kind": "button",
-      "refersTo": "button-primary",
-      "description": "Application-level primary action.",
-      "html": "<button class=\"ds-btn-primary\" type=\"button\">Create timer</button>",
-      "css": ".ds-btn-primary { min-height: 2rem; padding: 0.4rem 0.75rem; border: 1px solid color-mix(in srgb, var(--primary) 80%, white 8%); border-radius: var(--radius-md); background: var(--primary); color: #fff; font: 500 0.8125rem var(--font-body); cursor: pointer; transition: background-color var(--motion), transform var(--motion); } .ds-btn-primary:hover { background: var(--primary-hover); } .ds-btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-btn-primary:active { transform: translateY(1px); }"
+      "description": "Exact-course primary action with the source neutral fallback when no shell accent is available.",
+      "html": "<div class=\"ds-specimen\"><button class=\"ds-primary\" type=\"button\">Save changes</button></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} button.ds-primary{ border-color: transparent; background: var(--app-accent, var(--text-primary, #edf4ff)); color: var(--app-accent-contrast, var(--canvas, #0b1424)); } button.ds-primary:hover:not(:disabled){ filter: brightness(1.06); } @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "button-primary"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
-      "refersTo": "button-secondary",
-      "description": "Quiet adjacent action, including dialog cancellation.",
-      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancel</button>",
-      "css": ".ds-btn-secondary { min-height: 2rem; padding: 0.4rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-secondary); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: background-color var(--motion), border-color var(--motion), transform var(--motion); } .ds-btn-secondary:hover { border-color: var(--border-strong); background: var(--surface-3); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-btn-secondary:active { transform: translateY(1px); }"
+      "description": "Neutral bordered action with stronger surface and seam on hover.",
+      "html": "<div class=\"ds-specimen\"><button class=\"ds-secondary\" type=\"button\">Cancel</button></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} button.ds-secondary{ border-color: var(--border, #344f70); background: var(--surface-2, #1d3250); color: var(--text-secondary, #d4e3f5); } button.ds-secondary:hover{ border-color: var(--border-strong, #6e94bb); background: var(--surface-3, #2c4666); } @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "button-secondary"
     },
     {
       "name": "Ghost Button",
       "kind": "button",
-      "refersTo": "button-ghost",
-      "description": "Low-emphasis utility action.",
-      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Edit timer</button>",
-      "css": ".ds-btn-ghost { min-height: 2rem; padding: 0.4rem 0.75rem; border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: background-color var(--motion), color var(--motion), transform var(--motion); } .ds-btn-ghost:hover { background: var(--surface-2); color: var(--text-primary); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-btn-ghost:active { transform: translateY(1px); }"
+      "description": "Quiet utility action with a tonal hover surface.",
+      "html": "<div class=\"ds-specimen\"><button class=\"ds-ghost\" type=\"button\">Edit timer</button></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} button.ds-ghost{ color: var(--text-muted, #afc6e1); } button.ds-ghost:hover{ background: var(--surface-2, #1d3250); } @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "button-ghost"
     },
     {
       "name": "Text Field",
       "kind": "input",
-      "refersTo": "text-input",
-      "description": "Compact labeled input for timer and account forms.",
-      "html": "<label class=\"ds-field\"><span>Name</span><input class=\"ds-field-input\" placeholder=\"BIO130\"></label>",
-      "css": ".ds-field { display: grid; gap: var(--space-2); color: var(--text-muted); font: 500 0.75rem/1.5 var(--font-body); } .ds-field-input { width: 100%; min-height: 2.25rem; padding: 0.45rem 0.625rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-primary); caret-color: var(--primary); font: 400 0.875rem/1.5 var(--font-body); transition: border-color var(--motion), background-color var(--motion), box-shadow var(--motion); } .ds-field-input:hover { border-color: var(--border-strong); } .ds-field-input:focus { border-color: var(--primary); background: var(--surface-1); outline: none; box-shadow: var(--focus-ring); } .ds-field-input::placeholder { color: var(--text-subtle); opacity: 1; }"
+      "description": "Compact filled field with a label and visible hover and focus states.",
+      "html": "<div class=\"ds-specimen\"><label class=\"ds-field\">Course name<input type=\"text\" placeholder=\"e.g. History\"/></label></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-field{ display: grid; gap: 0.4rem; color: var(--text-secondary, #d4e3f5); font-size: 0.75rem; font-weight: 600; } .ds-field input{ width: 100%; min-height: 2.4rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border, #344f70); border-radius: var(--radius-md, 10px); background: var(--surface-2, #1d3250); color: var(--text-primary, #edf4ff); caret-color: var(--primary, var(--text-primary, #edf4ff)); transition: border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), box-shadow var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); } .ds-field input:hover{ border-color: var(--border-strong, #6e94bb); } .ds-field input:focus{ border-color: var(--primary, var(--text-primary, #edf4ff)); background: var(--surface-1, #15263d); outline: 1px solid var(--primary, var(--text-primary, #edf4ff)); outline-offset: 1px; box-shadow: none; } .ds-field input::placeholder{ color: var(--text-subtle, #a2bbd8); opacity: 1; } @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "text-input"
     },
     {
-      "name": "Active Navigation",
+      "name": "Painted Navigation Windows",
       "kind": "nav",
-      "refersTo": "nav-item-active",
-      "description": "Current route in the compact workspace navigation.",
-      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-nav-item-active\" href=\"#timers\" aria-current=\"page\">Timers</a><a class=\"ds-nav-item\" href=\"#history\">History</a></nav>",
-      "css": ".ds-nav { display: grid; gap: 2px; width: 11rem; } .ds-nav-item { position: relative; display: flex; align-items: center; min-height: 2rem; padding: 0 var(--space-3); border-radius: var(--radius-sm); color: var(--text-muted); font: 500 0.8125rem var(--font-body); text-decoration: none; transition: color var(--motion), background-color var(--motion); } .ds-nav-item:hover { background: var(--surface-2); color: var(--text-secondary); } .ds-nav-item:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-nav-item-active { background: var(--surface-2); color: var(--text-primary); } .ds-nav-item-active::before { position: absolute; left: 0.35rem; width: 2px; height: 0.875rem; border-radius: 2px; background: var(--primary); content: \"\"; }"
+      "description": "Four softly contoured route windows in the desktop two-by-two grid; active state has a quiet course wash and mixed-ink outline.",
+      "html": "<div class=\"ds-specimen\"><nav class=\"ds-primary-nav\" aria-label=\"Primary navigation\"><a class=\"ds-nav-pill ds-nav-pill-active\" href=\"#timers\" aria-current=\"page\"><svg class=\"ds-soft-frame\" viewBox=\"0 0 180 60\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-nav-paper-0\" patternUnits=\"userSpaceOnUse\" width=\"240\" height=\"240\"><image href=\"/materials/gouache-paper.webp\" width=\"240\" height=\"240\"/></pattern></defs><path class=\"ds-soft-frame-fill\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\"/><path class=\"ds-soft-frame-paint\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" fill=\"url(#ds-nav-paper-0)\"/><path class=\"ds-soft-frame-edge\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" vector-effect=\"non-scaling-stroke\"/></svg><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.5 1.5M9 2h6M12 2v3\"/></svg><span>Timers</span></a><a class=\"ds-nav-pill\" href=\"#schedule\"><svg class=\"ds-soft-frame\" viewBox=\"0 0 180 60\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-nav-paper-1\" patternUnits=\"userSpaceOnUse\" width=\"240\" height=\"240\"><image href=\"/materials/gouache-paper.webp\" width=\"240\" height=\"240\"/></pattern></defs><path class=\"ds-soft-frame-fill\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\"/><path class=\"ds-soft-frame-paint\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" fill=\"url(#ds-nav-paper-1)\"/><path class=\"ds-soft-frame-edge\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" vector-effect=\"non-scaling-stroke\"/></svg><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"16\" rx=\"4\"/><path d=\"M8 3v4m8-4v4M4 11h16m-11 4h.01M13 15h.01\"/></svg><span>Schedule</span></a><a class=\"ds-nav-pill\" href=\"#history\"><svg class=\"ds-soft-frame\" viewBox=\"0 0 180 60\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-nav-paper-2\" patternUnits=\"userSpaceOnUse\" width=\"240\" height=\"240\"><image href=\"/materials/gouache-paper.webp\" width=\"240\" height=\"240\"/></pattern></defs><path class=\"ds-soft-frame-fill\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\"/><path class=\"ds-soft-frame-paint\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" fill=\"url(#ds-nav-paper-2)\"/><path class=\"ds-soft-frame-edge\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" vector-effect=\"non-scaling-stroke\"/></svg><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 5v5h5m3-2v5l3 2\"/></svg><span>History</span></a><a class=\"ds-nav-pill\" href=\"#stats\"><svg class=\"ds-soft-frame\" viewBox=\"0 0 180 60\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-nav-paper-3\" patternUnits=\"userSpaceOnUse\" width=\"240\" height=\"240\"><image href=\"/materials/gouache-paper.webp\" width=\"240\" height=\"240\"/></pattern></defs><path class=\"ds-soft-frame-fill\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\"/><path class=\"ds-soft-frame-paint\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" fill=\"url(#ds-nav-paper-3)\"/><path class=\"ds-soft-frame-edge\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" vector-effect=\"non-scaling-stroke\"/></svg><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 20V11m7 9V5m7 15v-7M3 20h18\"/></svg><span>Stats</span></a></nav></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-primary-nav{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 0.5rem; } .ds-nav-pill{ --frame-fill: var(--surface-1, #15263d); --frame-stroke: color-mix(in srgb, var(--border, #344f70) 65%, transparent); position: relative; isolation: isolate; display: flex; min-width: 0; min-height: 3.4rem; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; border-radius: 16px 8px; color: var(--text-muted, #afc6e1); font-size: 0.75rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); } .ds-nav-pill > svg:not(.ds-soft-frame){ position: relative; z-index: 1; width: 1.05rem; height: 1.05rem; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; } .ds-nav-pill > span{ position: relative; z-index: 1; } .ds-nav-pill:hover{ --frame-fill: var(--surface-2, #1d3250); color: var(--text-primary, #edf4ff); } .ds-nav-pill-active{ --frame-fill: color-mix(in srgb, var(--app-accent, var(--text-muted, #afc6e1)) 10%, var(--surface-2, #1d3250)); --frame-stroke: var(--primary, var(--text-primary, #edf4ff)); color: var(--text-primary, #edf4ff); font-weight: 700; } .ds-nav-pill-active::after{ position: absolute; top: 10px; right: 12px; z-index: 1; width: 4px; height: 4px; border-radius: 50%; background: var(--primary, var(--text-primary, #edf4ff)); content: \"\"; } .ds-nav-pill-active > svg:not(.ds-soft-frame){ color: var(--primary, var(--text-primary, #edf4ff)); } .ds-soft-frame{ position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; } .ds-soft-frame-fill{ fill: var(--frame-fill, var(--surface-1, #15263d)); } .ds-soft-frame-paint{ mix-blend-mode: soft-light; } .ds-soft-frame-edge{ fill: none; stroke: var(--frame-stroke, var(--border, #344f70)); stroke-width: 0.8; } @media (max-height: 740px) and (min-width: 721px){.ds-primary-nav{ margin-bottom: var(--space-3, 0.75rem); }} @media (max-width: 720px){.ds-primary-nav{ display: flex; gap: var(--space-1, 0.25rem); margin: 0 0 var(--space-2, 0.5rem); overflow-x: auto; } .ds-nav-pill{ min-height: 2.4rem; flex: 1 0 auto; flex-direction: row; justify-content: center; gap: 0.4rem; padding-inline: var(--space-2, 0.5rem); font-size: 0.8125rem; } .ds-nav-pill-active::after{ top: 6px; right: 8px; width: 3px; height: 3px; }} @media (max-height: 540px) and (min-width: 721px){.ds-primary-nav{ gap: 0; margin-bottom: 0.65rem; } .ds-nav-pill{ min-height: 2.2rem; flex-direction: row; padding-block: 4px; font-size: 0.75rem; }} @media (max-width: 480px){.ds-nav-pill > svg:not(.ds-soft-frame){ display: none; } .ds-nav-pill{ min-height: 2.25rem; }} @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "nav-item-active"
     },
     {
       "name": "Selected Filter Chip",
       "kind": "chip",
-      "refersTo": "chip-active",
-      "description": "Selected compact filter for history or review views.",
-      "html": "<button class=\"ds-chip ds-chip-active\" type=\"button\" aria-pressed=\"true\">This week</button>",
-      "css": ".ds-chip { min-height: 1.875rem; padding: 0.3rem 0.65rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-muted); font: 500 0.75rem var(--font-body); cursor: pointer; transition: border-color var(--motion), background-color var(--motion); } .ds-chip:hover { border-color: var(--border-strong); } .ds-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-chip-active { border-color: color-mix(in srgb, var(--primary) 55%, var(--border)); background: var(--primary-soft); color: var(--text-primary); }"
+      "description": "Compact bordered course-washed filter with native button semantics.",
+      "html": "<div class=\"ds-specimen\"><button class=\"ds-chip ds-chip-active\" type=\"button\" aria-pressed=\"true\">This week</button></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-chip{ min-height: 1.875rem; padding: 0.3rem 0.65rem; border-color: var(--border, #344f70); background: var(--surface-2, #1d3250); color: var(--text-muted, #afc6e1); font-size: 0.75rem; } .ds-chip:hover{ border-color: var(--border-strong, #6e94bb); } .ds-chip-active{ border-color: color-mix(in srgb, var(--primary, var(--text-primary, #edf4ff)) 55%, var(--border, #344f70)); background: var(--primary-soft, #edf4ff12); color: var(--text-primary, #edf4ff); } @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "chip-active"
     },
     {
-      "name": "Panel",
+      "name": "Painted Panel",
       "kind": "card",
-      "refersTo": "panel",
-      "description": "Hairline panel with flat, divided weekly statistics rows.",
-      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><h2>Weekly statistics</h2></header><div class=\"ds-panel-body\"><div class=\"ds-week-day\"><strong>Monday</strong><span>2h 15m</span></div><div class=\"ds-week-day\"><strong>Tuesday</strong><span>1h 40m</span></div></div></section>",
-      "css": ".ds-panel { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-1); color: var(--text-secondary); font: 400 0.875rem/1.5 var(--font-body); } .ds-panel-header { margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); } .ds-panel-header h2 { margin: 0; color: var(--text-primary); font: 600 1rem/1.3 var(--font-display); letter-spacing: -0.025em; } .ds-panel-body { padding-top: var(--space-4); } .ds-week-day { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); background: transparent; } .ds-week-day:first-child { border-top: 1px solid var(--border); } .ds-week-day strong { color: var(--text-primary); font: 600 0.8125rem var(--font-body); } .ds-week-day span { color: var(--text-muted); font: 400 0.6875rem var(--font-body); }"
+      "description": "Paper material, fine mixed seam, differentiated corners, serif heading, and compact body.",
+      "html": "<div class=\"ds-specimen\"><section class=\"ds-panel\"><header class=\"ds-panel-header\"><h2>Study time</h2><span class=\"ds-panel-meta\">This week</span></header><div class=\"ds-panel-body\"><p>Time spent with each course.</p></div></section></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-panel{ min-width: 0; padding: var(--space-4, 1rem); border: 1px solid color-mix(in srgb, var(--border, #344f70) 75%, var(--surface-1, #15263d)); border-radius: 18px 12px 20px 12px; background-color: var(--surface-1, #15263d); background-image: var(--paint-grain, url(\"/materials/gouache-paper.webp\")); background-size: 360px; background-blend-mode: soft-light; } .ds-panel-header{ display: flex; align-items: center; justify-content: space-between; gap: var(--space-4, 1rem); margin: calc(var(--space-4, 1rem) * -1) calc(var(--space-4, 1rem) * -1) 0; padding: var(--space-4, 1rem) var(--space-4, 1rem) var(--space-2, 0.5rem); } .ds-panel-header p{ margin-top: 0.15rem; color: var(--text-muted, #afc6e1); font-size: 0.75rem; } .ds-panel-body{ padding-top: var(--space-3, 0.75rem); } .ds-panel-meta{ color: var(--text-subtle, #a2bbd8); font-size: 0.6875rem; } @media (max-width: 480px){.ds-panel{ padding: var(--space-3, 0.75rem); } .ds-panel-header{ margin: calc(var(--space-3, 0.75rem) * -1) calc(var(--space-3, 0.75rem) * -1) 0; padding-inline: var(--space-3, 0.75rem); }} @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "panel"
     },
     {
-      "name": "Timer Row",
+      "name": "Selected Course Frame",
       "kind": "button",
-      "refersTo": "timer-row-active",
-      "description": "Selected course in the sidebar, with its own color and tabular total.",
-      "html": "<button class=\"ds-timer-row\" style=\"--timer-color: #8f9250\" type=\"button\" aria-pressed=\"true\"><span class=\"ds-timer-name\"><i class=\"ds-timer-dot\" aria-hidden=\"true\"></i>BIO130</span><span class=\"ds-timer-total\">01:24:18</span></button>",
-      "css": ".ds-timer-row { display: grid; gap: 1px; width: 11rem; min-height: 2.75rem; padding: 0.45rem var(--space-2); border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-secondary); text-align: left; cursor: pointer; transition: background-color var(--motion), border-color var(--motion); } .ds-timer-row:hover { border-color: color-mix(in srgb, var(--border) 72%, transparent); background: var(--surface-2); } .ds-timer-row:focus-visible { outline: none; box-shadow: var(--focus-ring); } .ds-timer-name { display: flex; align-items: center; gap: var(--space-2); font: 500 0.8125rem var(--font-body); } .ds-timer-dot { width: 0.45rem; height: 0.45rem; flex: 0 0 auto; border-radius: 50%; background: var(--timer-color, #111827); } .ds-timer-total { padding-left: 1rem; color: var(--text-subtle); font: 400 0.6875rem var(--font-body); font-variant-numeric: tabular-nums; } .ds-timer-row .ds-timer-name, .ds-timer-row .ds-timer-total { color: var(--text-primary); }"
+      "description": "Neutral painted frame with an exact-course medallion and contrast-selected star; the course color does not fill the row.",
+      "html": "<div class=\"ds-specimen\"><button class=\"ds-timer-row ds-timer-row-active\" type=\"button\" aria-pressed=\"true\"><svg class=\"ds-soft-frame\" viewBox=\"0 0 180 60\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-course-paper\" patternUnits=\"userSpaceOnUse\" width=\"240\" height=\"240\"><image href=\"/materials/gouache-paper.webp\" width=\"240\" height=\"240\"/></pattern></defs><path class=\"ds-soft-frame-fill\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\"/><path class=\"ds-soft-frame-paint\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" fill=\"url(#ds-course-paper)\"/><path class=\"ds-soft-frame-edge\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" vector-effect=\"non-scaling-stroke\"/></svg><span class=\"ds-timer-row-main\"><span class=\"ds-timer-row-name\"><span class=\"ds-timer-row-dot\" style=\"color:var(--app-accent,var(--text-muted, #afc6e1))\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><circle class=\"ds-course-medallion\" cx=\"16\" cy=\"16\" r=\"13\"/><path class=\"ds-course-medallion-star\" d=\"m16 8 2.2 5.8L24 16l-5.8 2.2L16 24l-2.2-5.8L8 16l5.8-2.2Z\"/></svg></span><span>History</span></span><span class=\"ds-timer-row-total\">01:24:00</span></span></button></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-soft-frame{ position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; } .ds-soft-frame-fill{ fill: var(--frame-fill, var(--surface-1, #15263d)); } .ds-soft-frame-paint{ mix-blend-mode: soft-light; } .ds-soft-frame-edge{ fill: none; stroke: var(--frame-stroke, var(--border, #344f70)); stroke-width: 0.8; } .ds-timer-row{ --frame-fill: transparent; --frame-stroke: transparent; position: relative; isolation: isolate; width: 100%; min-width: 0; min-height: 3.5rem; padding: 0.6rem 0.65rem; border: 0; border-radius: 15px 8px; background: transparent; text-align: left; } .ds-timer-row:hover{ --frame-fill: var(--surface-1, #15263d); --frame-stroke: var(--border, #344f70); background: transparent; } .ds-timer-row-active{ --frame-fill: var(--surface-2, #1d3250); --frame-stroke: var(--primary, var(--text-primary, #edf4ff)); } .ds-timer-row > .ds-soft-frame{ opacity: 0; } .ds-timer-row-active > .ds-soft-frame,.ds-timer-row:hover > .ds-soft-frame{ opacity: 1; } .ds-timer-row-main{ position: relative; z-index: 1; display: grid; min-width: 0; gap: 2px; padding-left: 2rem; } .ds-timer-row-name{ display: flex; min-width: 0; align-items: center; gap: var(--space-2, 0.5rem); color: var(--text-secondary, #d4e3f5); font-size: 0.8125rem; font-weight: 600; } .ds-timer-row-name > span:last-child{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-timer-row-dot{ position: absolute; top: 50%; left: 0; display: grid; width: 1.65rem; height: 1.65rem; transform: translateY(-50%); place-items: center; } .ds-timer-row-dot svg{ width: 100%; height: 100%; overflow: visible; fill: currentColor; stroke: color-mix(in srgb, currentColor 40%, var(--text-primary, #edf4ff)); stroke-width: 0.6; } .ds-course-medallion{ fill: currentColor; stroke: var(--primary, var(--text-primary, #edf4ff)); stroke-width: 0.7; } .ds-course-medallion-star{ fill: var(--app-accent-contrast, var(--text-primary, #edf4ff)); stroke: none; } .ds-timer-row-total{ padding-left: 0; color: var(--text-subtle, #a2bbd8); font-size: 0.75rem; font-weight: 500; font-variant-numeric: tabular-nums; } .ds-timer-row-active .ds-timer-row-name,.ds-timer-row-active .ds-timer-row-total{ color: var(--text-primary, #edf4ff); } @media (max-width: 720px){.ds-timer-row{ min-width: 8rem; max-width: 10rem; } .ds-timer-row-total{ padding-left: 0; }} @media (max-height: 540px) and (min-width: 721px){.ds-timer-row{ min-height: 2.5rem; padding-block: 0.3rem; }} @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "timer-row-active"
     },
     {
-      "name": "Focus Timer Workspace",
+      "name": "Painted Desk Clock",
       "kind": "custom",
-      "description": "Tight course-colored timer stack with a thin dial, exact-HEX primary pill, and outlined adjustments.",
-      "html": "<div class=\"ds-timer-workspace\" style=\"--accent: #8f9250; --accent-contrast: #111827\"><span class=\"ds-timer-state\">Running</span><strong class=\"ds-timer-course\">BIO130</strong><div class=\"ds-timer-dial\"><div class=\"ds-timer-face\"><output class=\"ds-timer-time\" aria-label=\"Elapsed time\">01:24:18</output></div></div><div class=\"ds-timer-controls\"><button class=\"ds-timer-adjust\" type=\"button\">-10 min</button><button class=\"ds-timer-main\" type=\"button\">Pause</button><button class=\"ds-timer-adjust\" type=\"button\" disabled>+5 min</button></div></div>",
-      "css": ".ds-timer-workspace { display: grid; justify-items: center; gap: 0.75rem; font-family: var(--font-body); } .ds-timer-state { color: var(--text-subtle); font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; } .ds-timer-course { color: color-mix(in srgb, var(--accent) 52%, #ffffff); font-size: 1.25rem; line-height: 1.2; } .ds-timer-dial { position: relative; display: grid; width: 15rem; aspect-ratio: 1; place-items: center; border-radius: 50%; background: conic-gradient(var(--accent) 110deg, var(--surface-3) 0deg); } .ds-timer-dial::after { position: absolute; inset: 0.4rem; border: 1px solid var(--border); border-radius: 50%; background: var(--canvas); content: \"\"; } .ds-timer-face { position: relative; z-index: 1; display: grid; place-items: center; } .ds-timer-time { color: color-mix(in srgb, var(--accent) 52%, #ffffff); font: 500 2.65rem/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; } .ds-timer-controls { display: grid; width: min(100%, 24rem); grid-template-columns: minmax(5rem, 1fr) auto minmax(5rem, 1fr); align-items: center; gap: var(--space-3); } .ds-timer-controls button { min-height: 2.25rem; padding: 0 0.75rem; border-radius: var(--radius-md); font: 500 0.8125rem var(--font-body); cursor: pointer; transition: color var(--motion), border-color var(--motion), background-color var(--motion); } .ds-timer-adjust { width: 100%; max-width: 6.25rem; justify-self: center; border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 74%, transparent); color: var(--text-muted); } .ds-timer-adjust:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 42%, var(--border)); background: color-mix(in srgb, var(--accent) 9%, var(--surface-2)); color: var(--text-primary); } .ds-timer-adjust:disabled { border-color: color-mix(in srgb, var(--border) 70%, transparent); background: transparent; color: var(--text-subtle); opacity: 0.78; cursor: not-allowed; } .ds-timer-controls .ds-timer-main { min-width: 5.5rem; min-height: 2.625rem; padding: 0 1.4rem; justify-self: center; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: var(--accent-contrast); font-size: 0.875rem; } .ds-timer-main:hover { filter: brightness(1.08); } .ds-timer-controls button:focus-visible { outline: none; box-shadow: var(--focus-ring); }"
+      "description": "Arched paper case, functional circular gauge, muted-colon reading, contoured exact-HEX Play frame, and two-line round knobs; specimen shows 24 minutes and a 144-degree progress star.",
+      "html": "<div class=\"ds-specimen\"><section class=\"ds-timer-view\" aria-label=\"Timer specimen\"><header class=\"ds-timer-view-header\"><h1 class=\"ds-timer-name\">History</h1><span class=\"ds-timer-state\">Ready</span><svg class=\"ds-ornament-rule\" viewBox=\"0 0 180 18\" fill=\"none\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 11C29 2 48 16 76 9M104 9c28 7 47-7 73 2\"/><path class=\"ds-ornament-rule-star\" d=\"m90 3 1.8 4.2L96 9l-4.2 1.8L90 15l-1.8-4.2L84 9l4.2-1.8Z\"/><circle cx=\"69\" cy=\"9\" r=\"1\"/><circle cx=\"111\" cy=\"9\" r=\"1\"/></svg></header><div class=\"ds-timer-dial\"><svg class=\"ds-clock-housing\" viewBox=\"0 0 360 372\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-clock-paper\" patternUnits=\"userSpaceOnUse\" width=\"360\" height=\"360\"><image href=\"/materials/gouache-paper.webp\" width=\"360\" height=\"360\"/></pattern></defs><path class=\"ds-clock-housing-base\" d=\"M180 9C274 9 343 75 343 166v132c0 32-17 50-45 54-41 7-77 8-118 4-41 4-77 3-118-4-28-4-45-22-45-54V166C17 75 86 9 180 9Z\"/><path class=\"ds-clock-housing-paint\" d=\"M180 9C274 9 343 75 343 166v132c0 32-17 50-45 54-41 7-77 8-118 4-41 4-77 3-118-4-28-4-45-22-45-54V166C17 75 86 9 180 9Z\" fill=\"url(#ds-clock-paper)\"/><path class=\"ds-clock-housing-edge\" d=\"M180 9C274 9 343 75 343 166v132c0 32-17 50-45 54-41 7-77 8-118 4-41 4-77 3-118-4-28-4-45-22-45-54V166C17 75 86 9 180 9Z\"/><path class=\"ds-clock-housing-inlay\" d=\"M180 18C269 18 334 80 334 166v132c0 26-13 42-38 46-40 6-76 7-116 3-40 4-76 3-116-3-25-4-38-20-38-46V166C26 80 91 18 180 18Z\"/><path class=\"ds-clock-housing-flourish\" d=\"M45 304q8 25 36 25M279 329q28 0 36-25\"/></svg><svg class=\"ds-timer-dial-art\" viewBox=\"0 0 320 320\" aria-hidden=\"true\"><circle class=\"ds-timer-dial-rim\" cx=\"160\" cy=\"160\" r=\"157\" pathLength=\"100\" stroke-dasharray=\"96 4\" transform=\"rotate(-83 160 160)\"/><circle class=\"ds-timer-dial-track\" cx=\"160\" cy=\"160\" r=\"146\"/><circle class=\"ds-timer-dial-progress-edge\" cx=\"160\" cy=\"160\" r=\"146\" pathLength=\"100\" stroke-dasharray=\"40 100\" transform=\"rotate(-90 160 160)\"/><circle class=\"ds-timer-dial-progress\" cx=\"160\" cy=\"160\" r=\"146\" pathLength=\"100\" stroke-dasharray=\"40 100\" transform=\"rotate(-90 160 160)\"/><path class=\"ds-timer-dial-tick ds-timer-dial-tick-major\" d=\"M160 26v8\" transform=\"rotate(0 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(30 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(60 160 160)\"/><path class=\"ds-timer-dial-tick ds-timer-dial-tick-major\" d=\"M160 26v8\" transform=\"rotate(90 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(120 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(150 160 160)\"/><path class=\"ds-timer-dial-tick ds-timer-dial-tick-major\" d=\"M160 26v8\" transform=\"rotate(180 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(210 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(240 160 160)\"/><path class=\"ds-timer-dial-tick ds-timer-dial-tick-major\" d=\"M160 26v8\" transform=\"rotate(270 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(300 160 160)\"/><path class=\"ds-timer-dial-tick\" d=\"M160 28v3\" transform=\"rotate(330 160 160)\"/><path class=\"ds-timer-dial-point\" d=\"m160 6 2.2 5.8L168 14l-5.8 2.2L160 22l-2.2-5.8L152 14l5.8-2.2Z\" transform=\"rotate(144 160 160)\"/></svg><div class=\"ds-timer-face\"><div class=\"ds-timer-reading\"><output class=\"ds-timer-time\" role=\"timer\" aria-label=\"Elapsed time\"><span>00</span><span><span class=\"ds-timer-colon\">:</span>24</span><span><span class=\"ds-timer-colon\">:</span>00</span></output><span class=\"ds-timer-period\">Today</span></div></div></div><div class=\"ds-timer-controls\"><button class=\"ds-ghost ds-accent ds-timer-control-secondary\" type=\"button\"><span class=\"ds-adjustment-value\">?5<span class=\"ds-adjustment-unit\"> min</span></span></button><button class=\"ds-primary ds-timer-control-main\" type=\"button\"><svg class=\"ds-soft-frame\" viewBox=\"0 0 180 60\" preserveAspectRatio=\"none\" aria-hidden=\"true\" focusable=\"false\"><defs><pattern id=\"ds-play-paper\" patternUnits=\"userSpaceOnUse\" width=\"240\" height=\"240\"><image href=\"/materials/gouache-paper.webp\" width=\"240\" height=\"240\"/></pattern></defs><path class=\"ds-soft-frame-fill\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\"/><path class=\"ds-soft-frame-paint\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" fill=\"url(#ds-play-paper)\"/><path class=\"ds-soft-frame-edge\" d=\"M17 5Q90-1 163 5L174 14Q181 30 174 46L163 55Q90 61 17 55L6 46Q-1 30 6 14Z\" vector-effect=\"non-scaling-stroke\"/></svg><svg class=\"ds-play-icon\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z\"/></svg>Play</button><button class=\"ds-ghost ds-accent ds-timer-control-secondary\" type=\"button\"><span class=\"ds-adjustment-value\">+10<span class=\"ds-adjustment-unit\"> min</span></span></button></div></section></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-soft-frame{ position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; } .ds-soft-frame-fill{ fill: var(--frame-fill, var(--surface-1, #15263d)); } .ds-soft-frame-paint{ mix-blend-mode: soft-light; } .ds-soft-frame-edge{ fill: none; stroke: var(--frame-stroke, var(--border, #344f70)); stroke-width: 0.8; } .ds-ornament-rule{ display: block; width: min(100%, 180px); height: 16px; flex: 0 0 auto; margin-inline: auto; overflow: visible; color: var(--border-strong, #6e94bb); pointer-events: none; } .ds-ornament-rule path{ stroke: currentColor; stroke-width: 0.7; stroke-linecap: round; } .ds-ornament-rule-star,.ds-ornament-rule circle{ fill: currentColor; } button.ds-primary{ border-color: transparent; background: var(--app-accent, var(--text-primary, #edf4ff)); color: var(--app-accent-contrast, var(--canvas, #0b1424)); } button.ds-primary:hover:not(:disabled){ filter: brightness(1.06); } button.ds-ghost{ color: var(--text-muted, #afc6e1); } button.ds-ghost:hover{ background: var(--surface-2, #1d3250); } button.ds-ghost.ds-accent{ color: var(--text-muted, #afc6e1); } button.ds-ghost.ds-accent:hover{ color: var(--text-primary, #edf4ff); } .ds-timer-view{ display: grid; width: 100%; min-height: calc(100vh - clamp(2.5rem, 6vw, 4.5rem)); place-items: center; grid-template-rows: auto auto auto auto; align-content: center; gap: 1.35rem; } .ds-timer-view-header{ display: grid; justify-items: center; gap: 0.35rem; max-width: 100%; text-align: center; } .ds-timer-view-header .ds-ornament-rule{ width: 148px; height: 14px; margin-top: 2px; } .ds-timer-state{ display: inline-flex; align-items: center; gap: 0.45rem; color: var(--text-muted, #afc6e1); font-size: 0.75rem; font-weight: 600; } .ds-timer-state::before{ width: 0.35rem; height: 0.35rem; border-radius: 50%; background: var(--accent); content: \"\"; } .ds-timer-name{ max-width: min(32rem, 100%); overflow: hidden; color: var(--text-primary, #edf4ff); font-size: clamp(1.75rem, 3.5vw, 2.1rem); line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; } .ds-timer-dial{ position: relative; display: grid; width: clamp(16rem, min(42vw, 47vh), 23rem); aspect-ratio: 1; place-items: center; border-radius: 50%; } .ds-timer-dial::after{ position: absolute; inset: 1.15rem; z-index: 0; border-radius: inherit; background-color: var(--surface-1, #15263d); background-image: var(--paint-grain, url(\"/materials/gouache-paper.webp\")); background-size: 320px; background-blend-mode: soft-light; content: \"\"; } .ds-clock-housing{ position: absolute; inset: -15px -18px -22px; z-index: 0; width: calc(100% + 36px); height: calc(100% + 37px); overflow: visible; filter: drop-shadow(0 10px 15px var(--case-shadow, #020b1a70)); pointer-events: none; } .ds-clock-housing-base{ fill: var(--surface-2, #1d3250); } .ds-clock-housing-paint{ opacity: 0.65; mix-blend-mode: soft-light; } .ds-clock-housing-edge{ fill: none; stroke: var(--border-strong, #6e94bb); stroke-width: 1; } .ds-clock-housing-inlay{ fill: none; stroke: color-mix(in srgb, var(--text-primary, #edf4ff) 22%, var(--surface-2, #1d3250)); stroke-width: 0.7; } .ds-clock-housing-flourish{ fill: none; stroke: var(--border-strong, #6e94bb); stroke-width: 1; stroke-linecap: round; } .ds-timer-dial-art{ position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; fill: none; pointer-events: none; } .ds-timer-dial-rim{ stroke: var(--border-strong, #6e94bb); stroke-width: .8; } .ds-timer-dial-track{ stroke: var(--surface-3, #2c4666); stroke-width: 5; } .ds-timer-dial-progress-edge{ stroke: color-mix(in srgb, var(--accent) 30%, var(--text-primary, #edf4ff)); stroke-width: 8; stroke-linecap: round; } .ds-timer-dial-progress{ stroke: var(--accent); stroke-width: 6; stroke-linecap: round; } .ds-timer-dial-tick{ stroke: var(--border-strong, #6e94bb); stroke-width: 1.2; stroke-linecap: round; } .ds-timer-dial-tick-major{ stroke: var(--primary, var(--text-primary, #edf4ff)); stroke-width: 1.6; } .ds-timer-dial-point{ fill: var(--accent); stroke: var(--text-primary, #edf4ff); stroke-width: 0.7; stroke-linejoin: round; } .ds-timer-face{ position: relative; z-index: 2; display: grid; width: 100%; height: 100%; place-items: center; } .ds-timer-reading{ display: grid; justify-items: center; gap: 0.6rem; } .ds-timer-time{ color: var(--text-primary, #edf4ff); font-family: var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif); font-size: clamp(2.65rem, 7vw, 4.1rem); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; letter-spacing: -0.035em; line-height: 1; } .ds-timer-colon{ padding-inline: 0.035em; color: var(--text-muted, #afc6e1); font-size: 0.7em; vertical-align: 0.08em; } .ds-timer-period{ color: var(--text-muted, #afc6e1); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; } .ds-timer-controls{ display: grid; width: min(100%, 20rem); grid-template-columns: 3rem minmax(7rem, 8rem) 3rem; align-items: center; justify-content: center; gap: 1rem; padding-top: 0.7rem; } button.ds-timer-control-main{ --frame-fill: var(--accent); --frame-stroke: color-mix(in srgb, var(--accent) 55%, var(--text-primary, #edf4ff)); position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-width: 7rem; min-height: 3rem; padding: 0 1.3rem; justify-self: stretch; border: 0; border-radius: 16px; background: transparent; color: var(--accent-contrast, #fff); font-size: 0.875rem; line-height: 1; filter: drop-shadow(0 4px 5px var(--case-shadow, #020b1a70)); } .ds-timer-control-main > .ds-soft-frame{ z-index: -1; } .ds-timer-control-main .ds-soft-frame-paint{ display: none; } .ds-timer-control-main .ds-play-icon{ width: 1rem; height: 1rem; fill: currentColor; } button.ds-timer-control-main:hover{ filter: brightness(1.04) drop-shadow(0 4px 5px var(--case-shadow, #020b1a70)); background: transparent; } .ds-timer-control-secondary{ display: grid; width: 3rem; height: 3rem; max-width: none; min-height: 3rem; padding: 0; border-radius: 50%; place-items: center; justify-self: center; border-color: var(--border-strong, #6e94bb); background-color: var(--surface-1, #15263d); background-image: var(--paint-grain, url(\"/materials/gouache-paper.webp\")); background-size: 320px; background-blend-mode: soft-light; color: var(--text-secondary, #d4e3f5); line-height: 1; white-space: nowrap; } .ds-adjustment-value{ font-size: 0.95rem; font-weight: 600; } .ds-adjustment-unit{ display: block; padding-top: 2px; font-size: 0.6875rem; font-weight: 500; } .ds-timer-control-secondary:hover:not(:disabled){ border-color: color-mix(in srgb, var(--accent) 42%, var(--border, #344f70)); background: color-mix(in srgb, var(--accent) 9%, var(--surface-2, #1d3250)); color: var(--text-primary, #edf4ff); } .ds-timer-control-secondary:disabled{ border-color: color-mix(in srgb, var(--border, #344f70) 70%, transparent); background: transparent; color: var(--text-subtle, #a2bbd8); opacity: 0.78; } @media (max-width: 900px){.ds-timer-dial{ width: clamp(14rem, min(42vw, 43vh), 17.5rem); } .ds-timer-time{ font-size: clamp(2.5rem, 7.5vw, 4rem); }} @media (max-height: 740px) and (min-width: 721px){.ds-timer-view{ min-height: calc(100vh - 2rem); gap: 1.35rem; } .ds-timer-dial{ width: clamp(10rem, min(42vw, 41vh), 17.5rem); } .ds-timer-time{ font-size: clamp(2.1rem, 8vh, 3.8rem); }} @media (max-width: 720px){.ds-timer-view{ min-height: 29rem; } .ds-timer-dial{ width: clamp(12.5rem, 58vw, 16rem); }} @media (max-height: 540px) and (min-width: 721px){.ds-timer-view-header .ds-ornament-rule{ display: none; } .ds-timer-view{ gap: 0.9rem; } .ds-timer-controls{ padding-top: 0.4rem; }} @media (max-width: 480px){.ds-timer-controls{ gap: var(--space-2, 0.5rem); grid-template-columns: 3rem minmax(6rem, 7rem) 3rem; } .ds-timer-control-secondary{ padding-inline: 0; font-size: 0.75rem; } .ds-timer-control-main{ min-width: 4.75rem; padding-inline: 1rem; } .ds-timer-time{ font-size: clamp(2.6rem, 12vw, 3.5rem); }} @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}",
+      "refersTo": "timer-action"
     },
     {
-      "name": "FocusArc Brand Mark",
+      "name": "FocusArc Brand",
       "kind": "custom",
-      "description": "Product-specific progress-ring mark in the compact sidebar identity.",
-      "html": "<span class=\"ds-brand\"><span class=\"ds-brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 20 20\" focusable=\"false\"><circle class=\"ds-brand-track\" cx=\"10\" cy=\"10\" r=\"6\"></circle><circle class=\"ds-brand-arc\" cx=\"10\" cy=\"10\" r=\"6\"></circle><circle class=\"ds-brand-center\" cx=\"10\" cy=\"10\" r=\"1.15\"></circle></svg></span><span>FocusArc</span></span>",
-      "css": ".ds-brand { display: inline-flex; align-items: center; gap: 0.625rem; color: var(--text-primary); font: 600 0.9375rem var(--font-display); letter-spacing: -0.02em; } .ds-brand-mark { display: grid; width: 1.625rem; height: 1.625rem; place-items: center; border: 1px solid color-mix(in srgb, var(--primary) 76%, white); border-radius: var(--radius-sm); background: var(--primary); color: #fff; } .ds-brand-mark svg { width: 1rem; height: 1rem; overflow: visible; } .ds-brand-track, .ds-brand-arc { fill: none; stroke: currentColor; stroke-width: 1.5; } .ds-brand-track { opacity: 0.28; } .ds-brand-arc { stroke-dasharray: 28 38; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; } .ds-brand-center { fill: currentColor; }"
+      "description": "Soft Fraunces wordmark with the open clock arc and small star.",
+      "html": "<div class=\"ds-specimen\"><a class=\"ds-brand-link\" href=\"#timers\" aria-label=\"FocusArc timers\"><span class=\"ds-brand-mark\"><svg viewBox=\"0 0 32 32\" fill=\"none\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M24.5 17.5a10.5 10.5 0 1 1-10-12\" stroke=\"currentColor\" stroke-width=\"2.1\" stroke-linecap=\"round\"></path><path d=\"m23 3 1.8 5.2L30 10l-5.2 1.8L23 17l-1.8-5.2L16 10l5.2-1.8L23 3Z\" fill=\"currentColor\"></path><path d=\"M15 12v5l-3 2\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span><span>FocusArc</span></a></div>",
+      "css": "@font-face{\n  font-family: \"Nunito Sans\";\n  src: url(\"/fonts/nunito-sans-latin.woff2\") format(\"woff2\");\n  font-style: normal;\n  font-weight: 400 700;\n  font-display: swap;\n} @font-face{\n  font-family: \"Fraunces\";\n  src: url(\"/fonts/fraunces-variable.ttf\") format(\"truetype\");\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n} :where(.ds-specimen) {color:var(--text-secondary, #d4e3f5);font:400 .875rem/1.5 var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);--accent:var(--app-accent, var(--text-primary, #edf4ff));--accent-contrast:var(--app-accent-contrast,var(--canvas, #0b1424));} :where(.ds-specimen) button { min-height: 2.25rem; padding: 0.4rem 0.8rem; border: 1px solid transparent; border-radius: var(--radius-md, 10px); background: transparent; cursor: pointer; font-size: 0.8125rem; font-weight: 600; transition: color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), border-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), background-color var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)), transform var(--motion, 160ms cubic-bezier(0.16, 1, 0.3, 1)); font-family:var(--font-body, \"Nunito Sans\", \"Segoe UI\", sans-serif);line-height:1.5;} :where(.ds-specimen) button:hover{color:var(--text-primary, #edf4ff)} :where(.ds-specimen) button:active:not(:disabled){transform:translateY(1px)} :where(.ds-specimen) button:disabled{cursor:not-allowed;opacity:.66} :where(.ds-specimen) :focus-visible{outline:2px solid var(--primary, var(--text-primary, #edf4ff));outline-offset:3px;box-shadow:none} :where(.ds-specimen) h1,:where(.ds-specimen) h2,:where(.ds-specimen) h3 {\n  margin: 0;\n  color: var(--text-primary, #edf4ff);\n  font-family: var(--font-display, \"Fraunces\", Georgia, serif);\n  font-weight: 500;\n  font-optical-sizing: auto;\n  font-variation-settings: \"SOFT\" 55, \"WONK\" 1;\n  letter-spacing: -0.015em;\n} :where(.ds-specimen) h1{font-size:clamp(1.6rem,2.8vw,1.9rem);line-height:1.2} :where(.ds-specimen) h2{font-size:1.2rem;line-height:1.3} :where(.ds-specimen) p{margin:0} :where(.ds-specimen) a{color:inherit;text-decoration:none} :where(.ds-specimen) input{font:inherit} .ds-brand-link{ display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-primary, #edf4ff); font-family: var(--font-display, \"Fraunces\", Georgia, serif); font-size: 1.35rem; font-weight: 500; font-variation-settings: \"SOFT\" 55, \"WONK\" 1; letter-spacing: -0.035em; } .ds-brand-mark{ display: grid; width: 1.9rem; height: 1.9rem; place-items: center; color: var(--primary, var(--text-primary, #edf4ff)); } .ds-brand-mark svg{ width: 100%; height: 100%; overflow: visible; } @media (max-width: 720px){.ds-brand-link{ font-size: 1.2rem; } .ds-brand-mark{ width: 1.5rem; height: 1.5rem; }} @media (max-height: 540px) and (min-width: 721px){.ds-brand-link{ font-size: 1.2rem; }} @media(prefers-reduced-motion:reduce){.ds-specimen,.ds-specimen *,.ds-specimen *::before,.ds-specimen *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}"
     }
   ],
   "narrative": {
-    "northStar": "The Quiet Instrument",
-    "overview": "FocusArc behaves like a precise desk timer: present, readable, and composed. Its compact workspace supports an individual studying beside other material, with the active timer as the single point of emphasis. The atmosphere is calm, distraction-free, and quietly luxurious through alignment and restraint.\n\nThe interface takes Linear's near-black layers, fine cool-gray borders, restrained lavender, and clean type as a visual authority, then applies them to a personal study tool. Course colors give timers their own identity without turning the surrounding controls into decoration. Light mode preserves the same hierarchy with cool white and gray surfaces.",
+    "northStar": "The Cozy Desk Clock",
+    "overview": "FocusArc feels like a small painted desk clock beside a student's reading: cozy, whimsical, softly magical, and easy to use. Fraunces lettering, deep midnight blue, warm paper, layered curved frames, and delicate orbital rules translate the illustrated screensavers' personality into working interface materials.\n\nThe normal workspace keeps practical information and controls clear. An inset folio sidebar contains four navigation windows and neutral painted course frames; the selected course's exact color appears in its medallion, functional progress gauge, and contoured playback plaque. A real neutral gouache-paper texture gives the housing and panels a tactile surface. Dark mode is the default; warm paper light mode preserves the same hierarchy. Native controls, readable numerals, and gentle state changes keep this material world practical in a compact window.",
     "keyCharacteristics": [
-      "Compact, product-focused hierarchy for a small desktop window.",
-      "Flat layered surfaces separated by hairlines.",
-      "One interface accent, with user-defined course colors confined to timer identity, its primary control, and data.",
-      "Short, subtle state transitions and visible keyboard focus."
+      "Midnight blue and warm paper themes with layered painted surfaces and compact working density.",
+      "Soft Fraunces headings paired with readable Nunito Sans controls and tabular time.",
+      "Exact saved course colors on the progress gauge, selected course medallion, and principal actions.",
+      "Authored curved SVG frames, an arched clock housing, round adjustment knobs, and delicate arc-and-star details."
     ],
     "rules": [
       {
-        "name": "The One Accent Rule",
-        "body": "Lavender identifies interface action and focus; user-selected HEX colors identify a timer, its dial, its primary timer control, and related data only.",
+        "name": "The Course Color Rule",
+        "body": "Preserve the selected timer's valid six-digit HEX on its progress gauge, selected course medallion, and principal actions. Keep the course frame neutral; derive quiet emphasis and focus colors by mixing the course color with theme neutrals. Never replace the user's choice with a fixed or artificially saturated palette.",
         "section": "colors"
       },
       {
         "name": "The Legible Clock Rule",
-        "body": "Keep elapsed time stable through tabular numerals and make it visually dominant only in the timer workspace.",
+        "body": "Use Nunito Sans with tabular numerals for elapsed time and durations. Let Fraunces provide personality in headings while keeping operational labels easy to scan.",
         "section": "typography"
       },
       {
-        "name": "The Hairline Rule",
-        "body": "Prefer a surface step and fine border to a raised card shadow.",
+        "name": "The Painted Material Rule",
+        "body": "Build depth with neutral gouache-paper tooth, tonal layers, fine inset outlines, and soft silhouette-following shadows. Keep the ambient field lower contrast than the framed objects so the timer and controls remain clear.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do keep the timer readable and controllable at 900 × 700.",
-      "Do use the stepped surfaces, hairlines, and compact spacing rhythm for secondary views.",
-      "Do preserve visible keyboard focus, tabular time values, and reduced-motion behavior.",
-      "Do use a course's chosen HEX only for that timer's identity, primary control, and related data."
+      "Do keep the timer, course name, and playback controls usable together at 900 x 700.",
+      "Do preserve exact user HEX values, contrast-selected action text, tabular time, keyboard focus, and reduced-motion behavior.",
+      "Do use real neutral paper tooth, layered curved frames, soft offset depth, and compact spacing consistently across routes and states.",
+      "Do keep short Schedule sessions accurate in the timeline and provide readable selection rows when labels cannot fit."
     ],
     "donts": [
-      "Don't add decorative gradients, glows, or shadows to resting surfaces.",
-      "Don't use course colors as global control or navigation accents.",
-      "Don't enlarge secondary headings or cards until they compete with the active timer."
+      "Don't restore Linear-style lavender as a fixed global accent or the old corporate visual identity.",
+      "Don't use screensaver wallpapers as normal workspace backgrounds.",
+      "Don't add generic decorative clutter that competes with the course, elapsed time, or controls.",
+      "Don't force text into timeline markers too short to contain it.",
+      "Don't replace authored frames and differentiated corners with uniform generic rounded rectangles or saturate user HEX values to make the interface livelier."
     ]
   }
 }

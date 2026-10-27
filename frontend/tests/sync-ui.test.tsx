@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import TimersPage from "../src/routes/TimersPage";
@@ -102,4 +102,22 @@ it("uses the supplied shared clock for an active timeline block", () => {
   const session = { id: "active", timer_id: "running", start_at: "2026-10-25T15:00:00Z", end_at: null, day_date: "2026-10-25", day_of_week: 6, client_tz: "America/Toronto", duration_seconds: null };
   render(<DayTimeline sessions={[session]} timers={timers as any} timeZone="America/Toronto" dayDate="2026-10-25" nowMs={Date.parse("2026-10-25T15:30:00Z")} />);
   expect(screen.getByRole("button", { name: /Running course.*11:00.*11:30/ }).style.height).toBe("18px");
+});
+
+it("gives adjacent short sessions readable selection controls without stretching their timeline intervals", () => {
+  const base = { day_date: "2026-10-25", day_of_week: 6, client_tz: "America/Toronto" };
+  const sessions = [
+    { ...base, id: "short-15", timer_id: "old", start_at: "2026-10-25T15:00:00Z", end_at: "2026-10-25T15:15:00Z", duration_seconds: 900 },
+    { ...base, id: "short-23", timer_id: "running", start_at: "2026-10-25T15:15:00Z", end_at: "2026-10-25T15:38:00Z", duration_seconds: 1380 },
+  ];
+  render(<DayTimeline sessions={sessions} timers={timers as any} timeZone="America/Toronto" dayDate="2026-10-25" />);
+  const choices = within(screen.getByRole("group", { name: "Short sessions" })).getAllByRole("button");
+  expect(choices).toHaveLength(2);
+  expect(choices[0].textContent).toContain("11:00 - 11:15");
+  expect(choices[1].textContent).toContain("11:15 - 11:38");
+  expect(screen.getByRole("button", { name: /Old course.*11:00.*11:15/ }).style.height).toBe("9px");
+  expect(parseFloat(screen.getByRole("button", { name: /Running course.*11:15.*11:38/ }).style.height)).toBeCloseTo(13.8);
+  fireEvent.click(choices[1]);
+  expect(screen.getByRole("button", { name: "Add 10 minutes to session" })).toBeTruthy();
+  expect(choices[1].getAttribute("aria-pressed")).toBe("true");
 });

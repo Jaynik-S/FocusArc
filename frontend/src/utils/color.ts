@@ -38,6 +38,7 @@ export const getContrastColor = (value: string, fallback = "#111827") => {
   const backgroundLuminance = relativeLuminance(rgb);
   const darkContrast = contrastRatio(backgroundLuminance, relativeLuminance(DARK_TEXT));
   const lightContrast = contrastRatio(backgroundLuminance, 1);
+  if (darkContrast < 4.5 && lightContrast < 4.5) return "#000000";
   return darkContrast >= lightContrast ? "#111827" : "#ffffff";
 };
 

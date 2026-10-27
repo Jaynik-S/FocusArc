@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 
 import { ApiError } from "../api/apiClient";
 import { useAuth } from "../contexts/AuthContext";
+import BrandMark from "./BrandMark";
 
 const errorMessage = (cause: unknown) => {
   if (cause instanceof ApiError) {
@@ -53,6 +54,7 @@ export const AuthScreen = () => {
   return (
     <main className="auth-page">
       <section className="auth-panel" aria-labelledby="auth-title">
+        <span className="auth-brand-mark"><BrandMark /></span>
         <h1 id="auth-title">FocusArc</h1>
         <p>Sign in to your timers</p>
         <form onSubmit={submit} className="auth-form">
