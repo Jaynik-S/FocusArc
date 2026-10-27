@@ -11,6 +11,9 @@ import { isValidHexColor } from "../utils/color";
 import { formatDuration } from "../utils/time";
 import EndDayButton from "./EndDayButton";
 import PrimaryNav from "./PrimaryNav";
+import BrandMark from "./BrandMark";
+import OrnamentRule from "./OrnamentRule";
+import SoftFrame from "./SoftFrame";
 import TimerFormModal from "./TimerFormModal";
 
 type SidebarProps = {
@@ -100,11 +103,7 @@ const Sidebar = ({ username }: SidebarProps) => {
       <div className="sidebar-brand">
         <NavLink className="brand-link" to="/timers" aria-label="FocusArc timers">
           <span className="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 20 20" focusable="false">
-              <circle className="brand-mark-track" cx="10" cy="10" r="6" />
-              <circle className="brand-mark-arc" cx="10" cy="10" r="6" />
-              <circle className="brand-mark-center" cx="10" cy="10" r="1.15" />
-            </svg>
+            <BrandMark />
           </span>
           <span>FocusArc</span>
         </NavLink>
@@ -119,6 +118,7 @@ const Sidebar = ({ username }: SidebarProps) => {
       {syncError && <p className="error" role="status">{syncError}</p>}
       {!synced && !syncError ? <p className="muted" role="status">Synchronizing study data…</p> : null}
       <section className="sidebar-section" aria-labelledby="timer-list-heading">
+        <OrnamentRule />
         <div className="sidebar-section-header">
           <span id="timer-list-heading">Timers · Today</span>
           <button
@@ -156,12 +156,18 @@ const Sidebar = ({ username }: SidebarProps) => {
                   navigate("/timers");
                 }}
               >
+                <SoftFrame />
                 <div className="timer-row-main">
                   <div className="timer-row-name">
                     <span
                       className="timer-row-dot"
-                      style={{ backgroundColor: timerColor }}
-                    />
+                      style={{ color: timerColor }}
+                      aria-hidden="true"
+                    >
+                      <svg viewBox="0 0 32 32">{isSelected
+                        ? <><circle className="course-medallion" cx="16" cy="16" r="13" /><path className="course-medallion-star" d="m16 8 2.2 5.8L24 16l-5.8 2.2L16 24l-2.2-5.8L8 16l5.8-2.2Z" /></>
+                        : <circle cx="16" cy="16" r="4" />}</svg>
+                    </span>
                     <span>{timer.name}</span>
                   </div>
                   <span className="timer-row-total">
@@ -175,6 +181,7 @@ const Sidebar = ({ username }: SidebarProps) => {
         {actionError ? <div className="error">{actionError}</div> : null}
       </section>
       <div className="sidebar-section sidebar-endday">
+        <OrnamentRule />
         <div className="sidebar-endday-row">
           <button
             className="theme-toggle"

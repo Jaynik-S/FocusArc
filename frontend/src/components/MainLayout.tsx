@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { type CSSProperties, useLayoutEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
@@ -8,6 +8,7 @@ import { useScreensaverMode } from "../hooks/useScreensaverMode";
 import { useScreensaverWallpaper } from "../hooks/useScreensaverWallpaper";
 import Screensaver from "./Screensaver";
 import Sidebar from "./Sidebar";
+import { getContrastColor, isValidHexColor } from "../utils/color";
 
 const MainLayout = () => {
   const { user } = useAuth();
@@ -18,6 +19,11 @@ const MainLayout = () => {
   const normalView = useRef<HTMLDivElement>(null);
   const timerId = activeSession?.timer_id ?? selectedTimerId;
   const timer = snapshotTimers.find((item) => item.id === timerId) ?? null;
+  const accentTimer = snapshotTimers.find((item) => item.id === selectedTimerId) ?? timer;
+  const accentStyle = accentTimer && isValidHexColor(accentTimer.color) ? {
+    "--app-accent": accentTimer.color,
+    "--app-accent-contrast": getContrastColor(accentTimer.color),
+  } as CSSProperties : undefined;
   const displaySeconds = (timerId ? elapsedByTimer[timerId] ?? 0 : 0) + (activeSession ? elapsedSeconds : 0);
 
   useLayoutEffect(() => {
@@ -26,7 +32,7 @@ const MainLayout = () => {
 
   return (
     <>
-      <div className="app-layout" ref={normalView} aria-hidden={isOpen || undefined}>
+      <div className="app-layout" style={accentStyle} ref={normalView} aria-hidden={isOpen || undefined}>
         <Sidebar username={user?.username ?? ""} />
         <main className="main-content" id="main-content">
           <Outlet />

@@ -10,6 +10,7 @@ type SessionBlockProps = {
   style: CSSProperties;
   onSelect: () => void;
   selected: boolean;
+  compact: boolean;
 };
 
 const SessionBlock = ({
@@ -20,6 +21,7 @@ const SessionBlock = ({
   style,
   onSelect,
   selected,
+  compact,
 }: SessionBlockProps) => {
   return (
     <button
@@ -31,9 +33,12 @@ const SessionBlock = ({
       title={`${label}: ${timeRange}`}
       style={{ ...style, borderColor: color }}
       data-session={session.id}
+      data-compact={compact || undefined}
     >
+      {!compact ? <>
       <div className="session-block-title">{label}</div>
       <div className="session-block-meta">{timeRange}</div>
+      </> : null}
     </button>
   );
 };

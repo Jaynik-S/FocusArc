@@ -10,6 +10,8 @@ backups/
 *.tsbuildinfo
 *browser-state*.json
 .deployment-private/
+.impeccable/review/
+.playwright-cli/
 
 # Python
 __pycache__/

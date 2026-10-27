@@ -34,16 +34,23 @@ The primary operating context is an approximately 900 x 700 desktop window kept 
 ## Brand Commitments
 
 - Product name: FocusArc.
-- The experience is calm, minimal, compact, and distraction-free.
-- Dark-first presentation with an optional light theme.
-- The supplied `DESIGN-linear.app.md` is the primary visual reference: near-black layered surfaces, fine borders, restrained lavender accent, clean typography, minimal shadow, and subtle interaction.
+- The experience is soft, whimsical, cozy, playful, and slightly dreamy while remaining clean, compact, and practical. Layered material and expressive framing give the working interface the screensavers' personality.
+- Keep dark-first presentation with a fully styled warm light theme.
+- Midnight navy and warm paper, soft Fraunces headings, Nunito Sans controls, an open arc-and-star mark, and functional clock geometry connect everyday UI to the illustrated screensaver atmosphere. The inset folio, painted navigation windows, arched clock case, contoured playback plaque, and round adjustment knobs provide differentiated shapes and gentle depth.
+- Preserve arbitrary custom timer HEX colors. Exact course color carries the progress gauge, selected course medallion, and principal action; the course frame stays neutral. Neutral mixtures carry quiet emphasis and focus, with contrast-selected action text and medallion star.
+- Keep screensaver artwork in the screensaver experience; normal routes translate its softness through authored SVG frames, delicate orbital rules, and a real neutral gouache-paper material without wallpaper backgrounds or literal scenes.
+- The confirmed cozy redesign replaces the earlier Linear/lavender identity. DESIGN.md records the implemented system; DESIGN-linear.app.md remains an archival reference.
 
 ## Evidence on Hand
 
-- Existing application code and behavior under `frontend/`.
-- Product description and technical constraints in `README.md`.
-- Linear design analysis and tokens in `DESIGN-linear.app.md`.
-- User-provided reference screenshot in the redesign request.
+- Existing application code and behavior under frontend/, including the shared theme in frontend/src/styles.css and runtime accent/contrast handling.
+- Product description and technical constraints in README.md.
+- User-provided screensaver atmosphere references and confirmation: "Keep dark-first, with a warm light theme."
+- Implemented direction contract in .impeccable/surfaces/frontend-src-styles-css.md; current tokens and component examples in DESIGN.md and .impeccable/design.json.
+- Authored SoftFrame, ClockHousing, OrnamentRule, navigation, and course-medallion geometry; self-hosted official Fraunces variable TTF and Nunito Sans with provenance and SIL Open Font Licenses under frontend/public/fonts/; unchanged original screensaver artwork.
+- Neutral gouache-paper material under frontend/public/materials/: built-in image generation prompt and sidecar provenance, lossless WebP delivery with verified identical decoded pixels, and no scene or wallpaper crop in the working interface.
+- Implementation and verification record in docs/ui-redesign.md, with dark/light compact-window screenshots and the scoped finish-review outcome.
+- DESIGN-linear.app.md documents the superseded visual reference for historical context.
 
 ## Product Principles
 

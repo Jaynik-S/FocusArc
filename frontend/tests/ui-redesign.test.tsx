@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import TimerFormModal from "../src/components/TimerFormModal";
 import TimersPage from "../src/routes/TimersPage";
 
+const state = vi.hoisted(() => ({ empty: false }));
+
 const timer = {
   id: "timer-1",
   name: "CSC311",
@@ -37,7 +39,7 @@ vi.mock("../src/context/TimerRuntimeContext", () => ({
 
 vi.mock("../src/hooks/useTimers", () => ({
   useTimers: () => ({
-    timers: [timer],
+    timers: state.empty ? [] : [timer],
     loading: false,
     error: null,
     reload: vi.fn(),
@@ -46,9 +48,17 @@ vi.mock("../src/hooks/useTimers", () => ({
   }),
 }));
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); state.empty = false; });
 
 describe("compact timer workspace semantics", () => {
+  it("disables playback and adjustments when a stored selection no longer has a timer", () => {
+    state.empty = true;
+    render(<TimersPage />);
+    expect(screen.getByRole("heading", { name: "Select a timer" })).toBeTruthy();
+    for (const name of ["Play", "−5 min", "+10 min"]) {
+      expect((screen.getByRole("button", { name, exact: true }) as HTMLButtonElement).disabled).toBe(true);
+    }
+  });
   it("exposes the selected timer and elapsed time to assistive technology", () => {
     render(<TimersPage />);
 

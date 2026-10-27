@@ -2,6 +2,9 @@ import { CSSProperties, useEffect, useMemo, useState } from "react";
 
 import { Timer } from "../api/types";
 import TimerFormModal from "../components/TimerFormModal";
+import ClockHousing from "../components/ClockHousing";
+import OrnamentRule from "../components/OrnamentRule";
+import SoftFrame from "../components/SoftFrame";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
@@ -60,7 +63,7 @@ const TimersPage = () => {
   const accentContrast = getContrastColor(accentColor);
 
   const handlePlayPause = async () => {
-    if (!selectedTimerId || controlsBusy || !synced) {
+    if (!selectedTimer || controlsBusy || !synced) {
       return;
     }
     setActionError("");
@@ -69,7 +72,7 @@ const TimersPage = () => {
         await stopTimer();
         await timersState.reload();
       } else {
-        await startTimer(selectedTimerId);
+        await startTimer(selectedTimer.id);
         await timersState.reload();
       }
     } catch (err) {
@@ -78,11 +81,11 @@ const TimersPage = () => {
   };
 
   const handleAdjust = async (delta: number) => {
-    if (!selectedTimerId || controlsBusy || !synced) return;
+    if (!selectedTimer || controlsBusy || !synced) return;
     setActionError("");
     setAdjustmentStatus("");
     try {
-      await adjustOffset(selectedTimerId, delta);
+      await adjustOffset(selectedTimer.id, delta);
       setAdjustmentStatus("Session updated.");
     } catch (cause) {
       setActionError(cause instanceof Error ? cause.message : "Could not save adjustment. Refresh and try again.");
@@ -149,11 +152,11 @@ const TimersPage = () => {
           }
         >
         <div className="timer-view-header">
-          <span className="timer-state">{isActive ? "Running" : "Ready"}</span>
           <h1 className="timer-name" id="timer-heading">
             {selectedTimer ? selectedTimer.name : "Select a timer"}
           </h1>
-          <span className="muted">Today</span>
+          <span className="timer-state">{isActive ? "Running" : "Ready"}</span>
+          <OrnamentRule />
           {!synced ? <span className="muted" role="status">Synchronizing study data… Timer controls are unavailable until connected.</span> : null}
         </div>
         <div
@@ -164,15 +167,28 @@ const TimersPage = () => {
             } as CSSProperties
           }
         >
+          <ClockHousing />
+          <svg className="timer-dial-art" viewBox="0 0 320 320" aria-hidden="true">
+            <circle className="timer-dial-rim" cx="160" cy="160" r="157" pathLength="100" strokeDasharray="96 4" transform="rotate(-83 160 160)" />
+            <circle className="timer-dial-track" cx="160" cy="160" r="146" />
+            <circle className="timer-dial-progress-edge" cx="160" cy="160" r="146" pathLength="100"
+              strokeDasharray={`${progressFraction * 100} 100`} transform="rotate(-90 160 160)" />
+            <circle className="timer-dial-progress" cx="160" cy="160" r="146" pathLength="100"
+              strokeDasharray={`${progressFraction * 100} 100`} transform="rotate(-90 160 160)" />
+            {Array.from({ length: 12 }, (_, index) => <path key={index} className={`timer-dial-tick${index % 3 === 0 ? " timer-dial-tick-major" : ""}`}
+              d={index % 3 === 0 ? "M160 26v8" : "M160 28v3"} transform={`rotate(${index * 30} 160 160)`} />)}
+            <path className="timer-dial-point" d="m160 6 2.2 5.8L168 14l-5.8 2.2L160 22l-2.2-5.8L152 14l5.8-2.2Z" transform={`rotate(${progressAngle} 160 160)`} />
+          </svg>
           <div className="timer-face">
             <div
               className="timer-hand"
               style={{ transform: `translateX(-50%) rotate(${progressAngle}deg)` }}
             />
             <div className="timer-center" />
-            <output className="timer-time" role="timer" aria-label="Elapsed time">
-              {formatDuration(displaySeconds)}
-            </output>
+            <div className="timer-reading">
+              <output className="timer-time" role="timer" aria-label="Elapsed time">{formatDuration(displaySeconds).split(":").map((part, index) => <span key={index}>{index > 0 ? <span className="timer-colon">:</span> : null}{part}</span>)}</output>
+              <span className="timer-period">Today</span>
+            </div>
           </div>
         </div>
         <div className="timer-controls">
@@ -180,25 +196,29 @@ const TimersPage = () => {
             className="ghost accent timer-control-secondary"
             type="button"
             onClick={() => void handleAdjust(-300)}
-            disabled={!selectedTimerId || controlsBusy || !synced}
+            disabled={!selectedTimer || controlsBusy || !synced}
           >
-            −5 min
+            <span className="adjustment-value">−5<span className="adjustment-unit"> min</span></span>
           </button>
           <button
             className="primary timer-control-main"
             type="button"
             onClick={handlePlayPause}
-            disabled={!selectedTimerId || controlsBusy || !synced}
+            disabled={!selectedTimer || controlsBusy || !synced}
           >
+            <SoftFrame />
+            <svg className="play-icon" viewBox="0 0 20 20" aria-hidden="true">{isActive
+              ? <path d="M6 4h2v12H6zm6 0h2v12h-2z" />
+              : <path d="M6 3.8a.8.8 0 0 1 1.2-.7l9 6.2a.8.8 0 0 1 0 1.4l-9 6.2a.8.8 0 0 1-1.2-.7z" />}</svg>
             {isActive ? "Pause" : "Play"}
           </button>
           <button
             className="ghost accent timer-control-secondary"
             type="button"
             onClick={() => void handleAdjust(600)}
-            disabled={!selectedTimerId || controlsBusy || !synced}
+            disabled={!selectedTimer || controlsBusy || !synced}
           >
-            +10 min
+            <span className="adjustment-value">+10<span className="adjustment-unit"> min</span></span>
           </button>
         </div>
         {selectedTimer ? (

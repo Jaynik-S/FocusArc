@@ -14,6 +14,7 @@ import SessionBlock from "./SessionBlock";
 
 const PX_PER_MINUTE = 0.6;
 const MIN_BLOCK_HEIGHT = 8;
+const MIN_LABEL_HEIGHT = 28;
 
 const formatRange = (start: Date, end: Date, timeZone: string) =>
   `${formatTime(start, timeZone)} - ${formatTime(end, timeZone)}`;
@@ -88,6 +89,7 @@ const DayTimeline = ({ sessions, timers, timeZone, dayDate, nowMs = Date.now(), 
   const timelineHeight = (bounds.end - bounds.start) / 60000 * PX_PER_MINUTE;
   const ticks = Array.from({ length: Math.ceil((bounds.end - bounds.start) / 7200000) }, (_, i) => bounds.start + i * 7200000);
   const selectedTimer = selected ? timerMap.get(selected.timer_id) : null;
+  const shortBlocks = blocks.filter((block) => block.height < MIN_LABEL_HEIGHT);
 
   return (
     <>
@@ -99,6 +101,20 @@ const DayTimeline = ({ sessions, timers, timeZone, dayDate, nowMs = Date.now(), 
     </div> : null}
     {adjustment.error ? <p className="error" role="alert">{adjustment.error}</p> : null}
     {adjustment.status ? <p className="muted" role="status">{adjustment.status}</p> : null}
+    {shortBlocks.length > 0 ? <div className="schedule-session-choices" role="group" aria-label="Short sessions">
+      {shortBlocks.map((block) => <button
+        key={block.session.id}
+        className="schedule-session-choice"
+        type="button"
+        aria-label={`Select ${block.timer?.name ?? "Timer"} session`}
+        aria-describedby={`session-range-${block.session.id}`}
+        aria-pressed={selected?.id === block.session.id}
+        onClick={() => setSelected(block.session)}
+      >
+        <span className="schedule-session-choice-label"><span className="dot" style={{ background: block.timer?.color ?? "#1d4ed8" }} /><span>{block.timer?.name ?? "Timer"}</span></span>
+        <span className="schedule-session-choice-meta" id={`session-range-${block.session.id}`}>{block.timeRange}</span>
+      </button>)}
+    </div> : null}
     <div className="day-timeline">
       <div className="timeline-scale" style={{ height: timelineHeight }}>
         {ticks.map((instant) => {
@@ -126,6 +142,7 @@ const DayTimeline = ({ sessions, timers, timeZone, dayDate, nowMs = Date.now(), 
             timeRange={block.timeRange}
             onSelect={() => setSelected(block.session)}
             selected={selected?.id === block.session.id}
+            compact={block.height < MIN_LABEL_HEIGHT}
             style={{ top: block.top, height: block.height, left: `${block.lane / block.lanes * 100}%`, width: `calc(${100 / block.lanes}% - 8px)`, right: "auto" }}
           />
         ))}
