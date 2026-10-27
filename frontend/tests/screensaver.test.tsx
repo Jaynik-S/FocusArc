@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { useLayoutEffect } from "react";
 
 import Screensaver from "../src/components/Screensaver";
 import type { Timer } from "../src/api/types";
@@ -7,7 +8,11 @@ import { SCREENSAVER_WALLPAPERS } from "../src/utils/screensaverWallpapers";
 
 const state = vi.hoisted(() => ({ runtime: {} as Record<string, any>, frame: undefined as undefined | ((frame: { source: string; color: string }) => void) }));
 vi.mock("../src/context/TimerRuntimeContext", () => ({ useTimerRuntime: () => state.runtime }));
-vi.mock("../src/components/ScreensaverWallpaper", () => ({ ORIGINAL_ARTWORK_COLOR: "#377DC2", default: ({ color, onVisibleFrame }: any) => { state.frame = onVisibleFrame; return <div data-testid="screensaver-wallpaper" data-color={color} />; } }));
+vi.mock("../src/components/ScreensaverWallpaper", () => ({ default: ({ color, source, onVisibleFrame }: any) => {
+  state.frame = onVisibleFrame;
+  useLayoutEffect(() => { onVisibleFrame({ source, color: color.toUpperCase() }); }, []);
+  return <div data-testid="screensaver-wallpaper" data-color={color} />;
+} }));
 vi.mock("../src/components/ScreensaverEnvironment", () => ({ default: ({ scene, color }: any) => <canvas data-testid="environment" data-scene={scene} data-color={color} aria-hidden="true" /> }));
 const timer = { id: "course", name: "Creative Focus", color: "#a56de2" } as Timer;
 const exit = vi.fn();
@@ -23,11 +28,11 @@ it("renders live timer information and active controls with the matching wallpap
   expect(screen.getByRole("dialog", { name: "Timer screensaver" })).toBeTruthy();
   expect(screen.getByRole("heading", { name: "Creative Focus" })).toBeTruthy();
   expect(screen.getByRole("timer").textContent).toBe("00:42:10");
-  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#a56de2");
+  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#A56DE2");
   view.rerender(content(true, { ...timer, name: "Evening Flow", color: "#ff8855" }, 2531));
   expect(screen.getByRole("heading", { name: "Evening Flow" })).toBeTruthy();
   expect(screen.getByRole("timer").textContent).toBe("00:42:11");
-  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#ff8855");
+  expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#FF8855");
 });
 
 it("calls the shared adjustment and pause commands without creating another timer", async () => {
@@ -69,6 +74,13 @@ it("traps keyboard focus, keeps exit available offline and displays sync failure
   expect(screen.getByRole("button", { name: "Pause timer" }).disabled).toBe(true);
   expect(button.disabled).toBe(false);
   expect(screen.getByRole("status").textContent).toContain("Offline");
+});
+
+it("asks the normal view for a focus fallback if starting already blurred the opener", () => {
+  const fallback = vi.fn();
+  const view = render(<Screensaver isOpen onExit={exit} timer={timer} elapsedSeconds={1} onRestoreFocus={fallback} />);
+  view.rerender(<Screensaver isOpen={false} onExit={exit} timer={timer} elapsedSeconds={1} onRestoreFocus={fallback} />);
+  expect(fallback).toHaveBeenCalledTimes(1);
 });
 
 it("retains the running view and shows failed actions instead of claiming success", async () => {

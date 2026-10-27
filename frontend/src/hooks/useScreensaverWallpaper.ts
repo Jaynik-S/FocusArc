@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { storageForAccount } from "../storage/accountStorage";
 import { chooseScreensaverWallpaper, findScreensaverWallpaper, SCREENSAVER_WALLPAPERS } from "../utils/screensaverWallpapers";
@@ -16,22 +16,22 @@ export const useScreensaverWallpaper = (
   username: string,
   session: { id: string } | null,
 ) => {
-  const [wallpaperId, setWallpaperId] = useState(() => readSelection(username));
-  const current = useRef(wallpaperId);
   const activeId = session?.id ?? null;
-  // A session present at mount is a restored running timer, not a start/resume.
+  const [selection, setSelection] = useState(() => ({ activeId, wallpaperId: readSelection(username) }));
   const previousActiveId = useRef(activeId);
 
-  useEffect(() => {
+  // The activation tag prevents admission of an old choice while this effect commits.
+  // Guard the draw with a ref so StrictMode cannot select twice.
+  useLayoutEffect(() => {
     if (activeId === previousActiveId.current) return;
     previousActiveId.current = activeId;
-    if (!activeId) return;
-    const next = chooseScreensaverWallpaper(current.current).id;
-    // Update the ref before React state so StrictMode's effect replay cannot draw twice.
-    current.current = next;
-    setWallpaperId(next);
-    try { storageForAccount(username).setItem("screensaverWallpaper", JSON.stringify({ wallpaperId: next })); } catch { /* Keep the in-memory choice. */ }
-  }, [activeId, username]);
+    setSelection({ activeId, wallpaperId: activeId ? chooseScreensaverWallpaper(selection.wallpaperId).id : selection.wallpaperId });
+  }, [activeId, selection.wallpaperId]);
 
-  return findScreensaverWallpaper(wallpaperId) ?? SCREENSAVER_WALLPAPERS[0];
+  useEffect(() => {
+    if (!selection.wallpaperId) return;
+    try { storageForAccount(username).setItem("screensaverWallpaper", JSON.stringify({ wallpaperId: selection.wallpaperId })); } catch { /* Keep the in-memory choice. */ }
+  }, [selection.wallpaperId, username]);
+
+  return { ...(findScreensaverWallpaper(selection.wallpaperId) ?? SCREENSAVER_WALLPAPERS[0]), activationId: selection.activeId };
 };

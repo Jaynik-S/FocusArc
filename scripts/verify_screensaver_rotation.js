@@ -43,7 +43,7 @@ async page => {
       await view.getByRole('button', { name: 'Play', exact: true }).click(); await ready();
       assert(await screen.getAttribute('data-wallpaper') === wallpaper.id, 'Uniform first-choice interval failed: ' + wallpaper.id);
       assert(await screen.getAttribute('data-ink') === wallpaper.ink, 'Overlay ink does not match actual scene');
-      assert(await view.locator('.screensaver-wallpaper').evaluate((el, source) => getComputedStyle(el).backgroundImage.includes(source), wallpaper.source), 'Wrong image source');
+      assert(await view.locator('.screensaver-wallpaper').getAttribute('data-source') === wallpaper.source, 'Wrong committed image source');
       await view.screenshot({ path: '.deployment-private/wallpaper-' + wallpaper.id + '-white-900.png' });
       const firstSession = (await state()).active_session.id;
       await seed.patch(api + '/timers/' + course.id, { data: { color: '#42216F' } });

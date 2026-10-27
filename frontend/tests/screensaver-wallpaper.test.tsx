@@ -33,12 +33,12 @@ it("ignores obsolete color results while keeping the old frame until the next is
   expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#A8D5BA");
 });
 
-it("falls back to the clean master image after a processing failure", async () => {
+it("does not expose unrecolored artwork after a processing failure", async () => {
   state.render.mockRejectedValueOnce(new Error("Worker unavailable"));
   render(<ScreensaverWallpaper color="#FFFFFF" />);
-  await waitFor(() => expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-render-state")).toBe("fallback"));
-  expect(screen.getByTestId("screensaver-wallpaper").style.backgroundImage).toContain("master-screensaver.png");
-  expect(screen.getByTestId("screensaver-wallpaper").querySelector("canvas")?.width).toBe(0);
+  await waitFor(() => expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-render-state")).toBe("error"));
+  expect(screen.getByTestId("screensaver-wallpaper").style.backgroundImage).toBe("");
+  expect(screen.getByTestId("screensaver-wallpaper").querySelector("canvas")?.style.visibility).toBe("hidden");
 });
 
 it("closes a decoded bitmap when unmounted during decoding", async () => {
@@ -62,13 +62,12 @@ it("keeps the previous frame visible and reports loading when only the source ch
   expect(clearRect).not.toHaveBeenCalled();
 });
 
-it("reports the raw fallback immediately and retains the old canvas source until a new frame is committed", async () => {
+it("reports only committed canvas sources and retains the old source until the next commit", async () => {
   const ready = vi.fn();
   let finish!: (blob: Blob) => void;
   const view = render(<ScreensaverWallpaper color="#FFFFFF" source="/sky-garden.png" onVisibleSource={ready} />);
-  expect(ready).toHaveBeenCalledWith("/sky-garden.png");
+  expect(ready).not.toHaveBeenCalled();
   await waitFor(() => expect(drawImage).toHaveBeenCalledTimes(1));
-  ready.mockClear();
   state.render.mockReturnValueOnce(new Promise<Blob>(resolve => { finish = resolve; }));
   view.rerender(<ScreensaverWallpaper color="#FFFFFF" source="/forest.png" onVisibleSource={ready} />);
   expect(ready).toHaveBeenLastCalledWith("/sky-garden.png");
@@ -80,7 +79,7 @@ it("reports the raw fallback immediately and retains the old canvas source until
 it("reports the displayed HEX with its source, retaining both until recoloring finishes", async () => {
   const visible = vi.fn();
   const view = render(<ScreensaverWallpaper color="#A8D5BA" onVisibleFrame={visible} />);
-  expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#377DC2" }));
+  expect(visible).not.toHaveBeenCalled();
   await waitFor(() => expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#A8D5BA" })));
   const artwork = screen.getByTestId("screensaver-wallpaper").querySelector("canvas");
   expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ artwork }));
@@ -92,11 +91,12 @@ it("reports the displayed HEX with its source, retaining both until recoloring f
   expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#42216F" }));
 });
 
-it("switches scene and palette together to the original-art fallback after a painted-frame failure", async () => {
+it("retains the last matched scene and palette after a painted-frame failure", async () => {
   const visible = vi.fn();
   const view = render(<ScreensaverWallpaper color="#A8D5BA" onVisibleFrame={visible} />);
   await waitFor(() => expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ color: "#A8D5BA" })));
   state.render.mockRejectedValueOnce(new Error("Rendering failed"));
   view.rerender(<ScreensaverWallpaper color="#FF0000" source="/forest.png" onVisibleFrame={visible} />);
-  await waitFor(() => expect(visible).toHaveBeenLastCalledWith({ source: "/forest.png", color: "#377DC2", artwork: null }));
+  await waitFor(() => expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-render-state")).toBe("error"));
+  expect(visible).toHaveBeenLastCalledWith(expect.objectContaining({ source: "/screensaver/master-screensaver.png", color: "#A8D5BA" }));
 });
