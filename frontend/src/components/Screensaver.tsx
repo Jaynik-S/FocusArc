@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Timer } from "../api/types";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
@@ -6,6 +6,8 @@ import { formatDuration } from "../utils/time";
 import { SCREENSAVER_WALLPAPERS, type ScreensaverWallpaperDefinition } from "../utils/screensaverWallpapers";
 import ScreensaverWallpaper, { type VisibleWallpaperFrame } from "./ScreensaverWallpaper";
 import { normalizeScreensaverColor } from "../utils/screensaverRecolor";
+import { useScreensaverTransition } from "../hooks/useScreensaverTransition";
+import ScreensaverStardust from "./ScreensaverStardust";
 import ScreensaverEnvironment from "./ScreensaverEnvironment";
 import "./screensaver.css";
 
@@ -16,9 +18,10 @@ type ScreensaverProps = {
   elapsedSeconds: number;
   wallpaper?: ScreensaverWallpaperDefinition;
   onVisibleChange?: (visible: boolean) => void;
+  onRestoreFocus?: () => void;
 };
 
-const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREENSAVER_WALLPAPERS[0], onVisibleChange }: ScreensaverProps) => {
+const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREENSAVER_WALLPAPERS[0], onVisibleChange, onRestoreFocus }: ScreensaverProps) => {
   const { activeSession, busy, synced, error, stopTimer, adjustOffset } = useTimerRuntime();
   const [actionError, setActionError] = useState("");
   const [working, setWorking] = useState(false);
@@ -36,20 +39,34 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREEN
   const frameReady = visibleFrame?.source === wallpaper.source && visibleFrame.color === hex;
   const visible = isOpen && (admitted || frameReady);
   const failed = useCallback(() => setLoadFailed(true), []);
+  const transition = useScreensaverTransition(isOpen ? activation.sequence + 1 : 0);
+  const [origin, setOrigin] = useState({ x: "50%", y: "50%" });
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const dial = document.querySelector(".timer-dial")?.getBoundingClientRect();
+    if (dial) setOrigin({ x: `${dial.left + dial.width / 2}px`, y: `${dial.top + dial.height / 2}px` });
+  }, [isOpen, activation.sequence]);
   useLayoutEffect(() => { if (isOpen && frameReady) setAdmitted(true); }, [isOpen, frameReady]);
-  useLayoutEffect(() => { onVisibleChange?.(visible); }, [visible, onVisibleChange]);
   const visibleWallpaper = SCREENSAVER_WALLPAPERS.find(item => item.source === visibleFrame?.source) ?? wallpaper;
   const ink = visibleWallpaper.ink;
   const layer = useRef<HTMLElement>(null);
   const pause = useRef<HTMLButtonElement>(null);
   const exit = useRef<HTMLButtonElement>(null);
+  const focusOwner = useRef<HTMLElement | null>(null);
+  const wasVisible = useRef(false);
   const disabled = busy || working || !synced || !activeSession;
 
+  useLayoutEffect(() => {
+    // Capture before inert blurs the opener; restore after React's commit focus handling.
+    if (visible && !wasVisible.current) focusOwner.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    wasVisible.current = visible;
+    onVisibleChange?.(visible);
+  }, [visible, onVisibleChange]);
   useEffect(() => { setActionError(""); }, [activeSession?.id]);
   useEffect(() => {
     if (layer.current) layer.current.inert = !visible;
     if (!visible) return;
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previous = focusOwner.current;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     (pause.current?.disabled ? exit.current : pause.current)?.focus({ preventScroll: true });
@@ -70,8 +87,10 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREEN
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = overflow;
       if (previous?.isConnected) previous.focus({ preventScroll: true });
+      // Starting can disable/blur Play before artwork is ready; use the normal view's fallback.
+      if (!previous || previous === document.body || document.activeElement !== previous) onRestoreFocus?.();
     };
-  }, [visible, onExit]);
+  }, [visible, onExit, onRestoreFocus]);
 
   useEffect(() => {
     if (visible && disabled) exit.current?.focus({ preventScroll: true });
@@ -91,10 +110,14 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREEN
   return (
     <>
     {isOpen && loadFailed && !visible ? <p className="screensaver-load-error" role="status">Could not prepare the screensaver. Your timer is still running; pause and resume to retry.</p> : null}
-    <section ref={layer} className="screensaver" data-open={visible} data-wallpaper={visibleWallpaper.id} data-ink={ink} role="dialog" aria-modal={visible || undefined}
+    <section ref={layer} className="screensaver" data-open={visible} data-preparing={isOpen && !visible} data-entered={admitted} data-transition={transition} data-activation={activation.sequence} data-wallpaper={visibleWallpaper.id} data-ink={ink} role="dialog" aria-modal={visible || undefined}
+      style={{ "--portal-x": origin.x, "--portal-y": origin.y, "--entrance-accent": hex } as CSSProperties}
       aria-label="Timer screensaver" aria-hidden={!visible}>
+      <div className="screensaver-scene" key={activation.sequence}>
       <ScreensaverWallpaper key={activation.sequence} enabled={isOpen} color={hex} source={wallpaper.source} onVisibleFrame={setVisibleFrame} onError={failed} />
       <ScreensaverEnvironment key={visibleWallpaper.id} scene={visibleWallpaper.id} color={visibleFrame?.color ?? hex} artwork={visibleFrame?.artwork ?? null} active={visible} />
+      </div>
+      {transition === "stardust" ? <ScreensaverStardust key={`dust-${activation.sequence}`} /> : null}
       <button className="screensaver-exit" type="button" ref={exit} onClick={onExit} aria-label="Exit screensaver">
         <span aria-hidden="true">↙</span> Exit screensaver <kbd>Esc</kbd>
       </button>

@@ -38,6 +38,17 @@ it("chooses on every start or resume without repeating, but not on pause or time
   expect(random).toHaveBeenCalledTimes(3);
 });
 
+it("tags each choice with its activation so a new timer cannot admit the old choice", () => {
+  const view = hook();
+  expect(view.result.current.activationId).toBeNull();
+  view.rerender({ ...initial, session: active("one") });
+  expect(view.result.current.activationId).toBe("one");
+  const first = view.result.current.id;
+  view.rerender({ ...initial, session: active("two") });
+  expect(view.result.current.activationId).toBe("two");
+  expect(view.result.current.id).not.toBe(first);
+});
+
 it("keeps a saved choice after refresh and scopes it to its account", () => {
   const random = vi.spyOn(Math, "random").mockReturnValue(0.9);
   const view = hook();

@@ -30,6 +30,32 @@ it("keeps the timer view available until the exact selected HEX frame has been d
   expect(screen.getByTestId("environment").getAttribute("data-color")).toBe("#A8D5BA");
 });
 
+it("does not open if paused after rendering but before bitmap decoding completes", async () => {
+  let decode!: (bitmap: any) => void;
+  vi.mocked(createImageBitmap).mockReturnValueOnce(new Promise(done => { decode = done; }));
+  const view = render(content());
+  await waitFor(() => expect(createImageBitmap).toHaveBeenCalledTimes(1));
+  view.rerender(content(false));
+  const close = vi.fn();
+  await act(async () => decode({ width: 10, height: 10, close }));
+  expect(close).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+it("retains its entrance and canvas across ticks and an in-place HEX update", async () => {
+  const view = render(content());
+  const root = await screen.findByRole("dialog");
+  const entrance = root.getAttribute("data-transition");
+  const sequence = root.getAttribute("data-activation");
+  const canvas = root.querySelector(".screensaver-wallpaper canvas");
+  view.rerender(content(true, 0, "#FF5733"));
+  await waitFor(() => expect(screen.getByTestId("screensaver-wallpaper").getAttribute("data-color")).toBe("#FF5733"));
+  view.rerender(content(true, 0, "#FF5733"));
+  expect(root.getAttribute("data-transition")).toBe(entrance);
+  expect(root.getAttribute("data-activation")).toBe(sequence);
+  expect(root.querySelector(".screensaver-wallpaper canvas")).toBe(canvas);
+});
+
 it("never admits the previous canvas on a new activation or an obsolete render completion", async () => {
   const view = render(content());
   await screen.findByRole("dialog");

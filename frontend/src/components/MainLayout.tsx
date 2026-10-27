@@ -1,4 +1,4 @@
-import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
@@ -27,9 +27,16 @@ const MainLayout = () => {
   } as CSSProperties : undefined;
   const displaySeconds = (timerId ? elapsedByTimer[timerId] ?? 0 : 0) + (activeSession ? elapsedSeconds : 0);
 
-  useLayoutEffect(() => {
-    if (normalView.current) normalView.current.inert = screensaverVisible;
-  }, [screensaverVisible]);
+  const handleScreensaverVisibility = useCallback((visible: boolean) => {
+    // Release inert before the screensaver's effect cleanup restores keyboard focus.
+    if (normalView.current) normalView.current.inert = visible;
+    setScreensaverVisible(visible);
+  }, []);
+  const restoreNormalFocus = useCallback(() => {
+    const view = normalView.current;
+    const target = view?.querySelector<HTMLElement>(".timer-control-main:not(:disabled)") ?? view?.querySelector<HTMLElement>("main button:not(:disabled), .brand-link");
+    target?.focus({ preventScroll: true });
+  }, []);
 
   return (
     <>
@@ -39,7 +46,7 @@ const MainLayout = () => {
           <Outlet />
         </main>
       </div>
-      <Screensaver isOpen={isOpen && wallpaper.activationId === activeSession?.id} onExit={exit} timer={timer} elapsedSeconds={displaySeconds} wallpaper={wallpaper} onVisibleChange={setScreensaverVisible} />
+      <Screensaver isOpen={isOpen && wallpaper.activationId === activeSession?.id} onExit={exit} timer={timer} elapsedSeconds={displaySeconds} wallpaper={wallpaper} onVisibleChange={handleScreensaverVisibility} onRestoreFocus={restoreNormalFocus} />
     </>
   );
 };

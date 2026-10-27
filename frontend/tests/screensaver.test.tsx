@@ -76,6 +76,13 @@ it("traps keyboard focus, keeps exit available offline and displays sync failure
   expect(screen.getByRole("status").textContent).toContain("Offline");
 });
 
+it("asks the normal view for a focus fallback if starting already blurred the opener", () => {
+  const fallback = vi.fn();
+  const view = render(<Screensaver isOpen onExit={exit} timer={timer} elapsedSeconds={1} onRestoreFocus={fallback} />);
+  view.rerender(<Screensaver isOpen={false} onExit={exit} timer={timer} elapsedSeconds={1} onRestoreFocus={fallback} />);
+  expect(fallback).toHaveBeenCalledTimes(1);
+});
+
 it("retains the running view and shows failed actions instead of claiming success", async () => {
   state.runtime.stopTimer.mockRejectedValueOnce(new Error("Reconnect before changing a timer."));
   render(content());
