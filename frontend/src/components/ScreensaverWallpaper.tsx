@@ -4,23 +4,22 @@ import { MASTER_SCREENSAVER, normalizeScreensaverColor } from "../utils/screensa
 import { renderScreensaver } from "../utils/screensaverRenderer";
 
 export type VisibleWallpaperFrame = { source: string; color: string; artwork?: HTMLCanvasElement | null };
-export const ORIGINAL_ARTWORK_COLOR = "#377DC2";
-
-const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER, onVisibleSource, onVisibleFrame }: {
-  color: string; source?: string; onVisibleSource?: (source: string) => void; onVisibleFrame?: (frame: VisibleWallpaperFrame) => void;
+const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER, enabled = true, onVisibleSource, onVisibleFrame, onError }: {
+  color: string; source?: string; enabled?: boolean; onVisibleSource?: (source: string) => void; onVisibleFrame?: (frame: VisibleWallpaperFrame) => void; onError?: () => void;
 }) => {
   const hex = normalizeScreensaverColor(color);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [painted, setPainted] = useState<{ hex: string; source: string } | null>(null);
   const [failed, setFailed] = useState(false);
 
-  // Ink follows the actual retained canvas or raw fallback before the browser paints.
-  useLayoutEffect(() => { onVisibleSource?.(painted?.source ?? source); }, [painted?.source, source, onVisibleSource]);
+  // Only decoded, committed pixels count as ready; raw artwork is never an entrance fallback.
+  useLayoutEffect(() => { if (painted) onVisibleSource?.(painted.source); }, [painted, onVisibleSource]);
   useLayoutEffect(() => {
-    onVisibleFrame?.({ source: painted?.source ?? source, color: painted?.hex ?? ORIGINAL_ARTWORK_COLOR, artwork: painted ? canvas.current : null });
-  }, [painted?.source, painted?.hex, source, onVisibleFrame]);
+    if (painted) onVisibleFrame?.({ source: painted.source, color: painted.hex, artwork: canvas.current });
+  }, [painted, onVisibleFrame]);
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     setFailed(false);
     const paint = async () => {
@@ -39,17 +38,15 @@ const ScreensaverWallpaper = ({ color, source = MASTER_SCREENSAVER, onVisibleSou
         } finally { bitmap.close(); }
       } catch {
         if (cancelled) return;
-        if (canvas.current) canvas.current.width = 0;
-        setPainted(null); setFailed(true);
+        setFailed(true); onError?.();
       }
     };
     void paint();
     return () => { cancelled = true; };
-  }, [hex, source]);
+  }, [hex, source, enabled, onError]);
 
   return <div className="screensaver-wallpaper" data-testid="screensaver-wallpaper" data-color={painted?.hex ?? ""} data-source={painted?.source ?? source}
-    data-render-state={failed ? "fallback" : painted?.hex === hex && painted.source === source ? "ready" : "loading"}
-    style={{ backgroundImage: `url("${source}")` }} aria-hidden="true">
+    data-render-state={failed ? "error" : painted?.hex === hex && painted.source === source ? "ready" : "loading"} aria-hidden="true">
     <canvas ref={canvas} style={{ visibility: painted ? "visible" : "hidden" }} />
   </div>;
 };

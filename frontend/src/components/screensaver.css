@@ -56,6 +56,7 @@
 .screensaver-exit kbd { font: inherit; font-size: 0.6rem; opacity: 0.65; }
 .screensaver-messages { position: absolute; bottom: max(1.25rem, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(32rem, calc(100% - 3rem)); color: #fff3dc; text-align: center; font-size: 0.8rem; text-shadow: 0 1px 4px #071322, 0 0 12px #071322; }
 .screensaver-messages p { padding: 0.5rem; border-radius: 6px; background: rgb(7 19 34 / 70%); }
+.screensaver-load-error { position: fixed; z-index: 99; bottom: 1rem; left: 50%; transform: translateX(-50%); width: min(32rem, calc(100% - 2rem)); padding: 0.75rem 1rem; color: var(--text-primary); background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; }
 @media (max-width: 480px) {
   .screensaver-body { top: 34%; }
   .screensaver-name { letter-spacing: 0.07em; }
