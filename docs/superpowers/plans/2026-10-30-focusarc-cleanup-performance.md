@@ -89,7 +89,7 @@
 - [x] Move asset provenance out of `public/` so Vite ships binaries/licenses rather than source documentation and generation metadata.
 - [x] Stop tracking the generated TypeScript build-info artifact (it is already ignored).
 - [x] Build and compare `dist`: **15 files / 17,215,793 bytes**, down from **27 files / 24,849,238 bytes** (7,633,445 bytes / 30.7% smaller).
-- [ ] Commit as `chore(frontend): remove legacy code and assets`.
+- [x] Commit as `chore(frontend): remove legacy code and assets` (`1bdc923`).
 
 ## Task 4: Bound backend state and summary database work
 
@@ -100,12 +100,12 @@
 - Modify: `backend/app/services/sessions.py`
 - Modify: `backend/app/services/stats.py`
 
-- [ ] Add a query/call-count regression proving unchanged study-state and heartbeat paths do not fetch the active session twice.
-- [ ] Add adjustment coverage with many unrelated finalized summary days; assert touched-day totals remain correct and SQL work stays bounded.
-- [ ] Make the lock/expiry helper return the active session it already loaded and reuse it in snapshot, heartbeat, and command preparation paths.
-- [ ] Expose a range-total helper in `stats.py` and replace all-history summary repair with one bounded query over dates touched by the session's previous/new interval.
-- [ ] Preserve zero-total cached rows, timezone allocation behavior, revision semantics, row locking, and public responses.
-- [ ] Run focused backend tests against disposable PostgreSQL 15, then the full backend suite.
+- [x] Add a query/call-count regression proving unchanged study-state and heartbeat paths do not fetch the active session twice.
+- [x] Add adjustment coverage with 40 unrelated finalized summary days; assert touched-day totals remain correct and SQL work stays bounded (baseline **57 statements**, optimized **≤20**).
+- [x] Make the lock/expiry helper return the active session it already loaded and reuse it in snapshot, heartbeat, and command preparation paths.
+- [x] Expose a range-total helper in `stats.py` and replace all-history summary repair with one bounded query over dates touched by the session's previous/new interval.
+- [x] Preserve zero-total cached rows, timezone allocation behavior, revision semantics, row locking, and public responses.
+- [x] Run focused backend tests against disposable PostgreSQL 15, then the full backend suite (**186 passed**).
 - [ ] Commit as `perf(backend): bound study state and summary queries`.
 
 ## Task 5: Slim the production backend image

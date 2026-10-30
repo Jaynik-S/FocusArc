@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import event, select
 
 from app.models.day_summary import DaySummary
 from app.models.session import Session as StudySession
@@ -180,6 +180,52 @@ def test_adjustment_adds_course_to_already_finalized_previous_day(client, db_ses
     summary = db_session.scalar(select(DaySummary).where(DaySummary.timer_id == model.timer_id, DaySummary.day_date == date(2026, 1, 1)))
     assert summary is not None
     assert summary.total_seconds == 300
+
+
+def test_adjustment_repairs_only_affected_finalized_days(client, db_session, engine):
+    from app.schemas.session import AdjustSessionRequest
+
+    _, model = seed(client, db_session)
+    original = saved(client)
+    target_days = [
+        DaySummary(username="jay", timer_id=model.timer_id, day_date=date(2026, 1, 1), total_seconds=0),
+        DaySummary(username="jay", timer_id=model.timer_id, day_date=date(2026, 1, 2), total_seconds=1800),
+    ]
+    unrelated = [
+        DaySummary(username="jay", timer_id=model.timer_id,
+                   day_date=date(2025, 1, 1) + timedelta(days=index), total_seconds=123)
+        for index in range(40)
+    ]
+    db_session.add_all([*target_days, *unrelated])
+    db_session.commit()
+    session_id = model.id
+    data = AdjustSessionRequest(
+        delta_seconds=600,
+        expected_start_at=original["start_at"],
+        expected_end_at=original["end_at"],
+    )
+    statements = []
+
+    def capture(_connection, _cursor, statement, _parameters, _context, _executemany):
+        statements.append(statement)
+
+    event.listen(engine, "before_cursor_execute", capture)
+    try:
+        adjusted = service.adjust_session(db_session, "jay", session_id, data)
+        db_session.flush()
+    finally:
+        event.remove(engine, "before_cursor_execute", capture)
+
+    assert adjusted.duration_seconds == 2400
+    assert len(statements) <= 20
+    db_session.expire_all()
+    summaries = db_session.scalars(select(DaySummary).where(
+        DaySummary.username == "jay").order_by(DaySummary.day_date)).all()
+    assert [summary.total_seconds for summary in summaries[:40]] == [123] * 40
+    assert [(summary.day_date, summary.total_seconds) for summary in summaries[40:]] == [
+        (date(2026, 1, 1), 300),
+        (date(2026, 1, 2), 2100),
+    ]
 
 
 def test_simultaneous_edits_apply_once_and_reject_stale_version(client, db_session, engine):

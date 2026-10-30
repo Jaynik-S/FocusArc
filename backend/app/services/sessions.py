@@ -44,25 +44,39 @@ def _move_start(session: SessionModel, delta_seconds: int, end_at: datetime) -> 
 
 
 def _finish_session(db: Session, session: SessionModel, end_at: datetime, adjustment: int = 0) -> None:
+    previous_start = session.start_at
     session.end_at = end_at
     _move_start(session, adjustment, end_at)
     _increment_cycle_total(db, session.timer_id, session.duration_seconds or 0)
     db.flush()
-    _refresh_summaries(db, session.username)
+    _refresh_summaries(db, session, previous_start)
 
 
-def _refresh_summaries(db: Session, username: str) -> None:
+def _refresh_summaries(db: Session, session: SessionModel, previous_start: datetime) -> None:
     from app.models.day_summary import DaySummary
-    from app.services.stats import compute_day_totals, upsert_day_summaries
+    from app.services.stats import compute_interval_totals, upsert_day_summaries
 
-    # Existing finalized summaries are caches; replace their values rather than add.
-    summaries = db.scalars(select(DaySummary).where(DaySummary.username == username)).all()
-    totals = {day: dict(compute_day_totals(db, username, day)) for day in {s.day_date for s in summaries}}
+    # Active sessions are absent from finalized summaries; only completion can change them.
+    if session.end_at is None:
+        return
+    zone = _get_timezone(session.client_tz)
+    start_day = min(previous_start, session.start_at).astimezone(zone).date()
+    end_day = session.end_at.astimezone(zone).date()
+    summaries = db.scalars(select(DaySummary).where(
+        DaySummary.username == session.username,
+        DaySummary.day_date >= start_day,
+        DaySummary.day_date <= end_day,
+    )).all()
+    finalized_days = {summary.day_date for summary in summaries}
+    if not finalized_days:
+        return
+    first_day, last_day = min(finalized_days), max(finalized_days)
+    totals = compute_interval_totals(db, session.username, first_day, last_day)
     for summary in summaries:
         summary.total_seconds = totals[summary.day_date].get(summary.timer_id, 0)
     db.flush()
-    for day, values in totals.items():
-        upsert_day_summaries(db, username, day, values.items())
+    for day in sorted(finalized_days):
+        upsert_day_summaries(db, session.username, day, totals[day].items())
 
 
 def adjust_session(db: Session, username: str, session_id: UUID, data: AdjustSessionRequest) -> SessionModel | None:
@@ -87,7 +101,7 @@ def adjust_session(db: Session, username: str, session_id: UUID, data: AdjustSes
         if timer.cycle_reset_at is None or actual_end > timer.cycle_reset_at.astimezone(timezone.utc):
             _increment_cycle_total(db, session.timer_id, session.duration_seconds - previous_duration)
     db.flush()
-    _refresh_summaries(db, username)
+    _refresh_summaries(db, session, previous_start)
     if session.start_at != previous_start:
         increment_study_revision(db, username)
     return session

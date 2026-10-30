@@ -42,6 +42,35 @@ def test_snapshot_revision_unchanged_and_archive(client):
     assert snapshot(client)['revision'] == 2
 
 
+def test_snapshot_and_heartbeat_reuse_the_active_session_lookup(client, monkeypatch):
+    from app.services import sessions, study_state
+
+    _register(client)
+    timer = _create_timer(client, 'Study')
+    assert command(client, f"/api/timers/{timer['id']}/start", client_tz='UTC').status_code == 200
+    state = snapshot(client)
+    original = sessions.get_active_session
+    calls = 0
+
+    def counted(db, username):
+        nonlocal calls
+        calls += 1
+        return original(db, username)
+
+    monkeypatch.setattr(study_state.sessions, 'get_active_session', counted)
+    unchanged = client.get('/api/study-state', params={
+        'known_revision': state['revision'], 'known_day': state['day_date']})
+    assert unchanged.status_code == 200
+    assert unchanged.json()['changed'] is False
+    assert calls == 1
+
+    calls = 0
+    heartbeat = client.post('/api/study-heartbeat', json={
+        'active_session_id': state['active_session']['id']})
+    assert heartbeat.status_code == 204
+    assert calls == 1
+
+
 def test_stale_commands_and_legacy_cannot_stop_new_session(client):
     _register(client)
     a = _create_timer(client, 'A')

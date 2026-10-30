@@ -24,8 +24,10 @@ def check_revision(user: User, expected_revision: int) -> None:
         raise HTTPException(status_code=409, detail={'code': 'study_changed', 'message': 'Study data changed on another device. Sync and try again.'})
 
 
-def expire_locked(db: Session, user: User, now: datetime) -> bool:
-    active = sessions.get_active_session(db, user.username)
+def expire_locked(db: Session, user: User, now: datetime,
+                  active: SessionModel | None = None, *, active_loaded: bool = False) -> bool:
+    if not active_loaded:
+        active = sessions.get_active_session(db, user.username)
     if active is None:
         return False
     seen = user.study_last_seen_at or active.start_at
@@ -39,14 +41,15 @@ def expire_locked(db: Session, user: User, now: datetime) -> bool:
 
 def prepare_command(db: Session, username: str, payload: StudyCommand | None) -> User:
     user = sessions.lock_study_data(db, username)
-    if expire_locked(db, user, sessions.datetime.now(timezone.utc)):
+    active = sessions.get_active_session(db, username)
+    if expire_locked(db, user, sessions.datetime.now(timezone.utc), active, active_loaded=True):
         # Expiry must survive a subsequently rejected stale command.
         db.commit()
         user = sessions.lock_study_data(db, username)
+        active = sessions.get_active_session(db, username)
     if payload is None or payload.expected_revision is None or 'expected_active_session_id' not in payload.model_fields_set:
         raise HTTPException(status_code=409, detail={'code': 'reload_required', 'message': 'Reload FocusArc to use the updated timer controls.'})
     check_revision(user, payload.expected_revision)
-    active = sessions.get_active_session(db, username)
     if (active.id if active else None) != payload.expected_active_session_id:
         raise HTTPException(status_code=409, detail={'code': 'study_changed', 'message': 'The active timer changed. Sync and try again.'})
     return user
@@ -60,11 +63,11 @@ def guard_read_revision(request: Request, expected_revision: int | None = None,
             'code': 'account_changed', 'message': 'Account changed. Sign in again.'})
     if request.method != 'GET' or expected_revision is None:
         return
-    user = lock_current_state(db, request.state.username)
+    user, _active = lock_current_state(db, request.state.username)
     check_revision(user, expected_revision)
 
 
-def lock_current_state(db: Session, username: str) -> User:
+def lock_current_state(db: Session, username: str) -> tuple[User, SessionModel | None]:
     def read_lock():
         return db.scalar(select(User).where(User.username == username)
                          .with_for_update(read=True).execution_options(populate_existing=True))
@@ -75,19 +78,20 @@ def lock_current_state(db: Session, username: str) -> User:
         # Release the shared lock before upgrading, avoiding competing-reader deadlocks.
         db.rollback()
         user = sessions.lock_study_data(db, username)
-        expire_locked(db, user, sessions.datetime.now(timezone.utc))
+        active = sessions.get_active_session(db, username)
+        expire_locked(db, user, sessions.datetime.now(timezone.utc), active, active_loaded=True)
         db.commit()
         user = read_lock()
-    return user
+        active = sessions.get_active_session(db, username)
+    return user, active
 
 
 def get_study_state(db: Session, username: str, known_revision: int | None = None,
                     known_day: date | None = None) -> dict:
-    user = lock_current_state(db, username)
+    user, active = lock_current_state(db, username)
     now = sessions.datetime.now(timezone.utc)
     day = now.astimezone(sessions._get_timezone(user.study_timezone)).date()
     window = build_window(day, day, user.study_timezone)
-    active = sessions.get_active_session(db, username)
     result = dict(username=username, changed=known_revision != user.study_revision or known_day != day,
                   revision=user.study_revision, server_now=now,
                   study_timezone=user.study_timezone, day_date=day,
@@ -113,8 +117,9 @@ def get_study_state(db: Session, username: str, known_revision: int | None = Non
 def heartbeat(db: Session, username: str, active_session_id: UUID) -> bool:
     user = sessions.lock_study_data(db, username)
     now = sessions.datetime.now(timezone.utc)
-    expire_locked(db, user, now)
     active = sessions.get_active_session(db, username)
+    if expire_locked(db, user, now, active, active_loaded=True):
+        active = None
     if active is None or active.id != active_session_id:
         return False
     user.study_last_seen_at = now

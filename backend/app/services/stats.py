@@ -16,7 +16,7 @@ from app.models.timer import Timer
 from app.services.analytics_time import allocate_interval, build_window
 
 
-def _interval_totals(db: Session, username: str, start: date, end: date, client_tz: str | None = None) -> dict[date, dict[UUID, int]]:
+def compute_interval_totals(db: Session, username: str, start: date, end: date, client_tz: str | None = None) -> dict[date, dict[UUID, int]]:
     lower = datetime.combine(start - timedelta(days=2), time.min, timezone.utc)
     upper = datetime.combine(end + timedelta(days=3), time.min, timezone.utc)
     records = db.scalars(select(SessionModel).where(
@@ -39,7 +39,7 @@ def _interval_totals(db: Session, username: str, start: date, end: date, client_
 def compute_day_totals(
     db: Session, username: str, day_date: date, client_tz: str | None = None
 ) -> list[tuple[UUID, int]]:
-    return list(_interval_totals(db, username, day_date, day_date, client_tz)[day_date].items())
+    return list(compute_interval_totals(db, username, day_date, day_date, client_tz)[day_date].items())
 
 
 def upsert_day_summaries(
@@ -77,7 +77,7 @@ def compute_week_totals(
     db: Session, username: str, week_start: date, client_tz: str | None = None
 ) -> list[tuple[date, list[tuple[UUID, int]]]]:
     week_end = week_start + timedelta(days=6)
-    totals = _interval_totals(db, username, week_start, week_end, client_tz)
+    totals = compute_interval_totals(db, username, week_start, week_end, client_tz)
     return [(day, sorted(values.items())) for day, values in totals.items()]
 
 
@@ -87,6 +87,6 @@ def compute_averages(
     end_date = datetime.now(timezone.utc).astimezone(ZoneInfo(client_tz)).date() if client_tz else date.today()
     start_date = end_date - timedelta(days=days - 1)
 
-    totals = _interval_totals(db, username, start_date, end_date, client_tz)
+    totals = compute_interval_totals(db, username, start_date, end_date, client_tz)
     timer_ids = db.scalars(select(Timer.id).where(Timer.username == username, Timer.is_archived.is_(False))).all()
     return [(timer_id, sum(values.get(timer_id, 0) for values in totals.values()) // days) for timer_id in timer_ids]
