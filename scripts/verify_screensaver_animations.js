@@ -35,7 +35,8 @@ async page => {
       };
       window.addEventListener('DOMContentLoaded',()=>new MutationObserver(()=>{
         const art=document.querySelector('.screensaver-wallpaper');const effect=document.querySelector('.screensaver-environment');
-        if(!art || !effect)return;const source=art.getAttribute('data-source');const color=art.getAttribute('data-color')||'#377DC2';
+        if(!art || !effect || art.getAttribute('data-render-state')!=='ready')return;
+        const source=art.getAttribute('data-source');const color=art.getAttribute('data-color');
         const scene=wallpapers.find(item=>item.source===source)?.id;
         if(scene && (effect.getAttribute('data-scene')!==scene || effect.getAttribute('data-color')!==color))window.animationMetrics.mismatches.push({scene,color,effect:effect.dataset.scene,tint:effect.dataset.color});
       }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['data-color','data-source']}));
