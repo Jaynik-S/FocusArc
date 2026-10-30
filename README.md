@@ -77,7 +77,7 @@ For a populated local account (`demo` / `demo12345`) and step-by-step local test
 - **API:** [Render Web Services](https://render.com/docs/web-services) builds `backend/Dockerfile` and runs [FastAPI](https://fastapi.tiangolo.com/) with HTTPS and `/api/health` monitoring.
 - **Database:** [Neon](https://neon.com/) hosts the persistent [PostgreSQL](https://www.postgresql.org/) database, so Render rebuilds do not erase application data.
 - **Database connections:** [Psycopg](https://www.psycopg.org/) uses a **restricted pooled role** for the API. Migrations use a separate owner connection.
-- **Containers:** [Docker](https://www.docker.com/) keeps the **Python 3.11 environment consistent** across development, CI, and Render. The API container holds no permanent data.
+- **Containers:** [Docker](https://www.docker.com/) keeps the **Python 3.11 environment consistent** across development, CI, and Render. The production API installs a runtime-only dependency lock, excludes test tools, and holds no permanent data.
 - **Migrations:** [Alembic](https://alembic.sqlalchemy.org/) applies versioned schema changes before each production release.
 - **CI/CD:** [GitHub Actions](https://github.com/features/actions) tests the app, rehearses migrations, builds the Docker image, and deploys the **exact tested commit**. It verifies the backend before deploying the frontend.
 - **Local development:** [Docker Compose](https://docs.docker.com/compose/) runs PostgreSQL 15, the FastAPI API, and the Vite/Nginx frontend together.

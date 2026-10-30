@@ -106,7 +106,7 @@
 - [x] Expose a range-total helper in `stats.py` and replace all-history summary repair with one bounded query over dates touched by the session's previous/new interval.
 - [x] Preserve zero-total cached rows, timezone allocation behavior, revision semantics, row locking, and public responses.
 - [x] Run focused backend tests against disposable PostgreSQL 15, then the full backend suite (**186 passed**).
-- [ ] Commit as `perf(backend): bound study state and summary queries`.
+- [x] Commit as `perf(backend): bound study state and summary queries` (`7d6fe55`).
 
 ## Task 5: Slim the production backend image
 
@@ -115,14 +115,15 @@
 - Create: `backend/requirements-runtime.lock`
 - Modify: `backend/Dockerfile`
 - Modify: `.github/workflows/ci.yml`
+- Modify: `.github/workflows/deploy.yml`
 - Modify: `README.md`
 - Modify: `docs/deployment.md`
 
-- [ ] Move `pytest` and `httpx` from runtime dependencies to a `test` optional dependency group while retaining the fully pinned test lock for CI.
-- [ ] Create a pinned runtime lock containing only application/transitive runtime packages; retain Alembic because migrations run separately using the same image.
-- [ ] Install the runtime lock in the production Dockerfile and keep `pip install --no-deps .`.
-- [ ] Update CI/local test commands to install the test lock explicitly; do not change migration/startup separation.
-- [ ] Build the image, run `pip check`, import the FastAPI app, run health/release checks, and compare image size to the ~80 MB baseline.
+- [x] Move `pytest` and `httpx` from runtime dependencies to a `test` optional dependency group while retaining the fully pinned test lock for CI.
+- [x] Create a pinned runtime lock containing only application/transitive runtime packages; retain Alembic because migrations run separately using the same image.
+- [x] Install the runtime lock in the production Dockerfile and keep `pip install --no-deps .`.
+- [x] Update CI/deploy/local commands to use the complete test lock or runtime lock explicitly; do not change migration/startup separation.
+- [x] Build the image, run `pip check`, import the FastAPI app, run a live `/api/health` check and 7 deployment tests. Image size: **75,546,979 bytes**, down from **79,965,100 bytes** (4,418,121 bytes / 5.5% smaller); `pytest` and `httpx` are absent.
 - [ ] Commit as `build(backend): exclude test packages from runtime image`.
 
 ## Task 6: Full verification and before/after comparison

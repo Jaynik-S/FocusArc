@@ -6,14 +6,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=8000
 
-COPY pyproject.toml requirements.lock /app/
+COPY pyproject.toml requirements-runtime.lock /app/
 COPY app /app/app
 COPY alembic.ini /app/alembic.ini
 COPY alembic /app/alembic
 COPY entrypoint.sh /app/entrypoint.sh
 
-RUN pip install --no-cache-dir -r requirements.lock \
+RUN pip install --no-cache-dir -r requirements-runtime.lock \
     && pip install --no-cache-dir --no-deps . \
+    && pip check \
     && chmod +x /app/entrypoint.sh
 
 EXPOSE 8000

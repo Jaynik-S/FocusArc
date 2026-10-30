@@ -103,6 +103,7 @@ git status --short
 
 docker compose config --quiet
 docker build -t focusarc-auth-release ./backend
+docker run --rm --entrypoint python focusarc-auth-release -m pip check
 
 Push-Location frontend
 npm ci
@@ -118,12 +119,14 @@ The backend suite must use a disposable database whose database and role are bot
 ```powershell
 $backendPath = (Resolve-Path .\backend).Path
 docker run --rm --network focusarc-auth-test `
-  -v "${backendPath}:/app" -w /app `
+  --mount "type=bind,source=${backendPath},target=/app" -w /app `
   -e APP_ENV=dev `
   -e DATABASE_URL=postgresql+psycopg://focusarc_test:focusarc_test@focusarc-test-db:5432/focusarc_test `
   -e TEST_DATABASE_URL=postgresql+psycopg://focusarc_test:focusarc_test@focusarc-test-db:5432/focusarc_test `
-  --entrypoint python focusarc-auth-release -m pytest -ra
+  --entrypoint sh python:3.11-slim -c "pip install -q -r requirements.lock && pip install -q --no-deps . && pytest -ra"
 ```
+
+`requirements.lock` is the complete CI/test environment. `requirements-runtime.lock` is the smaller production and migration environment; the Render API image intentionally does not contain pytest or HTTP test clients.
 
 Generate the Render session secret locally, copy it directly into Render, then remove the shell variable:
 

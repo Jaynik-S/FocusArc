@@ -71,8 +71,9 @@ jobs:
       - name: Install locked migration dependencies
         working-directory: backend
         run: |
-          python -m pip install -r requirements.lock
+          python -m pip install -r requirements-runtime.lock
           python -m pip install --no-deps .
+          python -m pip check
       - name: Validate release configuration
         env:
           MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}

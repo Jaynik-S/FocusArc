@@ -35,11 +35,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install locked backend
+      - name: Install locked backend test dependencies
         working-directory: backend
         run: |
           python -m pip install -r requirements.lock
           python -m pip install --no-deps .
+          python -m pip check
       - name: Backend tests on disposable PostgreSQL
         working-directory: backend
         run: python -m pytest -ra
