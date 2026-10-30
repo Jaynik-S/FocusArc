@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, AuthenticationError, AUTHENTICATION_REQUIRED_EVENT } from "../api/apiClient";
 import { notifyStudySnapshotApplied, STUDY_DATA_CHANGED_EVENT } from "../api/dataEvents";
 import { registerStudySync } from "../api/studySyncState";
-import type { ResetTotalsResponse, StudySnapshot, StudyStateResponse } from "../api/types";
+import type { ResetTotalsResponse, StartTimerResponse, StopTimerResponse, StudySnapshot, StudyStateResponse } from "../api/types";
 import { createServerClock } from "../utils/serverClock";
 
 const TIME_ZONE = "America/Toronto";
 type SyncControls = {
   refresh: (invalidate?: boolean) => Promise<void>;
-  mutate: <T>(path: string, body?: Record<string, unknown>) => Promise<T>;
+  mutate: <T>(path: string, body?: Record<string, unknown>, applyResponse?: (snapshot: StudySnapshot, response: T) => StudySnapshot) => Promise<T>;
 };
 type SyncView = { username: string; snapshot: StudySnapshot | null; nowMs: number; loading: boolean; synced: boolean; error: string | null; busy: boolean };
 const emptyView = (username: string): SyncView => ({ username, snapshot: null, nowMs: 0, loading: Boolean(username), synced: false, error: null, busy: false });
@@ -108,17 +108,23 @@ export const useStudySync = (username = "") => {
       return inFlight;
     };
     const registration = registerStudySync(username, () => refresh(true));
-    const mutate = async <T,>(path: string, body: Record<string, unknown> = {}): Promise<T> => {
+    const mutate = async <T,>(path: string, body: Record<string, unknown> = {}, applyResponse?: (snapshot: StudySnapshot, response: T) => StudySnapshot): Promise<T> => {
       if (!current() || mutation) throw new Error("Wait for the current study action to finish.");
       if (!snapshot || !synchronized || !clock.isCalibrated()) throw new Error("Reconnect and sync before changing a timer.");
       mutation = true;
       generation++;
       update({ busy: true });
       try {
-        return await apiFetch<T>(path, {
+        const response = await apiFetch<T>(path, {
           method: "POST", signal: controller.signal,
           body: { ...body, expected_revision: snapshot.revision, expected_active_session_id: snapshot.active_session?.id ?? null },
         });
+        if (current() && snapshot && applyResponse) {
+          snapshot = applyResponse(snapshot, response);
+          registration.apply(snapshot);
+          update({ snapshot });
+        }
+        return response;
       } finally {
         mutation = false;
         // A lost response can still mean a committed write. Reconcile once; never replay it.
@@ -134,7 +140,8 @@ export const useStudySync = (username = "") => {
       if (current() && !document.hidden) void refresh(true).catch(() => {});
     };
     const changed = (event: Event) => {
-      if ((event as CustomEvent<{ source?: string }>).detail?.source !== "snapshot") void refresh(true).catch(() => {});
+      const source = (event as CustomEvent<{ source?: string }>).detail?.source;
+      if (source !== "snapshot" && source !== "mutation") void refresh(true).catch(() => {});
     };
     const online = () => { offline = false; resume(); };
     const wentOffline = () => {
@@ -191,24 +198,33 @@ export const useStudySync = (username = "") => {
   }, [username]);
 
   const refresh = useCallback(async () => { await controls.current?.refresh(); }, []);
-  const startTimer = useCallback(async (timerId: string) => { await controls.current?.mutate(`/timers/${timerId}/start`, { client_tz: TIME_ZONE }); }, []);
-  const stopTimer = useCallback(async () => { await controls.current?.mutate("/stop"); }, []);
+  const startTimer = useCallback(async (timerId: string) => {
+    await controls.current?.mutate<StartTimerResponse>(`/timers/${timerId}/start`, { client_tz: TIME_ZONE },
+      (snapshot, response) => ({ ...snapshot, active_session: response.active_session }));
+  }, []);
+  const stopTimer = useCallback(async () => {
+    await controls.current?.mutate<StopTimerResponse>("/stop", {}, (snapshot) => ({ ...snapshot, active_session: null }));
+  }, []);
   const resetTotals = useCallback(async () => {
     if (!controls.current) throw new Error("Sign in before resetting totals.");
     return controls.current.mutate<ResetTotalsResponse>("/totals/reset");
   }, []);
   const state = view.username === username ? view : emptyView(username);
+  const snapshotTimers = useMemo(() => state.snapshot?.timers ?? [], [state.snapshot?.timers]);
+  const elapsedByTimer = useMemo(
+    () => Object.fromEntries(snapshotTimers.map((timer) => [timer.id, timer.completed_today_seconds])),
+    [snapshotTimers],
+  );
   return useMemo(() => {
     const activeSession = state.snapshot?.active_session ?? null;
     const start = activeSession ? Math.max(Date.parse(activeSession.start_at), Date.parse(state.snapshot!.day_start_at)) : 0;
     const end = state.snapshot ? Math.min(state.nowMs, Date.parse(state.snapshot.day_end_at)) : 0;
     return {
       activeSession, elapsedSeconds: activeSession ? Math.max(0, Math.floor((end - start) / 1000)) : 0,
-      snapshotTimers: state.snapshot?.timers ?? [], revision: state.snapshot?.revision ?? null,
-      elapsedByTimer: Object.fromEntries((state.snapshot?.timers ?? []).map((timer) => [timer.id, timer.completed_today_seconds])),
+      snapshotTimers, revision: state.snapshot?.revision ?? null, elapsedByTimer,
       nowMs: state.nowMs, today: state.snapshot?.day_date ?? "", timeZone: state.snapshot?.study_timezone ?? TIME_ZONE,
       loading: state.loading, busy: state.busy, error: state.error, synced: state.synced,
       refresh, startTimer, stopTimer, resetTotals,
     };
-  }, [state, refresh, startTimer, stopTimer, resetTotals]);
+  }, [state, snapshotTimers, elapsedByTimer, refresh, startTimer, stopTimer, resetTotals]);
 };

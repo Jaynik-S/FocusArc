@@ -1,7 +1,7 @@
 import { type CSSProperties, useCallback, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
-import { useTimerRuntime } from "../context/TimerRuntimeContext";
+import { useTimerRuntimeState } from "../context/TimerRuntimeContext";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useScreensaverMode } from "../hooks/useScreensaverMode";
@@ -12,7 +12,7 @@ import { getContrastColor, isValidHexColor } from "../utils/color";
 
 const MainLayout = () => {
   const { user } = useAuth();
-  const { activeSession, snapshotTimers, elapsedByTimer, elapsedSeconds } = useTimerRuntime();
+  const { activeSession, snapshotTimers } = useTimerRuntimeState();
   const { selectedTimerId } = useSelectedTimer();
   const { isOpen, exit } = useScreensaverMode(activeSession?.id ?? null);
   const wallpaper = useScreensaverWallpaper(user?.username ?? "", activeSession);
@@ -25,7 +25,6 @@ const MainLayout = () => {
     "--app-accent": accentTimer.color,
     "--app-accent-contrast": getContrastColor(accentTimer.color),
   } as CSSProperties : undefined;
-  const displaySeconds = (timerId ? elapsedByTimer[timerId] ?? 0 : 0) + (activeSession ? elapsedSeconds : 0);
 
   const handleScreensaverVisibility = useCallback((visible: boolean) => {
     // Release inert before the screensaver's effect cleanup restores keyboard focus.
@@ -46,7 +45,7 @@ const MainLayout = () => {
           <Outlet />
         </main>
       </div>
-      <Screensaver isOpen={isOpen && wallpaper.activationId === activeSession?.id} onExit={exit} timer={timer} elapsedSeconds={displaySeconds} wallpaper={wallpaper} onVisibleChange={handleScreensaverVisibility} onRestoreFocus={restoreNormalFocus} />
+      <Screensaver isOpen={isOpen && wallpaper.activationId === activeSession?.id} onExit={exit} timer={timer} wallpaper={wallpaper} onVisibleChange={handleScreensaverVisibility} onRestoreFocus={restoreNormalFocus} />
     </>
   );
 };

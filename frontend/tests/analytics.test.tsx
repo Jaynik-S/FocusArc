@@ -12,6 +12,8 @@ vi.mock("../src/contexts/AuthContext", () => ({ useAuth: () => ({ user: { userna
 vi.mock("../src/context/TimerRuntimeContext", () => ({
   useTimerRuntime: () => ({ activeSession: null, timeZone: "UTC", today: "2026-10-16", nowMs: Date.now() }),
   useOptionalTimerRuntime: () => ({ activeSession: null, timeZone: "UTC", today: "2026-10-16", nowMs: Date.now() }),
+  useOptionalTimerRuntimeState: () => ({ activeSession: null, timeZone: "UTC", today: "2026-10-16" }),
+  useTimerRuntimeState: () => ({ activeSession: null, timeZone: "UTC", today: "2026-10-16" }),
 }));
 vi.mock("../src/utils/date", async (original) => ({ ...await original<object>(), getClientTimezone: () => "UTC" }));
 

@@ -17,3 +17,9 @@ export const notifyStudyDataChanged = (session?: Session) => {
   window.dispatchEvent(new CustomEvent(STUDY_DATA_CHANGED_EVENT, { detail: session }));
   channel?.postMessage(null);
 };
+
+/** Refresh local readers and other tabs; the local coordinator reconciles explicitly. */
+export const notifyStudyMutationCommitted = () => {
+  window.dispatchEvent(new CustomEvent(STUDY_DATA_CHANGED_EVENT, { detail: { source: "mutation" } }));
+  channel?.postMessage(null);
+};

@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 
 import { ResetTotalsResponse } from "../api/types";
-import { useTimerRuntime } from "../context/TimerRuntimeContext";
+import { useTimerRuntimeState } from "../context/TimerRuntimeContext";
 
 type EndDayButtonProps = {
   disabled?: boolean;
@@ -13,7 +13,7 @@ const EndDayButton = ({ disabled = false, onEnded }: EndDayButtonProps) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const titleId = useId();
-  const { resetTotals, busy: timerBusy, synced = true } = useTimerRuntime();
+  const { resetTotals, busy: timerBusy, synced = true } = useTimerRuntimeState();
 
   const handleConfirm = async () => {
     if (timerBusy || busy || !synced) return;

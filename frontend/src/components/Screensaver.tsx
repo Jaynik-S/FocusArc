@@ -15,14 +15,14 @@ type ScreensaverProps = {
   isOpen: boolean;
   onExit: () => void;
   timer: Timer | null;
-  elapsedSeconds: number;
+  elapsedSeconds?: number;
   wallpaper?: ScreensaverWallpaperDefinition;
   onVisibleChange?: (visible: boolean) => void;
   onRestoreFocus?: () => void;
 };
 
 const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREENSAVER_WALLPAPERS[0], onVisibleChange, onRestoreFocus }: ScreensaverProps) => {
-  const { activeSession, busy, synced, error, stopTimer, adjustOffset } = useTimerRuntime();
+  const { activeSession, elapsedSeconds: activeElapsedSeconds, elapsedByTimer, busy, synced, error, stopTimer, adjustOffset } = useTimerRuntime();
   const [actionError, setActionError] = useState("");
   const [working, setWorking] = useState(false);
   const [visibleFrame, setVisibleFrame] = useState<VisibleWallpaperFrame | null>(null);
@@ -55,6 +55,8 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREEN
   const focusOwner = useRef<HTMLElement | null>(null);
   const wasVisible = useRef(false);
   const disabled = busy || working || !synced || !activeSession;
+  const displaySeconds = elapsedSeconds ?? Math.max(0,
+    (timer ? elapsedByTimer[timer.id] ?? 0 : 0) + (activeSession?.timer_id === timer?.id ? activeElapsedSeconds : 0));
 
   useLayoutEffect(() => {
     // Capture before inert blurs the opener; restore after React's commit focus handling.
@@ -128,7 +130,7 @@ const Screensaver = ({ isOpen, onExit, timer, elapsedSeconds, wallpaper = SCREEN
           <span />
         </div>
         <h1 className="screensaver-name">{timer?.name ?? "Focus"}</h1>
-        <output className="screensaver-time" role="timer" aria-label="Elapsed time today">{formatDuration(elapsedSeconds)}</output>
+        <output className="screensaver-time" role="timer" aria-label="Elapsed time today">{formatDuration(displaySeconds)}</output>
         <div className="screensaver-controls" aria-label="Active timer controls">
           <button type="button" onClick={() => void act(-300)} disabled={disabled} aria-label="Subtract 5 minutes">−5 <span>min</span></button>
           <button className="screensaver-pause" type="button" ref={pause} onClick={() => void act()} disabled={disabled} aria-label="Pause timer">

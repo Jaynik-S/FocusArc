@@ -12,7 +12,12 @@ import { accountStorageKey } from "../src/storage/accountStorage";
 
 const state = vi.hoisted(() => ({ runtime: {} as Record<string, any>, sessionsArgs: [] as unknown[], scheduleDate: "", selected: "old" }));
 const timers = [{ id: "old", name: "Old course", color: "#111827" }, { id: "running", name: "Running course", color: "#111827" }];
-vi.mock("../src/context/TimerRuntimeContext", () => ({ useTimerRuntime: () => state.runtime, useOptionalTimerRuntime: () => state.runtime }));
+vi.mock("../src/context/TimerRuntimeContext", () => ({
+  useTimerRuntime: () => state.runtime,
+  useOptionalTimerRuntime: () => state.runtime,
+  useTimerRuntimeState: () => state.runtime,
+  useOptionalTimerRuntimeState: () => state.runtime,
+}));
 vi.mock("../src/hooks/useTimers", () => ({ useTimers: () => ({ timers, loading: false, reload: vi.fn() }) }));
 vi.mock("../src/hooks/useReportingTimers", () => ({ useReportingTimers: () => ({ timers, loading: false }) }));
 vi.mock("../src/hooks/useSessions", () => ({ useSessions: (...args: unknown[]) => { state.sessionsArgs = args; return { sessions: [], loading: false }; } }));

@@ -1,7 +1,6 @@
 import { CSSProperties, useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
-import { ResetTotalsResponse } from "../api/types";
 import { useSelectedTimer } from "../context/TimerSelectionContext";
 import { TimerFormValues, useTimers } from "../hooks/useTimers";
 import { useTimerRuntime } from "../context/TimerRuntimeContext";
@@ -92,10 +91,6 @@ const Sidebar = ({ username }: SidebarProps) => {
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to create timer");
     }
-  };
-
-  const handleResetTotals = async (_response: ResetTotalsResponse) => {
-    await timersState.reload();
   };
 
   return (
@@ -208,7 +203,7 @@ const Sidebar = ({ username }: SidebarProps) => {
           </button>
           <EndDayButton
             disabled={!isReady}
-            onEnded={handleResetTotals}
+            onEnded={() => {}}
           />
         </div>
       </div>

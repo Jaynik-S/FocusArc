@@ -1,6 +1,6 @@
 import { CSSProperties, memo, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTimerRuntime } from "../../context/TimerRuntimeContext";
+import { useTimerRuntimeState } from "../../context/TimerRuntimeContext";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { useReportingTimers } from "../../hooks/useReportingTimers";
 import { isValidHexColor } from "../../utils/color";
@@ -17,7 +17,7 @@ const Trend = memo(WeeklyTrend);
 
 export default function StatsOverview({ filters, onChange, today, clientTz }: { filters: AnalyticsFiltersValue; onChange: (value: AnalyticsFiltersValue) => void; today: string; clientTz: string }) {
   const timers = useReportingTimers();
-  const { activeSession } = useTimerRuntime();
+  const { activeSession } = useTimerRuntimeState();
   const invalidRange = validateAnalyticsRange(filters.from, filters.to, today);
   const analytics = useAnalytics(filters.from, filters.to, clientTz, filters.timerId, activeSession?.id ?? null, !invalidRange);
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthScreen } from "./components/AuthScreen";
 import MainLayout from "./components/MainLayout";
-import { TimerRuntimeProvider, useTimerRuntime } from "./context/TimerRuntimeContext";
+import { TimerRuntimeProvider, useTimerRuntimeState } from "./context/TimerRuntimeContext";
 import { TimerSelectionProvider } from "./context/TimerSelectionContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import HistoryPage from "./routes/HistoryPage";
@@ -13,7 +13,7 @@ import TimersPage from "./routes/TimersPage";
 import { migrateLegacyAccountStorage } from "./storage/accountStorage";
 
 const StudyReady = ({ children }: { children: React.ReactNode }) => {
-  const { revision, error, refresh } = useTimerRuntime();
+  const { revision, error, refresh } = useTimerRuntimeState();
   if (revision === null) return <main className="auth-page">
     <p role="status">Loading shared study data…</p>
     {error ? <div className="error" role="alert">{error} <button className="link-button" onClick={() => void refresh().catch(() => {})}>Retry sync</button></div> : null}

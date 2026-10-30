@@ -1,7 +1,7 @@
-import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TimerRuntimeProvider, useTimerRuntime } from "../src/context/TimerRuntimeContext";
+import { TimerRuntimeProvider, useTimerRuntime, useTimerRuntimeState } from "../src/context/TimerRuntimeContext";
 import { STUDY_DATA_CHANGED_EVENT, notifyStudyDataChanged } from "../src/api/dataEvents";
 import { getStudyRevision, getStudySnapshot } from "../src/api/studySyncState";
 import { createServerClock } from "../src/utils/serverClock";
@@ -37,6 +37,55 @@ describe("server calibrated clock", () => {
 });
 
 describe("study sync coordinator", () => {
+  it("does not rerender stable runtime consumers when only the server clock ticks", async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(async (url) => json(String(url).includes("study-heartbeat") ? {} : snapshot()));
+    let liveRenders = 0;
+    let stableRenders = 0;
+    const LiveClock = () => {
+      liveRenders++;
+      return <output aria-label="Live clock">{useTimerRuntime().nowMs}</output>;
+    };
+    const StableState = () => {
+      stableRenders++;
+      return <output aria-label="Stable revision">{useTimerRuntimeState().revision}</output>;
+    };
+    render(<TimerRuntimeProvider username="sync"><LiveClock /><StableState /></TimerRuntimeProvider>);
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    expect(screen.getByLabelText("Stable revision").textContent).toBe("1");
+    const liveBeforeTick = liveRenders;
+    const stableBeforeTick = stableRenders;
+    await act(async () => { await vi.advanceTimersByTimeAsync(1_100); });
+    expect(liveRenders).toBeGreaterThan(liveBeforeTick);
+    expect(stableRenders).toBe(stableBeforeTick);
+  });
+
+  it("applies a start response before its authoritative reconciliation finishes", async () => {
+    let reads = 0;
+    let starts = 0;
+    let finishReconciliation!: (response: Response) => void;
+    fetchMock.mockImplementation(async (url) => {
+      const path = new URL(String(url)).pathname;
+      if (path.endsWith("/start")) { starts++; return json({ active_session: session }); }
+      if (path.endsWith("/study-heartbeat")) return json({});
+      reads++;
+      if (reads === 1) return json(snapshot(1, null));
+      return new Promise((resolve) => { finishReconciliation = resolve; });
+    });
+    const hook = renderHook(() => useTimerRuntime(), { wrapper });
+    await waitFor(() => expect(hook.result.current.revision).toBe(1));
+    let starting!: Promise<void>;
+    act(() => { starting = hook.result.current.startTimer("t1"); });
+    await waitFor(() => expect(finishReconciliation).toBeTypeOf("function"));
+    expect(hook.result.current.activeSession?.id).toBe("s1");
+    expect(hook.result.current.busy).toBe(true);
+    await act(async () => { finishReconciliation(json(snapshot(2))); await starting; });
+    expect(hook.result.current.revision).toBe(2);
+    expect(hook.result.current.busy).toBe(false);
+    expect(starts).toBe(1);
+    expect(reads).toBe(2);
+  });
+
   it("applies active state and daily counters atomically and invalidates remote history changes", async () => {
     let current = snapshot();
     fetchMock.mockImplementation(async (url) => json(String(url).includes("study-heartbeat") ? {} : current));

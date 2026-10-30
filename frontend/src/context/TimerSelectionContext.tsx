@@ -30,7 +30,7 @@ export const TimerSelectionProvider = ({
   children: React.ReactNode;
   username: string;
 }) => {
-  const runtime = "useOptionalTimerRuntime" in TimerRuntime ? TimerRuntime.useOptionalTimerRuntime() : undefined;
+  const runtime = TimerRuntime.useOptionalTimerRuntimeState();
   const activeTimerId = runtime?.activeSession?.timer_id ?? null;
   const previousActiveTimerId = useRef<string | null>(null);
   const [selectedTimerId, setSelectedTimerId] = useState<string | null>(() => {

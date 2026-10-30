@@ -15,6 +15,7 @@ type TimerRuntimeContextValue = ReturnType<typeof useStudySync> & {
   adjustOffset: (timerId: string, deltaSeconds: number) => Promise<void>;
   applyLegacyAdjustment: (session: Session, deltaSeconds: number) => Promise<void>;
 };
+type TimerRuntimeStateValue = Omit<TimerRuntimeContextValue, "nowMs" | "elapsedSeconds">;
 
 const readLegacyDraft = (username: string, key: "sessionAdjustments" | "timerOffsets") => {
   try {
@@ -24,6 +25,8 @@ const readLegacyDraft = (username: string, key: "sessionAdjustments" | "timerOff
 };
 
 const TimerRuntimeContext = createContext<TimerRuntimeContextValue | undefined>(undefined);
+const TimerRuntimeStateContext = createContext<TimerRuntimeStateValue | undefined>(undefined);
+const EMPTY_OFFSETS: Record<string, number> = {};
 
 export const TimerRuntimeProvider = ({ children, username }: { children: React.ReactNode; username: string }) => {
   const sync = useStudySync(username);
@@ -70,16 +73,37 @@ export const TimerRuntimeProvider = ({ children, username }: { children: React.R
   }, [sync.resetTotals]);
   // Runtime counters are always authoritative. Reset only asks for a fresh snapshot.
   const resetRuntimeState = useCallback(() => { void sync.refresh().catch(() => {}); }, [sync.refresh]);
-  const value = useMemo(() => ({
-    ...sync, busy: sync.busy || adjusting, offsets: {}, activeAdjustmentSeconds: 0,
-    legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals,
-  }), [sync, adjusting, legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment, resetRuntimeState, startTimer, stopTimer, resetTotals]);
-  return <TimerRuntimeContext.Provider value={value}>{children}</TimerRuntimeContext.Provider>;
+  const stateValue = useMemo<TimerRuntimeStateValue>(() => ({
+    activeSession: sync.activeSession, snapshotTimers: sync.snapshotTimers, revision: sync.revision,
+    elapsedByTimer: sync.elapsedByTimer, today: sync.today, timeZone: sync.timeZone,
+    loading: sync.loading, busy: sync.busy || adjusting, error: sync.error, synced: sync.synced,
+    refresh: sync.refresh, offsets: EMPTY_OFFSETS, activeAdjustmentSeconds: 0,
+    legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment,
+    resetRuntimeState, startTimer, stopTimer, resetTotals,
+  }), [
+    sync.activeSession, sync.snapshotTimers, sync.revision, sync.elapsedByTimer, sync.today, sync.timeZone,
+    sync.loading, sync.busy, sync.error, sync.synced, sync.refresh, adjusting,
+    legacyPendingAdjustments, legacyPendingOffsets, adjustOffset, applyLegacyAdjustment,
+    resetRuntimeState, startTimer, stopTimer, resetTotals,
+  ]);
+  const value = useMemo<TimerRuntimeContextValue>(() => ({
+    ...stateValue, nowMs: sync.nowMs, elapsedSeconds: sync.elapsedSeconds,
+  }), [stateValue, sync.nowMs, sync.elapsedSeconds]);
+  return <TimerRuntimeStateContext.Provider value={stateValue}>
+    <TimerRuntimeContext.Provider value={value}>{children}</TimerRuntimeContext.Provider>
+  </TimerRuntimeStateContext.Provider>;
 };
 
 export const useOptionalTimerRuntime = () => useContext(TimerRuntimeContext);
 export const useTimerRuntime = () => {
   const context = useOptionalTimerRuntime();
   if (!context) throw new Error("useTimerRuntime must be used within TimerRuntimeProvider");
+  return context;
+};
+
+export const useOptionalTimerRuntimeState = () => useContext(TimerRuntimeStateContext);
+export const useTimerRuntimeState = () => {
+  const context = useOptionalTimerRuntimeState();
+  if (!context) throw new Error("useTimerRuntimeState must be used within TimerRuntimeProvider");
   return context;
 };

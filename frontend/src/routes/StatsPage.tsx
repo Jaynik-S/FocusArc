@@ -8,9 +8,9 @@ import * as TimerRuntime from "../context/TimerRuntimeContext";
 
 export default function StatsPage() {
   const [params, setParams] = useSearchParams();
-  const runtime = "useOptionalTimerRuntime" in TimerRuntime ? TimerRuntime.useOptionalTimerRuntime() : undefined;
+  const runtime = TimerRuntime.useOptionalTimerRuntimeState();
   const clientTz = runtime?.timeZone ?? "America/Toronto";
-  const today = runtime?.today ?? getLocalDateString(new Date(runtime?.nowMs ?? Date.now()), clientTz);
+  const today = runtime?.today ?? getLocalDateString(new Date(), clientTz);
   const previousToday = useRef(today);
   const reports = params.get("view") === "reports";
   const preset = params.get("range") ?? (params.has("from") || params.has("to") ? "custom" : "90d");

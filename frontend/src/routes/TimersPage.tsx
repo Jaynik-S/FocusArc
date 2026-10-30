@@ -70,10 +70,8 @@ const TimersPage = () => {
     try {
       if (isActive) {
         await stopTimer();
-        await timersState.reload();
       } else {
         await startTimer(selectedTimer.id);
-        await timersState.reload();
       }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to update timer");

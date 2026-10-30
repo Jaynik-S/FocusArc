@@ -48,6 +48,15 @@ export type ResetTotalsResponse = {
   totals: TimerTotal[];
 };
 
+export type StartTimerResponse = {
+  stopped_session: Session | null;
+  active_session: Session;
+};
+
+export type StopTimerResponse = {
+  stopped_session: Session | null;
+};
+
 export type DayStatsResponse = {
   day_date: string;
   totals: TimerTotal[];

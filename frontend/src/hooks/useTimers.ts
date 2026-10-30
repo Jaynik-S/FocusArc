@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 
 import { apiFetch } from "../api/apiClient";
-import { notifyStudyDataChanged } from "../api/dataEvents";
+import { notifyStudyMutationCommitted } from "../api/dataEvents";
 import { Timer } from "../api/types";
 import { useAuth } from "../contexts/AuthContext";
 import { getStudySnapshot, requestStudySync } from "../api/studySyncState";
@@ -34,7 +34,7 @@ export const useTimers = () => {
       method: "POST",
       body: payload,
     });
-    notifyStudyDataChanged();
+    notifyStudyMutationCommitted();
     await requestStudySync();
     return timer;
   }, []);
@@ -45,7 +45,7 @@ export const useTimers = () => {
         method: "PATCH",
         body: payload,
       });
-      notifyStudyDataChanged();
+      notifyStudyMutationCommitted();
       await requestStudySync();
       return timer;
     },
@@ -54,7 +54,7 @@ export const useTimers = () => {
 
   const archiveTimer = useCallback(async (id: string) => {
     await apiFetch<void>(`/timers/${id}`, { method: "DELETE" });
-    notifyStudyDataChanged();
+    notifyStudyMutationCommitted();
     await requestStudySync();
   }, []);
 
