@@ -124,7 +124,7 @@
 - [x] Install the runtime lock in the production Dockerfile and keep `pip install --no-deps .`.
 - [x] Update CI/deploy/local commands to use the complete test lock or runtime lock explicitly; do not change migration/startup separation.
 - [x] Build the image, run `pip check`, import the FastAPI app, run a live `/api/health` check and 7 deployment tests. Image size: **75,546,979 bytes**, down from **79,965,100 bytes** (4,418,121 bytes / 5.5% smaller); `pytest` and `httpx` are absent.
-- [ ] Commit as `build(backend): exclude test packages from runtime image`.
+- [x] Commit as `build(backend): exclude test packages from runtime image` (`c59cdf1`).
 
 ## Task 6: Full verification and before/after comparison
 
@@ -132,11 +132,11 @@
 - Modify: `deep-dive/focusarc-codebase-2026-10-30.md`
 - Modify: `docs/deployment.md` only if commands/results changed
 
-- [ ] Run frontend type checks, production build, and the full test suite. If the parallel-only baseline timeout recurs, verify each affected file and run the suite with bounded workers; document rather than hide it with a broad timeout.
-- [ ] Run all backend tests in Linux Python 3.11 against the disposable PostgreSQL 15 database and run deployment tests.
-- [ ] Run Alembic upgrade from an empty disposable database and verify the current revision.
-- [ ] At 900×700, exercise authentication, timer start/pause/switch/adjust, screensaver readiness and all five selections, History, Schedule, and Stats without visual redesign.
-- [ ] Record final frontend bundle/public bytes, Docker image bytes, request counts, rerender behavior, query bounds, and screensaver measurements in the audit.
-- [ ] Inspect `git diff`, ensure root `master-screensaver*.png` source files and all credentials/backups remain untracked, and verify each logical commit contains only intended files.
-- [ ] Commit final evidence/doc updates as `docs: record cleanup verification results`.
+- [x] Run frontend type checks, production build, and the full test suite. Strict TypeScript, **26 files / 142 tests**, and the production build passed without the baseline timeouts.
+- [x] Run all backend tests in Linux Python 3.11 against the disposable PostgreSQL 15 database and run deployment tests. **186 full-suite tests** and **22 explicit release tests** passed.
+- [x] Run Alembic upgrade from an empty disposable database and verify the current revision. First/second upgrades, `current`, `heads`, and schema assertions confirmed `0005_study_sync`.
+- [x] At 900×700, exercise authentication, timer start/pause/switch/adjust, screensaver readiness and all five selections, History, Schedule, and Stats without visual redesign. The synthetic-API sweep captured 30 states with zero page errors; all five wallpaper/animation cases passed.
+- [x] Record final frontend bundle/public bytes, Docker image bytes, request counts, rerender behavior, query bounds, and screensaver measurements in the audit.
+- [x] Inspect `git diff`, ensure root `master-screensaver*.png` source files and all credentials/backups remain untracked, and verify each logical commit contains only intended files.
+- [x] Commit final evidence/doc updates as `docs: record cleanup verification results`.
 

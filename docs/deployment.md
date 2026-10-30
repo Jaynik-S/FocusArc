@@ -1,12 +1,12 @@
 # FocusArc production deployment runbook
 
-Updated 2026-09-27. Architecture: Render Static Site, Render Docker Web Service, Neon PostgreSQL, and GitHub Actions. This runbook describes the username/password release; it does not claim that the branch is deployed.
+Updated 2026-10-30. Architecture: Render Static Site, Render Docker Web Service, Neon PostgreSQL, and GitHub Actions. This runbook describes the username/password release; it does not claim that the branch is deployed.
 
 Registration is public. Anyone who can reach FocusArc can create a separate account. Accounts do not share server data or browser-local counters. There is intentionally no email verification, password-reset email, or social login.
 
 ## What the release changes
 
-- Alembic revision `0003_add_password_hash` adds nullable `users.password_hash` without changing existing timers or sessions.
+- Alembic revision `0003_add_password_hash` adds nullable `users.password_hash` without changing existing timers or sessions. The current migration head is `0005_study_sync`; `0004_session_adjustments` and `0005_study_sync` preserve the same database and user data while adding adjustment/reset and synchronized-study-state fields.
 - Existing usernames with a null hash cannot be claimed by public registration. The release workflow privately initializes or verifies `jayy` before the new API is deployed.
 - Passwords are Argon2id hashes. The browser receives a signed HTTP-only cookie containing only the username.
 - The API, not the browser, resolves the authenticated username for every private query.
@@ -75,12 +75,12 @@ Restrict the `production` environment to `main` and enable required approval if 
 ## Exact release order
 
 1. Stop writes and take a current Neon backup or create a protected Neon branch/restore point. Record the existing Alembic revision and confirm the `jayy` row exists.
-2. Run all local checks on `user-password-auth`.
+2. Run all local checks on the intended release commit.
 3. Push the branch, review it, merge it to `main`, and wait for the exact `main` commit's CI run to pass.
 4. Update the Render settings above before deploying the new API. In particular, add `SESSION_SECRET`, set exact CORS, and remove legacy auth variables.
 5. Configure the GitHub production environment secrets/variables above.
 6. Enable `PRODUCTION_DEPLOY_ENABLED` and manually run the Deploy workflow with the successful CI commit's full 40-character SHA.
-7. The workflow runs `alembic upgrade head`, records revision `0003_add_password_hash`, then executes:
+7. The workflow runs `alembic upgrade head`, records revision `0005_study_sync`, then executes:
 
    ```text
    python -m app.admin set-initial-password --username jayy
@@ -98,7 +98,6 @@ Alembic never runs during production API startup. A failed migration, initialize
 Run from the repository root:
 
 ```powershell
-git switch user-password-auth
 git status --short
 
 docker compose config --quiet
@@ -138,10 +137,10 @@ $sessionSecret
 Remove-Variable sessionSecret, sessionSecretBytes
 ```
 
-Push the feature branch:
+Push the current release branch:
 
 ```powershell
-git push -u origin user-password-auth
+git push -u origin HEAD
 ```
 
 After review and merge, update local `main`, capture the tested SHA, and confirm its CI run passed:
@@ -190,7 +189,7 @@ FROM users
 WHERE username = 'jayy';
 ```
 
-Expected revision: `0003_add_password_hash`. Expected result: one `jayy` row with `password_configured = true`. Do not select or copy the hash itself. Existing timer/session row counts and totals must match the pre-release record.
+Expected revision: `0005_study_sync`. Expected result: one `jayy` row with `password_configured = true`. Do not select or copy the hash itself. Existing timer/session row counts and totals must match the pre-release record.
 
 For runtime least privilege, retain the existing restricted role: `SELECT/INSERT/UPDATE/DELETE` on application tables, `SELECT` on `alembic_version`, sequence use where required, and no schema ownership or `CREATE` privilege. Review grants after applying the migration.
 
@@ -232,7 +231,7 @@ Logout preserves these values. It does not preserve or expose a login session.
 ## Failure and rollback
 
 - Do not rerun a failed deployment blindly. Inspect the failed GitHub step and the exact Render deploy ID first.
-- Migration `0003` is additive and nullable, so the prior API can run with it if the new deployment fails. Do not downgrade automatically.
+- Treat migrations through `0005_study_sync` as forward-only during a release. Revision `0004_session_adjustments` intentionally repairs historical intervals, so do not downgrade automatically; use the protected backup/restore point for a coordinated database rollback.
 - If the initializer reports that the password is already set, verify that the GitHub secret contains the original chosen password. The tool intentionally refuses to reset it.
 - Rolling back the frontend and API does not remove the nullable column or password hash. Keep the pre-release backup until hosted acceptance is complete.
 - Rotating `SESSION_SECRET` invalidates every session immediately. Rotate only deliberately, then sign in again.
@@ -240,4 +239,4 @@ Logout preserves these values. It does not preserve or expose a login session.
 
 ## Current completion boundary
 
-Code, tests, migration, local configuration, release automation, and this runbook are prepared on `user-password-auth`. Merge, provider configuration, production migration, deployment, and hosted browser acceptance remain manual. Do not describe the hosted change as live until the exact deployed SHA and browser flow have been verified.
+Code, tests, migrations, local configuration, release automation, and this runbook are prepared in the repository. This document does not prove which commit is live: verify the exact deployed SHA, provider configuration, production migration, and hosted browser flow before describing a release as deployed.
