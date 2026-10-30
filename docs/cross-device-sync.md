@@ -81,7 +81,7 @@ newer session.
 | `backend/app/services/sessions.py`, `services/timers.py`, session/totals/end-day APIs and schemas | Atomic revisions with writes, guarded commands, server-owned explicit stop timestamps |
 | `backend/app/main.py`, `api/router.py` | Sweeper lifecycle and authenticated request guards |
 | `frontend/src/hooks/useStudySync.ts`, `utils/serverClock.ts`, `api/studySyncState.ts` | One request coordinator, calibrated clock, account-scoped state bridge |
-| `frontend/src/context/TimerRuntimeContext.tsx`, `hooks/useActiveSession.ts` | Shared daily counters and active state; compatibility entry point; explicit legacy draft recovery |
+| `frontend/src/context/TimerRuntimeContext.tsx`, `hooks/useStudySync.ts` | Shared daily counters and active state; explicit legacy draft recovery |
 | `frontend/src/api/apiClient.ts`, `api/sessionAdjustments.ts`, `api/dataEvents.ts` | Expected account binding, versioned edits, local invalidation and cross-tab prompts |
 | `frontend/src/hooks/useApiResource.ts`, `useTimers.ts`, `useReportingTimers.ts`, reporting hooks, `utils/studyDate.ts` | Revision-aware readers, shared metadata, background retention and shared-zone queries |
 | `frontend/src/App.tsx`, timer selection context, timer/History/Schedule/Stats routes and associated components | Initial snapshot gate, Today presentation, shared dates/ticks, guarded controls and cycle reset copy |

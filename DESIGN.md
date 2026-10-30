@@ -202,7 +202,7 @@ The sidecar's eight-step tonal strips are synthesized OKLCH inspection aids. The
 **Display Font:** Fraunces, with Georgia and serif fallbacks.
 **Body Font:** Nunito Sans, with Segoe UI and sans-serif fallbacks.
 
-**Character:** Fraunces gives headings and the wordmark soft, expressive lettering at weight 500, with optical sizing and variable axes SOFT 55 / WONK 1. Nunito Sans keeps buttons, forms, metadata, and the clock practical. Both fonts are self-hosted under the SIL Open Font License: the official unmodified Fraunces variable TTF supplies weights 100 to 900; Nunito Sans WOFF2 supplies 400 to 700. Font provenance lives under frontend/public/fonts/; unused Bree Serif files are an earlier reference, not the current display face.
+**Character:** Fraunces gives headings and the wordmark soft, expressive lettering at weight 500, with optical sizing and variable axes SOFT 55 / WONK 1. Nunito Sans keeps buttons, forms, metadata, and the clock practical. Both fonts are self-hosted under the SIL Open Font License: the official unmodified Fraunces variable TTF supplies weights 100 to 900; Nunito Sans WOFF2 supplies 400 to 700. Font provenance is recorded in `docs/asset-provenance.md`.
 
 ### Hierarchy
 
@@ -226,7 +226,7 @@ These are the current shell and timer arrangements, not mandatory compositions f
 
 ## Elevation & Depth
 
-Depth combines tonal layers, fine outlines, real paper tooth, and soft offset shadows. A low-contrast soft-light material sits across the ambient field; the folio, clock case, panels, and dialogs carry more visible material at different scales. The neutral gouache-paper WebP is a generated material, not scene art; its exact prompt and image provenance are recorded under frontend/public/materials/. The modal sits over an eight-pixel blurred, dimmed overlay. Focus remains a visible outline.
+Depth combines tonal layers, fine outlines, real paper tooth, and soft offset shadows. A low-contrast soft-light material sits across the ambient field; the folio, clock case, panels, and dialogs carry more visible material at different scales. The neutral gouache-paper WebP is a generated material, not scene art; its prompt and image provenance are recorded in `docs/asset-provenance.md`. The modal sits over an eight-pixel blurred, dimmed overlay. Focus remains a visible outline.
 
 ### Shadow Vocabulary
 

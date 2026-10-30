@@ -62,25 +62,9 @@ export type DayStatsResponse = {
   totals: TimerTotal[];
 };
 
-export type EndDayResponse = {
-  ended_day_date: string;
-  finalized: boolean;
-  totals: TimerTotal[];
-};
-
 export type DayScheduleResponse = {
   day_date: string;
   sessions: Session[];
-};
-
-export type WeekScheduleDay = {
-  day_date: string;
-  sessions: Session[];
-};
-
-export type WeekScheduleResponse = {
-  week_start: string;
-  days: WeekScheduleDay[];
 };
 
 export type WeekStatsDay = {

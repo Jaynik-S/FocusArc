@@ -355,23 +355,6 @@ button.timer-control-main:hover { filter: brightness(1.04) drop-shadow(0 4px 5px
 .week-stats-timers { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
 .week-stats-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); color: var(--text-muted); font-size: 0.75rem; }
 
-/* Secondary reusable components */
-.timer-card { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3); border-bottom: 1px solid var(--border); }
-.timer-meta { display: flex; min-width: 0; align-items: center; gap: var(--space-3); }
-.timer-icon { width: 0.55rem; height: 0.55rem; flex: 0 0 auto; overflow: hidden; border-radius: 50%; color: transparent; }
-.timer-title { color: var(--text-primary); font-weight: 600; }
-.timer-status { color: var(--text-muted); font-size: 0.75rem; }
-.timer-actions { display: flex; gap: var(--space-2); }
-.week-accordion { display: grid; gap: var(--space-2); }
-.week-day { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-1); }
-.week-day-header { display: flex; width: 100%; align-items: center; justify-content: space-between; border-radius: var(--radius-md); text-align: left; }
-.week-day-count { color: var(--text-muted); font-size: 0.6875rem; }
-.week-day-body { display: grid; gap: var(--space-2); padding: 0 var(--space-3) var(--space-3); }
-.week-session { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: var(--space-2); }
-.week-session-title { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; }
-.week-session-meta { color: var(--text-muted); font-size: 0.6875rem; }
-.top-bar { display: flex; align-items: center; justify-content: space-between; }
-.eyebrow { color: var(--text-subtle); font-size: 0.6875rem; }
 .badge { color: var(--text-muted); font-size: 0.6875rem; }
 
 /* Authentication and dialogs */

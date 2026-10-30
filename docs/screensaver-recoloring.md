@@ -19,7 +19,7 @@ The Oklab conversion matrices follow [Björn Ottosson's public-domain reference]
 
 ## Rendering and file map
 
-- `frontend/public/screensaver/master-screensaver*.png`: unmodified copies of the five supplied clean masters, centralized in `utils/screensaverWallpapers.ts`. Legacy blue/orange/purple files remain as unused reference assets. All five use this same mapper without image-specific processing profiles.
+- `frontend/public/screensaver/master-screensaver*.png`: unmodified copies of the five supplied clean masters, centralized in `utils/screensaverWallpapers.ts`. All five use this same mapper without image-specific processing profiles.
 - `frontend/src/workers/screensaver.worker.ts`: fetch/decode the master, prepare its pixel channels, render through OffscreenCanvas and return a PNG Blob. Source decoding/preparation is shared between colors.
 - `frontend/src/utils/screensaverRenderer.ts`: one shared module worker, concurrent-request deduplication, source/normalized-HEX cache keys and an eight-entry Blob LRU. A 20-second timeout or worker crash releases jobs safely. Idle workers terminate after 15 seconds, releasing source buffers. No object URLs or DOM nodes are cached.
 - `frontend/src/components/ScreensaverWallpaper.tsx`: decode a finished Blob, replace the visible Canvas in one task and close the ImageBitmap. Older async results cannot overwrite newer colors or an unmounted/disabled view. Keep the last complete frame during an in-place HEX update; on failure retain it. A new activation waits in the normal timer view until the exact source/HEX frame is ready; unrecolored masters are never shown as an entrance fallback. See [readiness and entrance transitions](screensaver-transitions.md).

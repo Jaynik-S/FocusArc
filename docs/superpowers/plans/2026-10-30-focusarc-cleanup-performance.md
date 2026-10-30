@@ -52,7 +52,7 @@
 - [x] Remove redundant `reload()` calls after start/stop/reset handlers.
 - [x] Label local mutation events so readers refresh once while the local coordinator explicitly reconciles once; continue broadcasting to other tabs.
 - [x] Run focused sync, adjustment, UI, and screensaver tests plus TypeScript checks.
-- [ ] Commit as `perf(frontend): reduce timer rerenders and sync requests`.
+- [x] Commit as `perf(frontend): reduce timer rerenders and sync requests` (`7d1176c`).
 
 ## Task 3: Remove verified frontend dead code and shipped legacy assets
 
@@ -73,17 +73,22 @@
 - Delete: `frontend/public/fonts/breeserif-OFL.txt`
 - Delete: `frontend/public/fonts/breeserif-FONTLOG.txt`
 - Delete: `frontend/tsconfig.tsbuildinfo`
-- Modify: `frontend/public/fonts/README.md`
-- Modify: `frontend/public/screensaver/README.md`
+- Delete: `frontend/public/fonts/README.md`
+- Delete: `frontend/public/screensaver/README.md`
+- Delete: `frontend/public/materials/README.md`
+- Delete: `frontend/public/materials/gouache-paper.prompt.txt`
+- Delete: `frontend/public/materials/gouache-paper.webp.json`
+- Create: `docs/asset-provenance.md`
 - Modify: `docs/cross-device-sync.md`
 - Modify: `docs/timer-adjustments.md`
 
-- [ ] Re-run repository-wide reference searches for every candidate and preserve anything dynamically referenced.
-- [ ] Point release coverage directly at `useStudySync`, then remove the one-line `useActiveSession` compatibility wrapper.
-- [ ] Remove the four unreferenced legacy UI modules, their supporting types, and only the CSS selectors exclusive to them.
-- [ ] Remove the three explicitly legacy wallpapers, unused PNG favicon, and unused Bree Serif files; update asset notes without changing active master artwork or its license trail.
-- [ ] Stop tracking the generated TypeScript build-info artifact (it is already ignored).
-- [ ] Build and compare `dist` file count/bytes with the baseline 27 files / 23.7 MiB.
+- [x] Re-run repository-wide reference searches for every candidate and preserve anything dynamically referenced.
+- [x] Point release coverage directly at `useStudySync`, then remove the one-line `useActiveSession` compatibility wrapper.
+- [x] Remove the four unreferenced legacy UI modules, their supporting types, and only the CSS selectors exclusive to them.
+- [x] Remove the three explicitly legacy wallpapers, unused PNG favicon, and unused Bree Serif files; update asset notes without changing active master artwork or its license trail.
+- [x] Move asset provenance out of `public/` so Vite ships binaries/licenses rather than source documentation and generation metadata.
+- [x] Stop tracking the generated TypeScript build-info artifact (it is already ignored).
+- [x] Build and compare `dist`: **15 files / 17,215,793 bytes**, down from **27 files / 24,849,238 bytes** (7,633,445 bytes / 30.7% smaller).
 - [ ] Commit as `chore(frontend): remove legacy code and assets`.
 
 ## Task 4: Bound backend state and summary database work

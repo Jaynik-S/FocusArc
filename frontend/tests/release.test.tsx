@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiFetch } from "../src/api/apiClient";
 import { TimerRuntimeProvider, useTimerRuntime } from "../src/context/TimerRuntimeContext";
-import { useActiveSession } from "../src/hooks/useActiveSession";
+import { useStudySync } from "../src/hooks/useStudySync";
 import { accountStorageKey } from "../src/storage/accountStorage";
 
 const json = (body: unknown, status = 200) =>
@@ -85,7 +85,7 @@ describe("account-scoped active session polling", () => {
     let resolve!: (response: Response) => void;
     fetchMock.mockImplementationOnce(() => new Promise((done) => { resolve = done; }))
       .mockImplementation(async () => json(study()));
-    renderHook(() => useActiveSession("jayy"));
+    renderHook(() => useStudySync("jayy"));
     await act(async () => { await vi.advanceTimersByTimeAsync(45_000); });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await act(async () => resolve(json(study())));
@@ -105,7 +105,7 @@ describe("account-scoped active session polling", () => {
     vi.setSystemTime(new Date("2026-10-25T16:00:00Z"));
     const session = { id: "session", timer_id: "timer", start_at: new Date().toISOString() };
     fetchMock.mockResolvedValueOnce(json(study(session))).mockResolvedValueOnce(json({})).mockRejectedValue(new Error("Offline"));
-    const { result } = renderHook(() => useActiveSession("jayy"));
+    const { result } = renderHook(() => useStudySync("jayy"));
     await act(async () => { await vi.advanceTimersByTimeAsync(2_000); });
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(result.current.activeSession?.id).toBe("session");
@@ -127,7 +127,7 @@ describe("account-scoped active session polling", () => {
       if (new URL(String(url)).pathname.endsWith("/stop")) throw new Error("Response lost");
       return json(String(url).includes("study-heartbeat") ? {} : study(session));
     });
-    renderHook(() => useActiveSession("jayy"));
+    renderHook(() => useStudySync("jayy"));
     await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
     const stops = fetchMock.mock.calls.filter(([url]) => new URL(String(url)).pathname.endsWith("/stop"));
     expect(stops).toHaveLength(0);
